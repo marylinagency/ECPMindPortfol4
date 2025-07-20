@@ -74,19 +74,23 @@
             font-family: 'Playfair Display', serif;
             font-size: 2.5rem;
             font-weight: 700;
-            margin: 0 3rem 1.5rem 3rem;
+            margin: 0 2rem 1.5rem 2rem;
+            text-align: center;
         }
         
         .cover-topic {
             font-size: 1.1rem;
-            margin: 0 3rem 2rem 3rem;
+            margin: 0 2rem 2rem 2rem;
             opacity: 0.9;
+            text-align: center;
+            max-width: 80%;
         }
         
         .cover-footer {
-            margin: 2rem 3rem 0 3rem;
+            margin: 2rem 2rem 0 2rem;
             font-size: 0.9rem;
             opacity: 0.8;
+            text-align: center;
         }
         
         .toc-title {
@@ -187,11 +191,16 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-                width: 100vw;
-                height: 100vh;
+                width: 100%;
+                height: 100%;
                 margin: 0;
-                padding: 3rem 2rem;
+                padding: 0;
                 box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
             }
             
             .cover-title {
