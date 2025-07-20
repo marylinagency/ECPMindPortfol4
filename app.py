@@ -247,6 +247,55 @@ def create_project():
     
     return redirect(url_for('project_view', project_id=project_id))
 
+@app.route('/create_ai_book', methods=['POST'])
+def create_ai_book():
+    config = load_config()
+    if not config.get('license_activated', False):
+        flash('Please activate your license first', 'error')
+        return redirect(url_for('index'))
+    
+    topic = request.form.get('topic', '').strip()
+    language = request.form.get('language', 'English')
+    chapters = int(request.form.get('chapters', 8))
+    style = request.form.get('style', 'professional')
+    action = request.form.get('action', 'generate_titles')
+    
+    if not topic:
+        flash('Book topic is required', 'error')
+        return redirect(url_for('index'))
+    
+    # Generate a project name from the topic
+    project_name = f"AI Book: {topic[:50]}..."
+    
+    # Create new project
+    project_id = str(uuid.uuid4())
+    project = {
+        'id': project_id,
+        'name': project_name,
+        'topic': topic,
+        'language': language,
+        'num_chapters': chapters,
+        'writing_style': style,
+        'cover_image': None,
+        'chapters': [],
+        'created_at': datetime.now().isoformat(),
+        'last_modified': datetime.now().isoformat(),
+        'generation_status': 'pending',
+        'ai_generated': True,
+        'generation_action': action
+    }
+    
+    # Save project
+    project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+    with open(project_file, 'w') as f:
+        json.dump(project, f, indent=2)
+    
+    # Start generation based on action
+    if action in ['generate_titles', 'generate_full']:
+        return redirect(url_for('generate_chapters', project_id=project_id))
+    
+    return redirect(url_for('project_view', project_id=project_id))
+
 @app.route('/project/<project_id>')
 def project_view(project_id):
     config = load_config()
