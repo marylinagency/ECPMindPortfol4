@@ -1872,8 +1872,11 @@ async function loadProjectMoodHistory(projectId) {
                 'excited': '🤩',
                 'focused': '🎯', 
                 'creative': '🎨',
+                'motivated': '💪',
+                'inspired': '💡',
                 'tired': '😴',
-                'blocked': '😵‍💫'
+                'blocked': '🧱',
+                'stressed': '😰'
             };
             
             const historyHTML = data.moods.slice(0, 10).map(moodEntry => {
@@ -1892,6 +1895,9 @@ async function loadProjectMoodHistory(projectId) {
             
             historyContainer.innerHTML = historyHTML;
             
+            // Calculate and display mood streak
+            calculateProjectMoodStreak(data.moods);
+            
         } else {
             console.error('Error loading project mood history:', data.message);
         }
@@ -1909,6 +1915,53 @@ async function loadProjectMoodHistory(projectId) {
                 </div>
             `;
             feather.replace();
+        }
+    }
+}
+
+function calculateProjectMoodStreak(moods) {
+    const streakElement = document.getElementById('streak-days');
+    if (!streakElement || !moods || moods.length === 0) {
+        if (streakElement) streakElement.textContent = '0';
+        return;
+    }
+    
+    // Sort moods by date (newest first)
+    const sortedMoods = [...moods].sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    let streak = 0;
+    const today = new Date();
+    let checkDate = new Date(today);
+    
+    // Check if there's a mood for today or yesterday
+    for (const mood of sortedMoods) {
+        const moodDate = new Date(mood.date);
+        const diffDays = Math.floor((checkDate - moodDate) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) {
+            // Mood for current check date exists
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+        } else if (diffDays === 1 && streak === 0) {
+            // If no mood today but mood yesterday, start streak from yesterday
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 2);
+        } else {
+            break; // Gap found, stop counting
+        }
+    }
+    
+    streakElement.textContent = streak;
+    
+    // Update streak display color based on streak length
+    const streakContainer = document.getElementById('project-mood-streak');
+    if (streakContainer) {
+        if (streak >= 7) {
+            streakContainer.className = 'mt-4 inline-flex items-center space-x-2 bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-full border border-green-200';
+        } else if (streak >= 3) {
+            streakContainer.className = 'mt-4 inline-flex items-center space-x-2 bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2 rounded-full border border-blue-200';
+        } else {
+            streakContainer.className = 'mt-4 inline-flex items-center space-x-2 bg-gradient-to-r from-pink-100 to-purple-100 px-4 py-2 rounded-full border border-pink-200';
         }
     }
 }
