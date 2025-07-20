@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} - BookGenPro{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-project-id="{{ project.id }}">
+    <!-- Project Header -->
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8 fade-in">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex-1">
+                <div class="flex items-center space-x-4 mb-4">
+                    <a href="{{ url_for('index') }}" class="text-gray-500 hover:text-gray-700">
+                        <i data-feather="arrow-left" class="w-5 h-5"></i>
+                    </a>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ project.name }}</h1>
+                    <span id="generation-status" class="status-badge status-{{ project.generation_status.replace('_', '-') if project.generation_status else 'pending' }}">
+                        {% if project.generation_status == 'pending' %}Ready to generate
+                        {% elif project.generation_status == 'generating_titles' %}Generating titles...
+                        {% elif project.generation_status == 'generating_content' %}Generating content...
+                        {% elif project.generation_status == 'completed' %}Generation completed
+                        {% elif project.generation_status.startswith('error:') %}Generation failed
+                        {% else %}{{ project.generation_status }}
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <p class="text-gray-600 mb-4">{{ project.topic }}</p>
+                
+                <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                    <span class="flex items-center">
+                        <i data-feather="globe" class="w-4 h-4 mr-1"></i>
+                        {{ project.language }}
+                    </span>
+                    <span class="flex items-center">
+                        <i data-feather="file-text" class="w-4 h-4 mr-1"></i>
+                        {{ project.chapters|length }}/{{ project.num_chapters }} chapters
+                    </span>
+                    <span class="flex items-center">
+                        <i data-feather="calendar" class="w-4 h-4 mr-1"></i>
+                        Created {{ project.created_at[:10] }}
+                    </span>
+                </div>
+            </div>
+            
+            {% if project.cover_image %}
+            <div class="mt-6 lg:mt-0 lg:ml-8">
+                <div class="w-32 h-44 rounded-lg overflow-hidden shadow-lg book-cover">
+                    <img src="{{ url_for('static', filename='../uploads/' + project.cover_image) }}" 
+                         alt="Book Cover" class="w-full h-full object-cover">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Progress Bar -->
+        {% if project.generation_status in ['generating_titles', 'generating_content'] %}
+        <div class="mt-6">
+            <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span>Generation Progress</span>
+                <span id="progress-text">{{ (project.chapters|selectattr('status', 'equalto', 'completed')|list|length / project.chapters|length * 100)|round|int if project.chapters else 0 }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="generation-progress" class="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full progress-bar" 
+                     style="width: {{ (project.chapters|selectattr('status', 'equalto', 'completed')|list|length / project.chapters|length * 100) if project.chapters else 0 }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap gap-4 mb-8">
+        {% if project.generation_status == 'pending' or project.generation_status.startswith('error:') %}
+        <a href="{{ url_for('generate_chapters', project_id=project.id) }}" 
+           class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">
+            <i data-feather="cpu" class="w-5 h-5 inline mr-2"></i>
+            Generate Chapters with AI
+        </a>
+        {% endif %}
+        
+        {% if project.chapters and project.generation_status == 'completed' %}
+        <a href="{{ url_for('export_pdf', project_id=project.id) }}" 
+           class="bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">
+            <i data-feather="download" class="w-5 h-5 inline mr-2"></i>
+            Export as PDF
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Chapters Section -->
+    {% if project.chapters %}
+    <div class="bg-white rounded-xl shadow-lg p-8 slide-in" id="chapters-container">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Chapters</h2>
+        
+        <div class="space-y-6">
+            {% for chapter in project.chapters %}
+            <div class="chapter-card bg-gray-50 rounded-lg p-6 {{ chapter.status }}" data-chapter-id="{{ chapter.id }}">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold text-gray-900 chapter-title">
+                            Chapter {{ chapter.number }}: {{ chapter.title }}
+                        </h3>
+                        <div class="flex items-center mt-2">
+                            <span class="status-badge status-{{ chapter.status }}">
+                                {% if chapter.status == 'pending' %}Pending
+                                {% elif chapter.status == 'generating' %}Generating...
+                                {% elif chapter.status == 'completed' %}Completed
+                                {% elif chapter.status == 'error' %}Error
+                                {% else %}{{ chapter.status|title }}
+                                {% endif %}
+                            </span>
+                            {% if chapter.content %}
+                            <span class="ml-4 text-sm text-gray-500">
+                                {{ chapter.content.split()|length }} words
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if chapter.status == 'completed' %}
+                    <button onclick="editChapter('{{ chapter.id }}')" 
+                            class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                            data-tooltip="Edit Chapter">
+                        <i data-feather="edit-2" class="w-5 h-5"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                
+                {% if chapter.content %}
+                <div class="chapter-content prose max-w-none">
+                    <div class="text-gray-700 line-clamp-4">
+                        {{ chapter.content[:300] }}...
+                    </div>
+                    {% if chapter.content|length > 300 %}
+                    <button class="text-blue-600 hover:text-blue-800 text-sm mt-2" onclick="toggleChapterContent(this)">
+                        Show full content
+                    </button>
+                    <div class="hidden full-content mt-4 text-gray-700 whitespace-pre-wrap">{{ chapter.content }}</div>
+                    {% endif %}
+                </div>
+                {% elif chapter.status == 'generating' %}
+                <div class="text-gray-500 italic">
+                    <div class="flex items-center">
+                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                        Generating content...
+                    </div>
+                </div>
+                {% elif chapter.status == 'error' %}
+                <div class="text-red-600 italic">
+                    Failed to generate content. Please try again.
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-xl shadow-lg p-12 text-center">
+        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-feather="book-open" class="w-12 h-12 text-gray-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">No Chapters Generated Yet</h3>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+            Click "Generate Chapters with AI" to automatically create chapter titles and content based on your book topic.
+        </p>
+        <a href="{{ url_for('generate_chapters', project_id=project.id) }}" 
+           class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium inline-block">
+            <i data-feather="cpu" class="w-5 h-5 inline mr-2"></i>
+            Generate Chapters with AI
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleChapterContent(button) {
+    const fullContent = button.nextElementSibling;
+    const preview = button.parentElement.querySelector('.line-clamp-4');
+    
+    if (fullContent.classList.contains('hidden')) {
+        fullContent.classList.remove('hidden');
+        preview.classList.add('hidden');
+        button.textContent = 'Show less';
+    } else {
+        fullContent.classList.add('hidden');
+        preview.classList.remove('hidden');
+        button.textContent = 'Show full content';
+    }
+}
+</script>
+{% endblock %}

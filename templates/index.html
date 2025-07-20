@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    {% if show_license %}
+        <!-- License Activation Section -->
+        <div class="min-h-screen flex items-center justify-center">
+            <div class="max-w-md w-full">
+                <div class="bg-white rounded-xl shadow-2xl p-8 glass-morphism fade-in">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 pulse-glow">
+                            <i data-feather="key" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Activate BookGenPro</h2>
+                        <p class="text-gray-600">Enter your license key to get started</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('activate_license') }}" data-validate>
+                        <div class="space-y-6">
+                            <div>
+                                <label for="license_key" class="block text-sm font-medium text-gray-700 mb-2">License Key</label>
+                                <input type="text" id="license_key" name="license_key" required
+                                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                       placeholder="Enter your license key">
+                            </div>
+                            
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                <input type="email" id="email" name="email" required
+                                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                       placeholder="Enter your email address">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Machine ID</label>
+                                <input type="text" value="{{ config.machine_id }}" readonly
+                                       class="w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                       data-tooltip="This is automatically generated for your device">
+                            </div>
+                            
+                            <button type="submit" 
+                                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">
+                                <i data-feather="unlock" class="w-5 h-5 inline mr-2"></i>
+                                Activate License
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+                        <p class="text-sm text-gray-600">
+                            Need a license? Visit 
+                            <a href="https://www.ecertifpro.com" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium">ECertifPro.com</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Main Dashboard -->
+        <div class="fade-in">
+            <!-- Hero Section -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-6xl font-bold gradient-text mb-4">
+                    BookGenPro
+                </h1>
+                <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                    Transform your ideas into complete books with AI-powered chapter generation, 
+                    professional styling, and seamless export capabilities.
+                </p>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Create New Project -->
+                <div class="bg-white rounded-xl shadow-lg p-8 page-turn">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center mr-4">
+                            <i data-feather="plus-circle" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">Create New Book</h3>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('create_project') }}" enctype="multipart/form-data" data-validate>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="project_name" class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+                                <input type="text" id="project_name" name="project_name" required
+                                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       placeholder="Enter project name">
+                            </div>
+                            
+                            <div>
+                                <label for="book_topic" class="block text-sm font-medium text-gray-700 mb-2">Book Topic/Theme</label>
+                                <textarea id="book_topic" name="book_topic" rows="3" required
+                                          class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          placeholder="Describe your book topic, genre, and main themes..."></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="language" class="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                                    <select id="language" name="language" class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        <option value="English">English</option>
+                                        <option value="Spanish">Spanish</option>
+                                        <option value="French">French</option>
+                                        <option value="German">German</option>
+                                        <option value="Italian">Italian</option>
+                                        <option value="Portuguese">Portuguese</option>
+                                        <option value="Arabic">Arabic</option>
+                                        <option value="Chinese">Chinese</option>
+                                        <option value="Japanese">Japanese</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="num_chapters" class="block text-sm font-medium text-gray-700 mb-2">Number of Chapters</label>
+                                    <input type="number" id="num_chapters" name="num_chapters" value="10" min="3" max="50"
+                                           class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="cover_image" class="block text-sm font-medium text-gray-700 mb-2">Cover Image (Optional)</label>
+                                <input type="file" id="cover_image" name="cover_image" accept="image/*"
+                                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       onchange="handleFileUpload(this)">
+                                <div id="cover-preview" class="mt-2 w-20 h-28 border-2 border-dashed border-gray-300 rounded-lg hidden"></div>
+                            </div>
+                            
+                            <button type="submit" 
+                                    class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">
+                                <i data-feather="book-open" class="w-5 h-5 inline mr-2"></i>
+                                Create Book Project
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- API Configuration -->
+                <div class="bg-white rounded-xl shadow-lg p-8 page-turn">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center mr-4">
+                            <i data-feather="settings" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">Configuration</h3>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <h4 class="font-medium text-gray-900">OpenRouter API</h4>
+                                <p class="text-sm text-gray-600">
+                                    {% if config.openrouter_api_key %}
+                                        <span class="text-green-600">✓ Configured</span>
+                                    {% else %}
+                                        <span class="text-red-600">✗ Not configured</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <a href="{{ url_for('settings') }}" 
+                               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Configure
+                            </a>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <h4 class="font-medium text-gray-900">Selected Model</h4>
+                                <p class="text-sm text-gray-600">{{ config.selected_model or 'Not selected' }}</p>
+                            </div>
+                            <a href="{{ url_for('settings') }}" 
+                               class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                Change
+                            </a>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                            <h4 class="font-medium text-blue-900 mb-2">Features Available</h4>
+                            <ul class="text-sm text-blue-800 space-y-1">
+                                <li class="flex items-center"><i data-feather="check" class="w-4 h-4 mr-2"></i>AI Chapter Generation</li>
+                                <li class="flex items-center"><i data-feather="check" class="w-4 h-4 mr-2"></i>Multi-language Support</li>
+                                <li class="flex items-center"><i data-feather="check" class="w-4 h-4 mr-2"></i>PDF & HTML Export</li>
+                                <li class="flex items-center"><i data-feather="check" class="w-4 h-4 mr-2"></i>Project Management</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Projects -->
+            {% if recent_projects %}
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8">Recent Projects</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for project in recent_projects %}
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden page-turn">
+                        {% if project.cover_image %}
+                            <div class="h-48 bg-cover bg-center book-cover" 
+                                 style="background-image: url('{{ url_for('static', filename='../uploads/' + project.cover_image) }}');">
+                            </div>
+                        {% else %}
+                            <div class="h-48 book-cover flex items-center justify-center">
+                                <i data-feather="book" class="w-16 h-16 text-white opacity-80"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ project.name }}</h3>
+                            <p class="text-gray-600 mb-4 line-clamp-2">{{ project.topic }}</p>
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span>{{ project.chapters|length }} chapters</span>
+                                <span>{{ project.language }}</span>
+                            </div>
+                            
+                            <a href="{{ url_for('project_view', project_id=project.id) }}" 
+                               class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center block">
+                                <i data-feather="arrow-right" class="w-4 h-4 inline mr-2"></i>
+                                Open Project
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- About Section -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">About BookGenPro</h2>
+                    <div class="max-w-4xl mx-auto">
+                        <p class="text-lg text-gray-600 mb-8">
+                            BookGenPro is an innovative AI-powered book generation tool that transforms your ideas into 
+                            complete, professionally structured books. Using advanced AI technology through OpenRouter API, 
+                            it automatically generates compelling chapter titles and rich content based on your book's theme.
+                        </p>
+                        
+                        <div class="grid md:grid-cols-3 gap-8 mb-8">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i data-feather="zap" class="w-8 h-8 text-white"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">AI-Powered</h3>
+                                <p class="text-gray-600">Advanced AI generates chapter titles and content automatically</p>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i data-feather="globe" class="w-8 h-8 text-white"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Multi-Language</h3>
+                                <p class="text-gray-600">Generate books in multiple languages with native fluency</p>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i data-feather="download" class="w-8 h-8 text-white"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Professional Export</h3>
+                                <p class="text-gray-600">Export to PDF and HTML with beautiful, professional styling</p>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 pt-8">
+                            <p class="text-gray-600 mb-4">
+                                Developed with passion by the ECPMind team, BookGenPro represents the cutting edge of 
+                                AI-assisted content creation, making professional book writing accessible to everyone.
+                            </p>
+                            <a href="https://www.ecertifpro.com" target="_blank" 
+                               class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold">
+                                <i data-feather="external-link" class="w-4 h-4 mr-2"></i>
+                                Learn more at ECertifPro.com
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
