@@ -61,7 +61,10 @@ def load_config():
         # Create default config
         default_config = {
             "openrouter_api_key": "",
+            "gemini_api_key": "",
+            "ai_provider": "openrouter",  # "openrouter" or "gemini"
             "selected_model": "meta-llama/llama-3.2-3b-instruct:free",
+            "gemini_model": "gemini-1.5-flash",
             "license_activated": False,
             "license_key": "",
             "email": "",
@@ -105,28 +108,142 @@ def verify_license(license_key, email, machine_id):
         return False, {"error": str(e)}
 
 def generate_with_openrouter(prompt, api_key, model="openai/gpt-3.5-turbo"):
-    """Generate content using OpenRouter API"""
+    """Generate content using OpenRouter API with retry logic and fallback models"""
+    import time
+    
+    # List of free models to try as fallbacks
+    free_models = [
+        model,  # Try the requested model first
+        "microsoft/phi-3-mini-128k-instruct:free",
+        "huggingface/CodeLlama-7b-Instruct-hf:free", 
+        "openchat/openchat-7b:free",
+        "openai/gpt-3.5-turbo"  # Fallback to paid model if available
+    ]
+    
+    for attempt, current_model in enumerate(free_models):
+        try:
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": current_model,
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ]
+            }
+            
+            response = requests.post("https://openrouter.ai/api/v1/chat/completions", 
+                                   json=data, headers=headers, timeout=45)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if 'choices' in result and len(result['choices']) > 0:
+                    return True, result['choices'][0]['message']['content']
+                else:
+                    return False, f"No content in API response: {result}"
+            elif response.status_code == 429:
+                # Rate limited, try next model
+                logging.warning(f"Rate limited on model {current_model}, trying next...")
+                if attempt < len(free_models) - 1:
+                    time.sleep(2)  # Brief wait before trying next model
+                    continue
+                else:
+                    return False, f"All models rate limited. Please wait a few minutes and try again."
+            else:
+                # Other HTTP error, try next model
+                logging.warning(f"HTTP {response.status_code} on model {current_model}: {response.text}")
+                if attempt < len(free_models) - 1:
+                    continue
+                else:
+                    return False, f"API Error: {response.status_code} - {response.text}"
+                    
+        except Exception as e:
+            logging.error(f"Exception with model {current_model}: {str(e)}")
+            if attempt < len(free_models) - 1:
+                continue
+            else:
+                return False, f"Connection error: {str(e)}"
+    
+    return False, "All retry attempts failed"
+
+def generate_with_gemini(prompt, api_key, model="gemini-1.5-flash"):
+    """Generate content using Google Gemini API"""
     try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        
         headers = {
-            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
+        
         data = {
-            "model": model,
-            "messages": [
-                {"role": "user", "content": prompt}
+            "contents": [{
+                "parts": [{
+                    "text": prompt
+                }]
+            }],
+            "generationConfig": {
+                "temperature": 0.7,
+                "topK": 1,
+                "topP": 1,
+                "maxOutputTokens": 4096,
+            },
+            "safetySettings": [
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                }
             ]
         }
-        response = requests.post("https://openrouter.ai/api/v1/chat/completions", 
-                               json=data, headers=headers, timeout=30)
+        
+        response = requests.post(url, json=data, headers=headers, timeout=30)
         
         if response.status_code == 200:
             result = response.json()
-            return True, result['choices'][0]['message']['content']
+            if 'candidates' in result and len(result['candidates']) > 0:
+                candidate = result['candidates'][0]
+                if 'content' in candidate and 'parts' in candidate['content']:
+                    return True, candidate['content']['parts'][0]['text']
+                else:
+                    return False, f"No content in Gemini response: {result}"
+            else:
+                return False, f"No candidates in Gemini response: {result}"
         else:
-            return False, f"API Error: {response.status_code} - {response.text}"
+            return False, f"Gemini API Error: {response.status_code} - {response.text}"
+            
     except Exception as e:
-        return False, str(e)
+        logging.error(f"Gemini API exception: {str(e)}")
+        return False, f"Gemini connection error: {str(e)}"
+
+def generate_content(prompt, config):
+    """Generate content using the selected AI provider"""
+    ai_provider = config.get('ai_provider', 'openrouter')
+    
+    if ai_provider == 'gemini':
+        api_key = config.get('gemini_api_key', '')
+        model = config.get('gemini_model', 'gemini-1.5-flash')
+        if not api_key:
+            return False, "Gemini API key not configured"
+        return generate_with_gemini(prompt, api_key, model)
+    else:
+        # Default to OpenRouter
+        api_key = config.get('openrouter_api_key', '')
+        model = config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free')
+        if not api_key:
+            return False, "OpenRouter API key not configured"
+        return generate_with_openrouter(prompt, api_key, model)
 
 @app.route('/')
 def index():
@@ -192,8 +309,11 @@ def settings():
 @app.route('/save_settings', methods=['POST'])
 def save_settings():
     config = load_config()
-    config['openrouter_api_key'] = request.form.get('api_key', '')
-    config['selected_model'] = request.form.get('model', 'openai/gpt-3.5-turbo')
+    config['ai_provider'] = request.form.get('ai_provider', 'openrouter')
+    config['openrouter_api_key'] = request.form.get('openrouter_api_key', '')
+    config['gemini_api_key'] = request.form.get('gemini_api_key', '')
+    config['selected_model'] = request.form.get('model', 'meta-llama/llama-3.2-3b-instruct:free')
+    config['gemini_model'] = request.form.get('gemini_model', 'gemini-1.5-flash')
     save_config(config)
     flash('Settings saved successfully!', 'success')
     return redirect(url_for('settings'))
@@ -315,12 +435,19 @@ def project_view(project_id):
 @app.route('/generate_chapters/<project_id>')
 def generate_chapters(project_id):
     config = load_config()
-    api_key = config.get('openrouter_api_key', '')
-    model = config.get('selected_model', 'openai/gpt-3.5-turbo')
+    ai_provider = config.get('ai_provider', 'openrouter')
     
-    if not api_key:
-        flash('Please configure your OpenRouter API key in settings', 'error')
-        return redirect(url_for('project_view', project_id=project_id))
+    # Check if the selected AI provider has API key configured
+    if ai_provider == 'gemini':
+        api_key = config.get('gemini_api_key', '')
+        if not api_key:
+            flash('Please configure your Gemini API key in settings', 'error')
+            return redirect(url_for('project_view', project_id=project_id))
+    else:
+        api_key = config.get('openrouter_api_key', '')
+        if not api_key:
+            flash('Please configure your OpenRouter API key in settings', 'error')
+            return redirect(url_for('project_view', project_id=project_id))
     
     try:
         project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
@@ -329,7 +456,7 @@ def generate_chapters(project_id):
         
         # Start background generation
         thread = threading.Thread(target=generate_chapters_background, 
-                                args=(project_id, project, api_key, model))
+                                args=(project_id, project, config))
         thread.daemon = True
         thread.start()
         
@@ -340,7 +467,7 @@ def generate_chapters(project_id):
         flash(f'Error starting generation: {str(e)}', 'error')
         return redirect(url_for('project_view', project_id=project_id))
 
-def generate_chapters_background(project_id, project, api_key, model):
+def generate_chapters_background(project_id, project, config):
     """Background task to generate chapters"""
     project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
     try:
@@ -353,7 +480,7 @@ def generate_chapters_background(project_id, project, api_key, model):
         titles_prompt = f"""Generate {project['num_chapters']} compelling chapter titles for a book about "{project['topic']}" in {project['language']}. 
         Return only the titles, one per line, numbered from 1 to {project['num_chapters']}."""
         
-        success, titles_result = generate_with_openrouter(titles_prompt, api_key, model)
+        success, titles_result = generate_content(titles_prompt, config)
         
         if not success:
             project['generation_status'] = f'error: {titles_result}'
@@ -402,7 +529,7 @@ def generate_chapters_background(project_id, project, api_key, model):
             The content should be detailed, engaging, and approximately 1000-1500 words. 
             Use proper formatting with paragraphs and sections where appropriate."""
             
-            success, content_result = generate_with_openrouter(content_prompt, api_key, model)
+            success, content_result = generate_content(content_prompt, config)
             
             if success:
                 chapter['content'] = content_result.strip()
@@ -439,7 +566,7 @@ def project_status(project_id):
         return jsonify({
             'status': project.get('generation_status', 'pending'),
             'chapters': project.get('chapters', []),
-            'progress': (completed_chapters / total_chapters * 100) if total_chapters > 0 else 0,
+            'progress': (completed_chapters / max(total_chapters, 1) * 100) if total_chapters > 0 else 0,
             'completed_chapters': completed_chapters,
             'total_chapters': total_chapters
         })
@@ -452,12 +579,19 @@ def project_status(project_id):
 def regenerate_chapter(project_id, chapter_id):
     """Regenerate a specific chapter"""
     config = load_config()
-    api_key = config.get('openrouter_api_key', '')
-    model = config.get('selected_model', 'openai/gpt-3.5-turbo')
+    ai_provider = config.get('ai_provider', 'openrouter')
     
-    if not api_key:
-        flash('Please configure your OpenRouter API key in settings', 'error')
-        return redirect(url_for('project_view', project_id=project_id))
+    # Check if the selected AI provider has API key configured
+    if ai_provider == 'gemini':
+        api_key = config.get('gemini_api_key', '')
+        if not api_key:
+            flash('Please configure your Gemini API key in settings', 'error')
+            return redirect(url_for('project_view', project_id=project_id))
+    else:
+        api_key = config.get('openrouter_api_key', '')
+        if not api_key:
+            flash('Please configure your OpenRouter API key in settings', 'error')
+            return redirect(url_for('project_view', project_id=project_id))
     
     try:
         project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
@@ -477,7 +611,7 @@ def regenerate_chapter(project_id, chapter_id):
         
         # Start background regeneration
         thread = threading.Thread(target=regenerate_single_chapter, 
-                                args=(project_id, chapter_id, project, api_key, model))
+                                args=(project_id, chapter_id, project, config))
         thread.daemon = True
         thread.start()
         
@@ -488,7 +622,7 @@ def regenerate_chapter(project_id, chapter_id):
         flash(f'Error starting regeneration: {str(e)}', 'error')
         return redirect(url_for('project_view', project_id=project_id))
 
-def regenerate_single_chapter(project_id, chapter_id, project, api_key, model):
+def regenerate_single_chapter(project_id, chapter_id, project, config):
     """Background task to regenerate a single chapter"""
     project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
     
@@ -505,7 +639,7 @@ def regenerate_single_chapter(project_id, chapter_id, project, api_key, model):
                 The content should be detailed, engaging, and approximately 1000-1500 words. 
                 Use proper formatting with paragraphs and sections where appropriate."""
                 
-                success, content_result = generate_with_openrouter(content_prompt, api_key, model)
+                success, content_result = generate_content(content_prompt, config)
                 
                 if success:
                     chapter['content'] = content_result.strip()

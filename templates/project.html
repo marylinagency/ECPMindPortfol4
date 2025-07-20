@@ -46,7 +46,7 @@
             {% if project.cover_image %}
             <div class="mt-6 lg:mt-0 lg:ml-8">
                 <div class="w-32 h-44 rounded-lg overflow-hidden shadow-lg book-cover">
-                    <img src="{{ url_for('static', filename='../uploads/' + project.cover_image) }}" 
+                    <img src="{{ url_for('static', filename='uploads/' + project.cover_image) }}" 
                          alt="Book Cover" class="w-full h-full object-cover">
                 </div>
             </div>
@@ -58,11 +58,11 @@
         <div class="mt-6">
             <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
                 <span>Generation Progress</span>
-                <span id="progress-text">{{ (project.chapters|selectattr('status', 'equalto', 'completed')|list|length / project.chapters|length * 100)|round|int if project.chapters else 0 }}%</span>
+                <span id="progress-text">{{ (project.chapters|selectattr('status', 'equalto', 'completed')|list|length / (project.chapters|length if project.chapters|length > 0 else 1) * 100)|round|int if project.chapters else 0 }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
                 <div id="generation-progress" class="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full progress-bar" 
-                     style="width: {{ (project.chapters|selectattr('status', 'equalto', 'completed')|list|length / project.chapters|length * 100) if project.chapters else 0 }}%"></div>
+                     style="width: {{ (project.chapters|selectattr('status', 'equalto', 'completed')|list|length / (project.chapters|length if project.chapters|length > 0 else 1) * 100) if project.chapters else 0 }}%"></div>
             </div>
         </div>
         {% endif %}
