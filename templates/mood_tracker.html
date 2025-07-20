@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-desktop py-8">
+    <!-- Header Section -->
+    <div class="glass-card mb-8 p-8 text-center fade-in">
+        <div class="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl pulse-glow">
+            <i data-feather="heart" class="w-10 h-10 text-white"></i>
+        </div>
+        <h1 class="text-5xl font-bold text-white mb-4">Writing Mood Tracker</h1>
+        <p class="text-xl text-white/80 max-w-3xl mx-auto">
+            Track your writing moods, reflect on your creative energy, and understand your patterns to become a better author
+        </p>
+    </div>
+
+    <!-- Mood Tracking Section -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+        <!-- Today's Mood Section -->
+        <div class="glass-card p-8 slide-in-left">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-red-500 rounded-lg flex items-center justify-center mr-4">
+                    <i data-feather="smile" class="w-6 h-6 text-white"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-white">How are you feeling today?</h2>
+            </div>
+            
+            <!-- Mood Selection Grid -->
+            <div class="grid grid-cols-4 gap-4 mb-6">
+                <div class="mood-emoji" data-mood="excited" onclick="selectMood('excited', '🤩', 'Excited')">
+                    <span class="text-3xl">🤩</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Excited</span>
+                </div>
+                <div class="mood-emoji" data-mood="focused" onclick="selectMood('focused', '🎯', 'Focused')">
+                    <span class="text-3xl">🎯</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Focused</span>
+                </div>
+                <div class="mood-emoji" data-mood="creative" onclick="selectMood('creative', '🎨', 'Creative')">
+                    <span class="text-3xl">🎨</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Creative</span>
+                </div>
+                <div class="mood-emoji" data-mood="motivated" onclick="selectMood('motivated', '💪', 'Motivated')">
+                    <span class="text-3xl">💪</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Motivated</span>
+                </div>
+                <div class="mood-emoji" data-mood="inspired" onclick="selectMood('inspired', '💡', 'Inspired')">
+                    <span class="text-3xl">💡</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Inspired</span>
+                </div>
+                <div class="mood-emoji" data-mood="calm" onclick="selectMood('calm', '😌', 'Calm')">
+                    <span class="text-3xl">😌</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Calm</span>
+                </div>
+                <div class="mood-emoji" data-mood="tired" onclick="selectMood('tired', '😴', 'Tired')">
+                    <span class="text-3xl">😴</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Tired</span>
+                </div>
+                <div class="mood-emoji" data-mood="stressed" onclick="selectMood('stressed', '😰', 'Stressed')">
+                    <span class="text-3xl">😰</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Stressed</span>
+                </div>
+                <div class="mood-emoji" data-mood="happy" onclick="selectMood('happy', '😊', 'Happy')">
+                    <span class="text-3xl">😊</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Happy</span>
+                </div>
+                <div class="mood-emoji" data-mood="contemplative" onclick="selectMood('contemplative', '🤔', 'Thoughtful')">
+                    <span class="text-3xl">🤔</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Thoughtful</span>
+                </div>
+                <div class="mood-emoji" data-mood="melancholy" onclick="selectMood('melancholy', '😔', 'Melancholy')">
+                    <span class="text-3xl">😔</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Melancholy</span>
+                </div>
+                <div class="mood-emoji" data-mood="blocked" onclick="selectMood('blocked', '🧱', 'Blocked')">
+                    <span class="text-3xl">🧱</span>
+                    <span class="text-sm font-medium text-gray-700 mt-2">Blocked</span>
+                </div>
+            </div>
+
+            <!-- Mood Note -->
+            <div class="mb-6">
+                <label for="mood-note" class="block text-lg font-medium text-white mb-3">Optional Note</label>
+                <textarea id="mood-note" rows="3" 
+                          class="w-full px-4 py-3 bg-white/90 backdrop-blur border-0 rounded-xl focus:ring-4 focus:ring-pink-300 focus:outline-none shadow-lg transition-all duration-300"
+                          placeholder="How are you feeling about your writing today? What's inspiring or challenging you?"></textarea>
+            </div>
+
+            <!-- Save Button -->
+            <button id="save-mood-btn" onclick="saveMood()" disabled
+                    class="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-xl font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                <i data-feather="heart" class="w-5 h-5 inline mr-2"></i>Save My Mood
+            </button>
+        </div>
+
+        <!-- Mood History & Insights -->
+        <div class="glass-card p-8 slide-in-right">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mr-4">
+                    <i data-feather="calendar" class="w-6 h-6 text-white"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-white">Your Mood Journey</h2>
+            </div>
+
+            <!-- Mood History Container -->
+            <div id="mood-history" class="space-y-4">
+                <!-- History will be loaded dynamically -->
+            </div>
+
+            <!-- Quick Stats -->
+            <div id="mood-stats" class="mt-8 p-6 bg-white/10 backdrop-blur rounded-xl border border-white/20">
+                <h3 class="text-xl font-semibold text-white mb-4">This Week's Insights</h3>
+                <div id="stats-content" class="space-y-3">
+                    <!-- Stats will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mood Patterns & Analytics -->
+    <div class="glass-card p-8 slide-in-up">
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mr-4">
+                <i data-feather="trending-up" class="w-6 h-6 text-white"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-white">Mood Patterns & Writing Tips</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Mood Pattern Cards -->
+            <div class="bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
+                <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center mb-4">
+                    <i data-feather="sun" class="w-5 h-5 text-white"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Morning Energy</h3>
+                <p class="text-white/80 text-sm">Track when you feel most creative to optimize your writing schedule.</p>
+            </div>
+
+            <div class="bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
+                <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
+                    <i data-feather="moon" class="w-5 h-5 text-white"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Evening Reflection</h3>
+                <p class="text-white/80 text-sm">Evening moods often reveal deeper insights about your creative process.</p>
+            </div>
+
+            <div class="bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
+                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mb-4">
+                    <i data-feather="target" class="w-5 h-5 text-white"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Consistency</h3>
+                <p class="text-white/80 text-sm">Regular mood tracking helps identify patterns and triggers.</p>
+            </div>
+        </div>
+
+        <!-- Writing Tips Based on Mood -->
+        <div id="mood-tips" class="mt-8 p-6 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl border border-white/20">
+            <h3 class="text-xl font-semibold text-white mb-4">
+                <i data-feather="lightbulb" class="w-5 h-5 inline mr-2"></i>
+                Writing Tips for Your Mood
+            </h3>
+            <div id="tips-content" class="text-white/90">
+                <p class="mb-3">🎯 <strong>Focused?</strong> Perfect time for editing and detailed work.</p>
+                <p class="mb-3">🎨 <strong>Creative?</strong> Let your imagination flow with new scenes or characters.</p>
+                <p class="mb-3">😴 <strong>Tired?</strong> Try light editing or brainstorming instead of heavy writing.</p>
+                <p>🧱 <strong>Blocked?</strong> Switch to a different project or try free-writing exercises.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-8 text-center">
+        <div class="inline-flex space-x-4">
+            <a href="{{ url_for('index') }}" 
+               class="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur text-white rounded-lg hover:bg-white/30 transition-all duration-300">
+                <i data-feather="home" class="w-5 h-5 mr-2"></i>
+                Back to Dashboard
+            </a>
+            <button onclick="exportMoodData()" 
+                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg hover:shadow-lg transition-all duration-300">
+                <i data-feather="download" class="w-5 h-5 mr-2"></i>
+                Export Mood Data
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize mood tracker when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadMoodHistory();
+    generateMoodStats();
+    feather.replace();
+});
+
+// Export mood data functionality
+function exportMoodData() {
+    fetch('/get_mood_history')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const csvContent = "data:text/csv;charset=utf-8," 
+                    + "Date,Mood,Note,Timestamp\n"
+                    + data.moods.map(mood => 
+                        `${mood.date},${mood.mood},"${mood.note || ''}",${mood.timestamp}`
+                    ).join("\n");
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "mood_tracker_data.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('Mood data exported successfully!', 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Error exporting mood data:', error);
+            showNotification('Error exporting mood data', 'error');
+        });
+}
+
+// Generate mood statistics
+function generateMoodStats() {
+    fetch('/get_mood_history')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.moods.length > 0) {
+                const recentMoods = data.moods.slice(0, 7); // Last 7 entries
+                const moodCounts = {};
+                
+                recentMoods.forEach(entry => {
+                    moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
+                });
+                
+                const mostCommon = Object.keys(moodCounts).reduce((a, b) => 
+                    moodCounts[a] > moodCounts[b] ? a : b
+                );
+                
+                const statsContent = document.getElementById('stats-content');
+                statsContent.innerHTML = `
+                    <div class="flex items-center text-white/90">
+                        <i data-feather="star" class="w-4 h-4 mr-2"></i>
+                        <span>Most common mood: <strong>${mostCommon}</strong></span>
+                    </div>
+                    <div class="flex items-center text-white/90">
+                        <i data-feather="activity" class="w-4 h-4 mr-2"></i>
+                        <span>Entries this week: <strong>${recentMoods.length}</strong></span>
+                    </div>
+                    <div class="flex items-center text-white/90">
+                        <i data-feather="calendar" class="w-4 h-4 mr-2"></i>
+                        <span>Tracking since: <strong>${data.moods[data.moods.length - 1]?.date || 'Today'}</strong></span>
+                    </div>
+                `;
+                feather.replace();
+            }
+        })
+        .catch(error => console.error('Error loading mood stats:', error));
+}
+</script>
+{% endblock %}

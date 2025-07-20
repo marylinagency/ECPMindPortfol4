@@ -270,6 +270,17 @@ def index():
     
     return render_template('index.html', config=config, recent_projects=recent_projects)
 
+@app.route('/mood-tracker')
+def mood_tracker():
+    """Writing Mood Tracker page"""
+    config = load_config()
+    
+    # Check if license is activated
+    if not config.get('license_activated', False):
+        return redirect(url_for('index'))
+    
+    return render_template('mood_tracker.html', config=config)
+
 @app.route('/activate_license', methods=['POST'])
 def activate_license():
     license_key = request.form.get('license_key', '').strip()
