@@ -8,5 +8,5 @@
   "chapters": [],
   "created_at": "2025-07-20T16:09:07.006325",
   "last_modified": "2025-07-20T16:09:07.006338",
-  "generation_status": "pending"
+  "generation_status": "error: API Error: 429 - {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"meta-llama/llama-3.2-3b-instruct:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations\",\"provider_name\":\"Venice\"}},\"user_id\":\"user_2wCj130qWeP5TaknKWIp34AuKpw\"}"
 }
