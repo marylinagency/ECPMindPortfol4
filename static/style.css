@@ -147,6 +147,80 @@ body {
     margin-top: 2px;
 }
 
+/* Project-specific mood tracker styles */
+.project-mood-emoji {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 60px;
+}
+
+.project-mood-emoji:hover {
+    border-color: #ec4899;
+    background: #fdf2f8;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.15);
+}
+
+.project-mood-emoji.selected {
+    border-color: #ec4899;
+    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+    box-shadow: 0 2px 15px rgba(236, 72, 153, 0.25);
+    transform: scale(1.05);
+}
+
+.project-mood-emoji span:first-child {
+    margin-bottom: 2px;
+    filter: grayscale(20%);
+    transition: filter 0.3s ease;
+}
+
+.project-mood-emoji:hover span:first-child,
+.project-mood-emoji.selected span:first-child {
+    filter: grayscale(0%);
+}
+
+.project-mood-history-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+    padding: 6px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.project-mood-history-item.today {
+    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+    border-color: #ec4899;
+}
+
+.project-mood-history-item .emoji {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.project-mood-history-item .date {
+    font-size: 9px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.project-mood-history-item .mood-name {
+    font-size: 8px;
+    color: #374151;
+    margin-top: 1px;
+}
+
 .mood-note-modal {
     position: fixed;
     top: 0;

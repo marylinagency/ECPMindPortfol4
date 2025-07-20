@@ -249,6 +249,13 @@ function showManualForm() {
             
             <form method="POST" action="/create_project" enctype="multipart/form-data" class="space-y-6">
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Book Title</label>
+                    <input type="text" name="book_title" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                           placeholder="Enter your book title">
+                </div>
+                
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
                     <input type="text" name="project_name" required
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -1747,3 +1754,170 @@ async function loadMoodHistory() {
         }
     }
 }
+
+// Project-specific Writing Mood Tracker Functions
+let selectedProjectMood = null;
+
+function selectProjectMood(mood, emoji, name) {
+    // Remove previous selection
+    document.querySelectorAll('.project-mood-emoji').forEach(element => {
+        element.classList.remove('selected');
+    });
+    
+    // Add selection to clicked mood
+    const moodElement = document.querySelector(`[data-mood="${mood}"]`);
+    if (moodElement) {
+        moodElement.classList.add('selected');
+    }
+    
+    // Store selected mood
+    selectedProjectMood = {
+        mood: mood,
+        emoji: emoji,
+        name: name
+    };
+    
+    // Enable save button
+    const saveBtn = document.getElementById('save-project-mood-btn');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+    }
+}
+
+async function saveProjectMood() {
+    if (!selectedProjectMood) {
+        showNotification('Please select a mood first', 'error');
+        return;
+    }
+    
+    // Get project ID from page
+    const projectElement = document.querySelector('[data-project-id]');
+    if (!projectElement) {
+        showNotification('Project ID not found', 'error');
+        return;
+    }
+    
+    const projectId = projectElement.dataset.projectId;
+    const note = document.getElementById('project-mood-note').value.trim();
+    const saveBtn = document.getElementById('save-project-mood-btn');
+    
+    try {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i data-feather="loader" class="w-4 h-4 inline mr-2 animate-spin"></i>Saving...';
+        feather.replace();
+        
+        const response = await fetch(`/project/${projectId}/save_project_mood`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                mood: selectedProjectMood.mood,
+                note: note
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Project mood saved successfully!', 'success');
+            
+            // Reset form
+            document.querySelectorAll('.project-mood-emoji').forEach(element => {
+                element.classList.remove('selected');
+            });
+            document.getElementById('project-mood-note').value = '';
+            selectedProjectMood = null;
+            
+            // Refresh mood history
+            loadProjectMoodHistory(projectId);
+        } else {
+            showNotification(data.message || 'Error saving project mood', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error saving project mood:', error);
+        showNotification('Error saving project mood. Please try again.', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i data-feather="heart" class="w-4 h-4 inline mr-2"></i>Save Project Mood';
+        feather.replace();
+    }
+}
+
+async function loadProjectMoodHistory(projectId) {
+    try {
+        const response = await fetch(`/project/${projectId}/get_project_mood_history`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const historyContainer = document.getElementById('project-mood-history');
+            if (!historyContainer) return;
+            
+            if (data.moods.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="flex-shrink-0 text-center text-gray-400">
+                        <div class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
+                            <i data-feather="calendar" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-xs">No moods yet</span>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            const moodEmojis = {
+                'excited': '🤩',
+                'focused': '🎯', 
+                'creative': '🎨',
+                'tired': '😴',
+                'blocked': '😵‍💫'
+            };
+            
+            const historyHTML = data.moods.slice(0, 10).map(moodEntry => {
+                const date = new Date(moodEntry.date);
+                const isToday = moodEntry.date === today;
+                const emoji = moodEmojis[moodEntry.mood] || '😊';
+                
+                return `
+                    <div class="project-mood-history-item ${isToday ? 'today' : ''}" title="${moodEntry.note || 'No note'}">
+                        <div class="emoji">${emoji}</div>
+                        <div class="date">${date.getMonth() + 1}/${date.getDate()}</div>
+                        <div class="mood-name">${moodEntry.mood}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            historyContainer.innerHTML = historyHTML;
+            
+        } else {
+            console.error('Error loading project mood history:', data.message);
+        }
+        
+    } catch (error) {
+        console.error('Error loading project mood history:', error);
+        const historyContainer = document.getElementById('project-mood-history');
+        if (historyContainer) {
+            historyContainer.innerHTML = `
+                <div class="flex-shrink-0 text-center text-gray-400">
+                    <div class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
+                        <i data-feather="alert-circle" class="w-5 h-5"></i>
+                    </div>
+                    <span class="text-xs">Error loading</span>
+                </div>
+            `;
+            feather.replace();
+        }
+    }
+}
+
+// Auto-load project mood history when on project page
+document.addEventListener('DOMContentLoaded', function() {
+    const projectElement = document.querySelector('[data-project-id]');
+    if (projectElement) {
+        const projectId = projectElement.dataset.projectId;
+        loadProjectMoodHistory(projectId);
+    }
+});

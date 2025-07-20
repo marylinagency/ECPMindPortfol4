@@ -73,6 +73,70 @@
         
         <!-- Writing Mood Tracker -->
         <div class="mt-8 bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-xl p-6">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i data-feather="heart" class="w-6 h-6 text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Writing Mood for This Project</h3>
+                <p class="text-gray-600">How are you feeling about working on "{{ project.name }}" today?</p>
+            </div>
+            
+            <!-- Mood Selection -->
+            <div class="grid grid-cols-5 gap-3 mb-6">
+                <div class="project-mood-emoji" data-mood="excited" onclick="selectProjectMood('excited', '🤩', 'Excited')">
+                    <span class="text-2xl">🤩</span>
+                    <span class="text-xs text-gray-600 font-medium">Excited</span>
+                </div>
+                <div class="project-mood-emoji" data-mood="focused" onclick="selectProjectMood('focused', '🎯', 'Focused')">
+                    <span class="text-2xl">🎯</span>
+                    <span class="text-xs text-gray-600 font-medium">Focused</span>
+                </div>
+                <div class="project-mood-emoji" data-mood="creative" onclick="selectProjectMood('creative', '🎨', 'Creative')">
+                    <span class="text-2xl">🎨</span>
+                    <span class="text-xs text-gray-600 font-medium">Creative</span>
+                </div>
+                <div class="project-mood-emoji" data-mood="tired" onclick="selectProjectMood('tired', '😴', 'Tired')">
+                    <span class="text-2xl">😴</span>
+                    <span class="text-xs text-gray-600 font-medium">Tired</span>
+                </div>
+                <div class="project-mood-emoji" data-mood="blocked" onclick="selectProjectMood('blocked', '😵‍💫', 'Blocked')">
+                    <span class="text-2xl">😵‍💫</span>
+                    <span class="text-xs text-gray-600 font-medium">Blocked</span>
+                </div>
+            </div>
+            
+            <!-- Mood Note -->
+            <div class="mb-4">
+                <textarea id="project-mood-note" 
+                          class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-300 focus:outline-none resize-none"
+                          rows="2" 
+                          placeholder="Add a note about your writing mood for this project (optional)..."></textarea>
+            </div>
+            
+            <!-- Save Button -->
+            <div class="text-center mb-6">
+                <button id="save-project-mood-btn" 
+                        onclick="saveProjectMood()" 
+                        class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-feather="heart" class="w-4 h-4 inline mr-2"></i>
+                    Save Project Mood
+                </button>
+            </div>
+            
+            <!-- Project Mood History -->
+            <div>
+                <h4 class="text-lg font-semibold text-gray-800 mb-3 text-center">Your Writing Journey on This Project</h4>
+                <div id="project-mood-history" class="flex gap-2 overflow-x-auto pb-2">
+                    <!-- History will be populated here -->
+                    <div class="flex-shrink-0 text-center text-gray-400">
+                        <div class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
+                            <i data-feather="calendar" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-xs">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">

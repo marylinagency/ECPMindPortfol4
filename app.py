@@ -478,6 +478,81 @@ def get_mood_history():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error loading mood history: {str(e)}'})
 
+@app.route('/project/<project_id>/save_project_mood', methods=['POST'])
+def save_project_mood(project_id):
+    """Save user's writing mood for specific project"""
+    try:
+        data = request.get_json()
+        mood = data.get('mood')
+        note = data.get('note', '')
+        
+        if not mood:
+            return jsonify({'success': False, 'message': 'Mood is required'})
+        
+        # Load or create project-specific mood data
+        mood_file = f'project_{project_id}_mood.json'
+        try:
+            with open(mood_file, 'r') as f:
+                mood_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            mood_data = {'project_id': project_id, 'moods': []}
+        
+        # Get today's date
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        # Check if mood already exists for today
+        existing_mood_index = None
+        for i, entry in enumerate(mood_data['moods']):
+            if entry.get('date') == today:
+                existing_mood_index = i
+                break
+        
+        # Create mood entry
+        mood_entry = {
+            'date': today,
+            'mood': mood,
+            'note': note,
+            'timestamp': datetime.now().isoformat(),
+            'project_id': project_id
+        }
+        
+        # Update or add mood entry
+        if existing_mood_index is not None:
+            mood_data['moods'][existing_mood_index] = mood_entry
+        else:
+            mood_data['moods'].append(mood_entry)
+        
+        # Keep only last 30 days
+        mood_data['moods'] = mood_data['moods'][-30:]
+        
+        # Save mood data
+        with open(mood_file, 'w') as f:
+            json.dump(mood_data, f, indent=2)
+        
+        return jsonify({'success': True, 'message': 'Project mood saved successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error saving project mood: {str(e)}'})
+
+@app.route('/project/<project_id>/get_project_mood_history')
+def get_project_mood_history(project_id):
+    """Get project-specific mood history"""
+    try:
+        mood_file = f'project_{project_id}_mood.json'
+        try:
+            with open(mood_file, 'r') as f:
+                mood_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            mood_data = {'project_id': project_id, 'moods': []}
+        
+        # Sort by date (newest first)
+        mood_data['moods'].sort(key=lambda x: x['date'], reverse=True)
+        
+        return jsonify({'success': True, 'moods': mood_data['moods'], 'project_id': project_id})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error loading project mood history: {str(e)}'})
+
 @app.route('/create_project', methods=['POST'])
 def create_project():
     config = load_config()
@@ -529,6 +604,103 @@ def create_project():
     
     return redirect(url_for('project_view', project_id=project_id))
 
+def enhance_book_title(title, topic, language="English"):
+    """Enhance book title using AI"""
+    try:
+        config = load_config()
+        
+        prompt = f"""You are a professional book title consultant. Enhance and improve this book title to make it more engaging, marketable, and compelling.
+
+Original Title: "{title}"
+Book Topic/Description: {topic}
+Target Language: {language}
+
+Guidelines:
+- Make it catchy and marketable
+- Keep it relevant to the topic
+- Consider the target audience
+- Add subtitle if beneficial
+- Maximum 100 characters total
+- Return ONLY the enhanced title, nothing else
+
+Enhanced title:"""
+
+        if config['ai_provider'] == 'gemini' and config.get('gemini_api_key'):
+            import google.genai as genai
+            client = genai.Client(api_key=config['gemini_api_key'])
+            response = client.models.generate_content(
+                model=config.get('gemini_model', 'gemini-2.5-flash'),
+                contents=prompt
+            )
+            return response.text.strip() if response.text else title
+        
+        elif config.get('openrouter_api_key'):
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {config['openrouter_api_key']}"},
+                json={
+                    "model": config.get('selected_model', 'anthropic/claude-3.5-sonnet:beta'),
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": 200
+                }
+            )
+            return response.json()['choices'][0]['message']['content'].strip()
+        
+        return title
+        
+    except Exception as e:
+        logging.error(f"Error enhancing title: {e}")
+        return title
+
+def generate_book_description(title, topic, author_bio="", language="English"):
+    """Generate professional book description using AI"""
+    try:
+        config = load_config()
+        
+        prompt = f"""You are a professional book marketing copywriter. Create a compelling, professional book description for Amazon KDP and other book platforms.
+
+Book Title: {title}
+Topic/Content: {topic}
+Author Info: {author_bio if author_bio else "Not provided"}
+Language: {language}
+
+Create a description that includes:
+1. A compelling hook that grabs attention
+2. What readers will learn or gain
+3. Target audience
+4. Key benefits and outcomes
+5. Professional tone suitable for book marketing
+6. 150-300 words total
+
+Write in {language}. Return ONLY the book description:"""
+
+        if config['ai_provider'] == 'gemini' and config.get('gemini_api_key'):
+            import google.genai as genai
+            client = genai.Client(api_key=config['gemini_api_key'])
+            response = client.models.generate_content(
+                model=config.get('gemini_model', 'gemini-2.5-flash'),
+                contents=prompt
+            )
+            return response.text.strip() if response.text else "Professional book covering essential topics and insights."
+        
+        elif config.get('openrouter_api_key'):
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {config['openrouter_api_key']}"},
+                json={
+                    "model": config.get('selected_model', 'anthropic/claude-3.5-sonnet:beta'),
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": 500
+                }
+            )
+            return response.json()['choices'][0]['message']['content'].strip()
+        
+        return "Professional book covering essential topics and insights."
+        
+    except Exception as e:
+        logging.error(f"Error generating description: {e}")
+        return "Professional book covering essential topics and insights."
+
 @app.route('/create_ai_book', methods=['POST'])
 def create_ai_book():
     config = load_config()
@@ -536,6 +708,7 @@ def create_ai_book():
         flash('Please activate your license first', 'error')
         return redirect(url_for('index'))
     
+    book_title = request.form.get('book_title', '').strip()
     topic = request.form.get('topic', '').strip()
     author_bio = request.form.get('author_bio', '').strip()
     language = request.form.get('language', 'English')
@@ -543,18 +716,27 @@ def create_ai_book():
     style = request.form.get('style', 'professional')
     action = request.form.get('action', 'generate_titles')
     
-    if not topic:
-        flash('Book topic is required', 'error')
+    if not book_title or not topic:
+        flash('Book title and topic are required', 'error')
         return redirect(url_for('index'))
     
-    # Generate a project name from the topic
-    project_name = f"AI Book: {topic[:50]}..."
+    # Enhance the book title using AI
+    enhanced_title = enhance_book_title(book_title, topic, language)
+    
+    # Generate book description using AI
+    book_description = generate_book_description(enhanced_title, topic, author_bio, language)
+    
+    # Use enhanced title as project name
+    project_name = enhanced_title[:80]
     
     # Create new project
     project_id = str(uuid.uuid4())
     project = {
         'id': project_id,
         'name': project_name,
+        'title': enhanced_title,
+        'original_title': book_title,
+        'description': book_description,
         'topic': topic,
         'author_bio': author_bio,
         'language': language,
