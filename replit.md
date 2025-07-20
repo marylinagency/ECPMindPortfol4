@@ -148,15 +148,16 @@ Preferred communication style: Simple, everyday language.
 - Implemented smooth scrolling navigation between chapters in preview mode
 - Created comprehensive export functionality with PDF generation capabilities
 
-### 2025-07-20: Enhanced AI Model Selection & License System
-- Added comprehensive list of free AI models from OpenRouter
-- Organized models into Free and Premium sections with clear visual distinction
-- Set default model to Llama 3.2 3B Instruct (free) for better user experience
-- Updated cost optimization guidance to highlight free model benefits
-- Enhanced Machine ID generation with better system fingerprinting
-- Simplified license activation to only require email and license key input
-- Improved user interface with automatic Machine ID display
-- Added 15+ free models including Llama, Phi-3, Mistral, and OpenChat variants
+### 2025-07-20: Dual AI Provider Integration with Status System
+- Added Google Gemini API integration as alternative to OpenRouter
+- Implemented dual AI provider system with automatic fallback for rate limits
+- Added provider selection in settings page with dynamic configuration sections
+- Created header status indicator showing current AI provider configuration (green/red dots)
+- Removed Configuration card from homepage for cleaner interface design
+- Fixed critical bugs: division by zero in progress, file path security, LSP errors
+- Enhanced error handling with improved retry logic and user feedback
+- Added comprehensive provider switching functionality with real-time status updates
+- Set up automatic failover system to handle rate limiting across providers
 
 ### 2025-07-20: Complete Dynamic App Transformation
 - Transformed static interface into fully dynamic interactive experience

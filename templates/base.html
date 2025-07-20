@@ -39,6 +39,20 @@
                 
                 <div class="flex items-center space-x-4">
                     {% if config and config.license_activated %}
+                        <!-- AI Status Indicator -->
+                        <div class="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-2">
+                            {% if config.ai_provider == 'gemini' and config.gemini_api_key %}
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span class="text-sm font-medium text-gray-700">Gemini AI</span>
+                            {% elif config.ai_provider == 'openrouter' and config.openrouter_api_key %}
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span class="text-sm font-medium text-gray-700">OpenRouter</span>
+                            {% else %}
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <span class="text-sm font-medium text-gray-700">Not Configured</span>
+                            {% endif %}
+                        </div>
+                        
                         <a href="{{ url_for('index') }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             <i data-feather="home" class="w-4 h-4 inline mr-2"></i>Home
                         </a>

@@ -11,5 +11,8 @@
     "message": "License activated successfully",
     "product_name": "bookgenpro",
     "success": true
-  }
+  },
+  "ai_provider": "gemini",
+  "gemini_api_key": "AIzaSyB3v1iQ-w5XgbwyDn1mdSj5colqX9ZcX1E",
+  "gemini_model": "gemini-1.5-flash"
 }

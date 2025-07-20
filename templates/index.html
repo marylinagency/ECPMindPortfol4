@@ -228,58 +228,7 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="grid md:grid-cols-2 gap-8 mb-12">
-                <!-- API Configuration -->
-                <div class="bg-white rounded-xl shadow-lg p-8 card-interactive scroll-reveal">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center mr-4">
-                            <i data-feather="settings" class="w-6 h-6 text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-900">Configuration</h3>
-                    </div>
-                    
-                    <div class="space-y-4 slide-in-up animate-delay-700">
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg card-interactive">
-                            <div>
-                                <h4 class="font-medium text-gray-900">OpenRouter API</h4>
-                                <p class="text-sm text-gray-600">
-                                    {% if config.openrouter_api_key %}
-                                        <span class="text-green-600">✓ Configured</span>
-                                    {% else %}
-                                        <span class="text-red-600">✗ Not configured</span>
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <a href="{{ url_for('settings') }}" 
-                               class="modern-button bg-clear-blue text-white px-4 py-2 rounded-lg">
-                                Configure
-                            </a>
-                        </div>
-                        
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <h4 class="font-medium text-gray-900">Selected Model</h4>
-                                <p class="text-sm text-gray-600">{{ config.selected_model or 'Not selected' }}</p>
-                            </div>
-                            <a href="{{ url_for('settings') }}" 
-                               class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                                Change
-                            </a>
-                        </div>
-                        
-                        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                            <h4 class="font-medium text-blue-900 mb-2">Features Available</h4>
-                            <ul class="text-sm text-blue-800 space-y-1">
-                                <li class="flex items-center"><i data-feather="check" class="w-4 h-4 mr-2"></i>AI Chapter Generation</li>
-                                <li class="flex items-center"><i data-feather="check" class="w-4 h-4 mr-2"></i>Multi-language Support</li>
-                                <li class="flex items-center"><i data-feather="check" class="w-4 h-4 mr-2"></i>PDF & HTML Export</li>
-                                <li class="flex items-center"><i data-feather="check" class="w-4 h-4 mr-2"></i>Project Management</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
             
             <!-- Recent Projects with Modern Effects -->
             {% if recent_projects %}
