@@ -116,6 +116,13 @@
             Export as PDF
         </a>
         {% endif %}
+        
+        <!-- Delete Project Button -->
+        <button onclick="deleteProject('{{ project.id }}')" 
+                class="bg-gradient-to-r from-red-700 to-red-800 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">
+            <i data-feather="trash-2" class="w-5 h-5 inline mr-2"></i>
+            Delete Project
+        </button>
     </div>
     
     <!-- Chapters Section -->
@@ -369,6 +376,17 @@ function closeModal() {
             document.body.removeChild(modal);
         }
     });
+}
+
+function deleteProject(projectId) {
+    if (confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+        // Create a form and submit it to delete the project
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/delete_project/${projectId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 
 function saveChapter(chapterId, content) {

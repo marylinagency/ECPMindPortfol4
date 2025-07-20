@@ -15,84 +15,80 @@
         
         body {
             font-family: 'Crimson Text', serif;
-            line-height: 1.6;
+            font-size: 11pt;
+            line-height: 1.4;
             color: #333;
             background: #fff;
         }
         
         .book-container {
-            max-width: 800px;
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .book-page {
+            width: 6in;
+            height: 9in;
+            background: white;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 0.75in;
+            position: relative;
+            font-family: 'Crimson Text', serif;
+            font-size: 11pt;
+            line-height: 1.4;
         }
         
         .cover-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            padding: 0;
-            margin: 0;
+            padding: 2rem;
             {% if project.cover_image %}
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}') center/cover no-repeat;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}') center/cover;
             {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             {% endif %}
             background-size: cover;
             background-position: center;
             color: white;
+            border-radius: 8px;
             page-break-after: always;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        }
+        
+        .cover-page > * {
             position: relative;
-            margin-left: -2rem;
-            margin-right: -2rem;
-            margin-top: -2rem;
+            z-index: 1;
         }
         
         .cover-title {
             font-family: 'Playfair Display', serif;
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
         .cover-topic {
-            font-size: 1.2rem;
-            margin-bottom: 3rem;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
             opacity: 0.9;
         }
         
-        .cover-image {
-            max-width: 300px;
-            max-height: 400px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            margin: 2rem auto;
-            display: none; /* Hide since we're using background image */
-        }
-        
         .cover-footer {
-            margin-top: 3rem;
-            font-size: 1rem;
+            margin-top: 2rem;
+            font-size: 0.9rem;
             opacity: 0.8;
-        }
-        
-        .table-of-contents {
-            page-break-before: always;
-            margin-bottom: 3rem;
         }
         
         .toc-title {
             font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
+            font-size: 2rem;
             text-align: center;
             margin-bottom: 2rem;
             color: #2d3748;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 1rem;
         }
         
         .toc-list {
@@ -103,56 +99,30 @@
         .toc-item {
             display: flex;
             justify-content: space-between;
-            padding: 0.5rem 0;
+            padding: 0.75rem 0;
             border-bottom: 1px dotted #cbd5e0;
         }
         
-        .toc-chapter {
-            font-weight: 600;
-            color: #4a5568;
-        }
-        
-        .toc-page {
-            color: #718096;
-        }
-        
-        .chapter {
-            page-break-before: always;
-            margin-bottom: 3rem;
-        }
-        
-        .chapter-header {
-            margin-bottom: 2rem;
+        .chapter-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
             text-align: center;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            color: #2d3748;
         }
         
         .chapter-number {
-            font-family: 'Playfair Display', serif;
-            font-size: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
             color: #718096;
             letter-spacing: 2px;
             margin-bottom: 0.5rem;
         }
         
-        .chapter-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 1rem;
-        }
-        
-        .chapter-content {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            text-align: justify;
-            color: #4a5568;
-        }
-        
         .chapter-content p {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
+            text-align: justify;
             text-indent: 2rem;
         }
         
@@ -169,18 +139,19 @@
             color: #667eea;
         }
         
-        .footer {
+        .page-number {
+            position: absolute;
+            bottom: 0.5in;
+            width: 100%;
             text-align: center;
-            margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e2e8f0;
-            color: #718096;
-            font-size: 0.9rem;
+            font-size: 10pt;
+            color: #666;
+            left: 0;
         }
         
         /* Amazon KDP Print Settings */
         @page {
-            size: 6in 9in; /* Amazon standard paperback size */
+            size: 6in 9in;
             margin: 0.75in 0.625in 0.75in 0.625in;
             @bottom-center {
                 content: counter(page);
@@ -196,41 +167,16 @@
             }
         }
         
-        /* Reset counter for chapters */
-        .chapter {
-            counter-increment: chapterpage;
-        }
-        
-        .chapter:first-child {
-            counter-reset: chapterpage 1;
-        }
-        
-        .cover-page, .table-of-contents {
-            counter-reset: chapterpage 0;
-        }
-        
-        .chapter::after {
-            content: "";
-            position: absolute;
-            bottom: 0.5in;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
         @media print {
-            body {
-                font-size: 11pt;
-                line-height: 1.4;
-            }
-            
-            .book-container {
-                padding: 0;
-                max-width: none;
+            .book-page {
+                margin: 0;
+                width: 100%;
+                height: 100%;
+                padding: 0.75in;
             }
             
             .cover-page {
                 padding: 2rem 1rem;
-                margin-bottom: 0;
             }
             
             .cover-title {
@@ -240,41 +186,30 @@
             .chapter-title {
                 font-size: 1.3rem;
             }
-            
-            .chapter-content {
-                font-size: 11pt;
-                line-height: 1.4;
-            }
         }
     </style>
 </head>
 <body>
     <div class="book-container">
         <!-- Cover Page -->
-        <div class="cover-page">
-            {% if project.cover_image %}
-            <img src="{{ url_for('static', filename='uploads/' + project.cover_image) }}" 
-                 alt="Book Cover" class="cover-image">
-            {% endif %}
-            
+        <div class="book-page cover-page">
             <h1 class="cover-title">{{ project.name }}</h1>
             <p class="cover-topic">{{ project.topic }}</p>
-            
             <div class="cover-footer">
                 <p>Generated with BookGenPro</p>
                 <p>Language: {{ project.language }}</p>
-                <p>{{ project.chapters|length }} Chapters</p>
+                <p>{{ project.chapters|length if project.chapters else 0 }} Chapters</p>
             </div>
         </div>
         
         <!-- Table of Contents -->
-        <div class="table-of-contents">
+        <div class="book-page" style="page-break-before: always;">
             <h2 class="toc-title">Table of Contents</h2>
             <ul class="toc-list">
                 {% for chapter in project.chapters %}
                 <li class="toc-item">
-                    <span class="toc-chapter">Chapter {{ chapter.number }}: {{ chapter.title }}</span>
-                    <span class="toc-page">{{ loop.index }}</span>
+                    <span>Chapter {{ chapter.number }}: {{ chapter.title }}</span>
+                    <span>{{ loop.index }}</span>
                 </li>
                 {% endfor %}
             </ul>
@@ -282,12 +217,9 @@
         
         <!-- Chapters -->
         {% for chapter in project.chapters %}
-        <div class="chapter">
-            <div class="chapter-header">
-                <div class="chapter-number">CHAPTER {{ chapter.number }}</div>
-                <h1 class="chapter-title">{{ chapter.title }}</h1>
-            </div>
-            
+        <div class="book-page" style="page-break-before: always;">
+            <div class="chapter-number">CHAPTER {{ chapter.number }}</div>
+            <h1 class="chapter-title">{{ chapter.title }}</h1>
             <div class="chapter-content">
                 {% set clean_content = chapter.content.replace('##', '').replace('###', '').replace('**', '').replace('*', '').replace('_', '') %}
                 {% for paragraph in clean_content.split('\n\n') %}
@@ -296,6 +228,7 @@
                     {% endif %}
                 {% endfor %}
             </div>
+            <div class="page-number">{{ loop.index }}</div>
         </div>
         {% endfor %}
         

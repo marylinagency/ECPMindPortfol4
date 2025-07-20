@@ -20,7 +20,7 @@ app.secret_key = os.environ.get("SESSION_SECRET", "bookgenpro-secret-key-2025")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Configuration
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'static/uploads'
 PROJECTS_FOLDER = 'projects'
 EXPORTS_FOLDER = 'exports'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
@@ -502,6 +502,40 @@ def upload_project_cover(project_id):
     except Exception as e:
         flash(f'Error updating cover image: {str(e)}', 'error')
         return redirect(url_for('project_view', project_id=project_id))
+
+@app.route('/delete_project/<project_id>', methods=['POST', 'DELETE'])
+def delete_project(project_id):
+    """Delete a project and all its associated files"""
+    config = load_config()
+    if not config.get('license_activated', False):
+        flash('Please activate your license first', 'error')
+        return redirect(url_for('index'))
+    
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        
+        # Load project to get cover image path
+        if os.path.exists(project_file):
+            with open(project_file, 'r') as f:
+                project = json.load(f)
+            
+            # Remove cover image if it exists
+            if project.get('cover_image'):
+                cover_path = os.path.join(UPLOAD_FOLDER, project['cover_image'])
+                if os.path.exists(cover_path):
+                    os.remove(cover_path)
+            
+            # Remove project file
+            os.remove(project_file)
+            
+            flash('Project deleted successfully!', 'success')
+        else:
+            flash('Project not found', 'error')
+            
+    except Exception as e:
+        flash(f'Error deleting project: {str(e)}', 'error')
+    
+    return redirect(url_for('index'))
 
 @app.route('/project/<project_id>/preview')
 def book_preview(project_id):
