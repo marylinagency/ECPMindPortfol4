@@ -104,11 +104,11 @@
         </button>
         
         {% if project.chapters and project.generation_status == 'completed' %}
-        <button onclick="previewBook()" 
-                class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium mr-4">
+        <a href="{{ url_for('book_preview', project_id=project.id) }}" 
+           class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium mr-4">
             <i data-feather="eye" class="w-5 h-5 inline mr-2"></i>
-            Preview Full Book
-        </button>
+            Live Preview & Edit
+        </a>
         
         <a href="{{ url_for('export_pdf', project_id=project.id) }}" 
            class="bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">

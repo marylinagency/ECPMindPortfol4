@@ -499,6 +499,56 @@ def upload_project_cover(project_id):
         flash(f'Error updating cover image: {str(e)}', 'error')
         return redirect(url_for('project_view', project_id=project_id))
 
+@app.route('/project/<project_id>/preview')
+def book_preview(project_id):
+    """Live book preview with real-time editing"""
+    config = load_config()
+    if not config.get('license_activated', False):
+        flash('Please activate your license first', 'error')
+        return redirect(url_for('index'))
+    
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        return render_template('book_preview.html', project=project, config=config)
+    except FileNotFoundError:
+        flash('Project not found', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/api/update_project/<project_id>', methods=['POST'])
+def update_project_content(project_id):
+    """Update project content via AJAX"""
+    config = load_config()
+    if not config.get('license_activated', False):
+        return jsonify({'success': False, 'message': 'License not activated'})
+    
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        edit_type = request.form.get('editType')
+        
+        if edit_type == 'cover':
+            project['name'] = request.form.get('name', project['name'])
+            project['topic'] = request.form.get('topic', project['topic'])
+        elif edit_type == 'chapter':
+            chapter_index = int(request.form.get('chapterIndex'))
+            if 0 <= chapter_index < len(project.get('chapters', [])):
+                project['chapters'][chapter_index]['title'] = request.form.get('title')
+                project['chapters'][chapter_index]['content'] = request.form.get('content')
+        
+        project['last_modified'] = datetime.now().isoformat()
+        
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        return jsonify({'success': True, 'message': 'Project updated successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
 @app.route('/generate_chapters/<project_id>')
 def generate_chapters(project_id):
     config = load_config()
@@ -834,23 +884,7 @@ def save_chapter_content(chapter_id):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/book_preview/<project_id>')
-def book_preview(project_id):
-    """Full book preview page"""
-    config = load_config()
-    if not config.get('license_activated', False):
-        flash('Please activate your license first', 'error')
-        return redirect(url_for('index'))
-    
-    try:
-        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
-        with open(project_file, 'r') as f:
-            project = json.load(f)
-        
-        return render_template('book_preview.html', project=project, config=config)
-    except FileNotFoundError:
-        flash('Project not found', 'error')
-        return redirect(url_for('index'))
+
 
 @app.route('/check_generation_status/<project_id>')
 def check_generation_status(project_id):
