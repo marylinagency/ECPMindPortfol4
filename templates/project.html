@@ -71,6 +71,96 @@
             </div>
         </div>
         
+        <!-- Writing Mood Tracker -->
+        <div class="mt-8 bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
+                        <i data-feather="heart" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Writing Mood Tracker</h3>
+                        <p class="text-sm text-gray-600">How are you feeling about your writing today?</p>
+                    </div>
+                </div>
+                <div id="mood-streak" class="text-right">
+                    <div class="text-sm font-medium text-gray-900">Streak: <span id="streak-count">0</span> days</div>
+                    <div class="text-xs text-gray-500">Keep going!</div>
+                </div>
+            </div>
+            
+            <!-- Mood Selection -->
+            <div class="grid grid-cols-5 md:grid-cols-10 gap-3 mb-4">
+                <button class="mood-emoji" data-mood="excited" data-emoji="🚀" data-label="Excited" onclick="selectMood('excited', '🚀')">
+                    <span class="text-3xl">🚀</span>
+                    <span class="text-xs">Excited</span>
+                </button>
+                <button class="mood-emoji" data-mood="creative" data-emoji="✨" data-label="Creative" onclick="selectMood('creative', '✨')">
+                    <span class="text-3xl">✨</span>
+                    <span class="text-xs">Creative</span>
+                </button>
+                <button class="mood-emoji" data-mood="focused" data-emoji="🎯" data-label="Focused" onclick="selectMood('focused', '🎯')">
+                    <span class="text-3xl">🎯</span>
+                    <span class="text-xs">Focused</span>
+                </button>
+                <button class="mood-emoji" data-mood="motivated" data-emoji="💪" data-label="Motivated" onclick="selectMood('motivated', '💪')">
+                    <span class="text-3xl">💪</span>
+                    <span class="text-xs">Motivated</span>
+                </button>
+                <button class="mood-emoji" data-mood="happy" data-emoji="😊" data-label="Happy" onclick="selectMood('happy', '😊')">
+                    <span class="text-3xl">😊</span>
+                    <span class="text-xs">Happy</span>
+                </button>
+                <button class="mood-emoji" data-mood="neutral" data-emoji="😐" data-label="Neutral" onclick="selectMood('neutral', '😐')">
+                    <span class="text-3xl">😐</span>
+                    <span class="text-xs">Neutral</span>
+                </button>
+                <button class="mood-emoji" data-mood="tired" data-emoji="😴" data-label="Tired" onclick="selectMood('tired', '😴')">
+                    <span class="text-3xl">😴</span>
+                    <span class="text-xs">Tired</span>
+                </button>
+                <button class="mood-emoji" data-mood="stressed" data-emoji="😰" data-label="Stressed" onclick="selectMood('stressed', '😰')">
+                    <span class="text-3xl">😰</span>
+                    <span class="text-xs">Stressed</span>
+                </button>
+                <button class="mood-emoji" data-mood="blocked" data-emoji="🧱" data-label="Blocked" onclick="selectMood('blocked', '🧱')">
+                    <span class="text-3xl">🧱</span>
+                    <span class="text-xs">Blocked</span>
+                </button>
+                <button class="mood-emoji" data-mood="inspired" data-emoji="💡" data-label="Inspired" onclick="selectMood('inspired', '💡')">
+                    <span class="text-3xl">💡</span>
+                    <span class="text-xs">Inspired</span>
+                </button>
+            </div>
+            
+            <!-- Current Mood Display -->
+            <div id="current-mood" class="hidden mb-4">
+                <div class="bg-white rounded-lg p-4 border-2 border-pink-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <span id="selected-emoji" class="text-4xl"></span>
+                            <div>
+                                <div class="font-medium text-gray-900">Current mood: <span id="selected-mood"></span></div>
+                                <div class="text-sm text-gray-600">Logged at <span id="mood-time"></span></div>
+                            </div>
+                        </div>
+                        <button onclick="addMoodNote()" class="bg-pink-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-pink-600 transition-colors">
+                            <i data-feather="message-circle" class="w-4 h-4 inline mr-1"></i>
+                            Add Note
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mood History (Recent 7 days) -->
+            <div class="bg-white rounded-lg p-4">
+                <h4 class="font-medium text-gray-900 mb-3">This Week's Mood Journey</h4>
+                <div id="mood-history" class="flex space-x-2 overflow-x-auto">
+                    <!-- Mood history will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
         <!-- Progress Bar -->
         {% if project.generation_status in ['generating_titles', 'generating_content'] %}
         <div class="mt-6">

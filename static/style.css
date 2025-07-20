@@ -72,6 +72,115 @@ body {
     animation: floatingLights 12s ease-in-out infinite;
 }
 
+/* Writing Mood Tracker Styles */
+.mood-emoji {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    aspect-ratio: 1;
+    min-height: 80px;
+}
+
+.mood-emoji:hover {
+    border-color: #ec4899;
+    background: #fdf2f8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.15);
+}
+
+.mood-emoji.selected {
+    border-color: #ec4899;
+    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+    box-shadow: 0 4px 20px rgba(236, 72, 153, 0.25);
+    transform: scale(1.05);
+}
+
+.mood-emoji span:first-child {
+    margin-bottom: 4px;
+    filter: grayscale(20%);
+    transition: filter 0.3s ease;
+}
+
+.mood-emoji:hover span:first-child,
+.mood-emoji.selected span:first-child {
+    filter: grayscale(0%);
+}
+
+.mood-history-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+    padding: 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.mood-history-item.today {
+    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+    border-color: #ec4899;
+}
+
+.mood-history-item .emoji {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.mood-history-item .date {
+    font-size: 10px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.mood-history-item .mood-name {
+    font-size: 9px;
+    color: #374151;
+    margin-top: 2px;
+}
+
+.mood-note-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.mood-note-content {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.mood-celebration {
+    animation: celebrate 1s ease-out;
+}
+
+@keyframes celebrate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1) rotate(5deg); }
+    100% { transform: scale(1); }
+}
+
 /* Keyframe Animations */
 @keyframes modernSlide {
     0% { background-position: 0% 50%; }
