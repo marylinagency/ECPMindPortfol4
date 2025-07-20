@@ -16,7 +16,7 @@
         body {
             font-family: 'Crimson Text', serif;
             font-size: 11pt;
-            line-height: 1.4;
+            line-height: 1.6;
             color: #333;
             background: #fff;
         }
@@ -32,102 +32,117 @@
             height: 9in;
             background: white;
             margin: 0 auto;
-            padding: 0.5in;
+            padding: 0.75in;
             position: relative;
             font-family: 'Crimson Text', serif;
             font-size: 11pt;
-            line-height: 1.4;
+            line-height: 1.6;
         }
         
         .cover-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6in;
+            height: 9in;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 1.5rem;
-            margin: 0;
-            width: 6in;
-            height: 9in;
+            padding: 2rem;
             {% if project.cover_image %}
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}');
+            background: url('{{ url_for("static", filename="uploads/" + project.cover_image) }}') no-repeat center center;
             {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             {% endif %}
             background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
             color: white;
             page-break-after: always;
-            position: absolute;
-            top: 0;
-            left: 0;
             box-sizing: border-box;
         }
         
-        .cover-page > * {
+        .cover-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6in;
+            height: 9in;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 0;
+        }
+        
+        .cover-content {
             position: relative;
             z-index: 1;
+            max-width: 80%;
         }
         
         .cover-title {
             font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin: 0 0 0.8rem 0;
+            margin: 0 0 1rem 0;
             color: white;
             line-height: 1.2;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+
         }
         
         .cover-topic {
-            font-size: 1rem;
-            margin: 0 0 1.5rem 0;
+            font-size: 1.2rem;
+            margin: 0 0 2rem 0;
             opacity: 0.95;
             color: white;
             line-height: 1.4;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+
+            font-style: italic;
         }
         
         .cover-footer {
-            margin: 1.5rem 0 0 0;
-            font-size: 0.85rem;
+            margin: 2rem 0 0 0;
+            font-size: 0.9rem;
             opacity: 0.9;
             color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+
         }
         
         .cover-footer p {
-            margin: 0.2rem 0;
+            margin: 0.3rem 0;
         }
         
         .toc-title {
             font-family: 'Playfair Display', serif;
-            font-size: 2rem;
+            font-size: 1.8rem;
             text-align: center;
-            margin-bottom: 2rem;
+            margin: 1rem 0 2rem 0;
             color: #2d3748;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
         }
         
         .toc-list {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
         
         .toc-item {
             display: flex;
             justify-content: space-between;
-            padding: 0.75rem 0;
+            padding: 0.5rem 0;
             border-bottom: 1px dotted #cbd5e0;
+            font-size: 1rem;
         }
         
         .chapter-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
             text-align: center;
-            margin-bottom: 2rem;
+            margin: 1rem 0 2rem 0;
             color: #2d3748;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
         }
         
         .chapter-number {
@@ -136,12 +151,23 @@
             color: #718096;
             letter-spacing: 2px;
             margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        
+        .chapter-content {
+            text-align: justify;
+            hyphens: auto;
+            margin-bottom: 1.5rem;
         }
         
         .chapter-content p {
             margin-bottom: 1.2rem;
+            text-indent: 1.5em;
+            line-height: 1.6;
             text-align: justify;
-            text-indent: 2rem;
+            hyphens: auto;
+            orphans: 3;
+            widows: 3;
         }
         
         .chapter-content p:first-child {
@@ -149,32 +175,32 @@
         }
         
         .chapter-content p:first-child::first-letter {
-            font-size: 3rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
             font-weight: bold;
             float: left;
-            line-height: 1;
-            margin: 0.1rem 0.2rem 0 0;
+            line-height: 0.8;
+            margin: 0.15rem 0.5rem 0 0;
             color: #667eea;
         }
         
         .page-number {
             position: absolute;
             bottom: 0.5in;
-            width: 100%;
+            width: calc(100% - 1.5in);
             text-align: center;
             font-size: 10pt;
             color: #666;
-            left: 0;
         }
         
         /* Amazon KDP Print Settings */
         @page {
             size: 6in 9in;
-            margin: 0.5in 0.5in 0.5in 0.5in;
+            margin: 0.75in;
             @bottom-center {
                 content: counter(page);
                 font-family: 'Crimson Text', serif;
-                font-size: 9pt;
+                font-size: 10pt;
                 color: #666;
             }
         }
@@ -188,11 +214,16 @@
         }
         
         @media print {
+            body {
+                font-size: 11pt;
+                line-height: 1.6;
+            }
+            
             .book-page {
                 margin: 0;
                 width: 100%;
                 height: 100%;
-                padding: 0.5in;
+                padding: 0.75in;
                 position: relative;
             }
             
@@ -200,33 +231,63 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-                width: 100%;
-                height: 100%;
+                width: 6in;
+                height: 9in;
                 margin: 0;
-                padding: 3rem 2rem;
+                padding: 2rem;
                 box-sizing: border-box;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
             }
             
             .cover-title {
-                font-size: 2.2rem;
-                margin-bottom: 2rem;
+                font-size: 2.5rem;
+                margin-bottom: 1.5rem;
             }
             
             .chapter-title {
-                font-size: 1.4rem;
-                margin-bottom: 2.5rem;
+                font-size: 1.6rem;
+                margin-bottom: 2rem;
             }
             
             .chapter-content p {
-                margin-bottom: 1.3rem;
+                margin-bottom: 1.2rem;
                 text-align: justify;
                 hyphens: auto;
             }
+            
+            .page-number {
+                bottom: 0.75in;
+            }
+        }
+        
+        /* Author Bio Styles */
+        .author-bio-page {
+            width: 6in;
+            height: 9in;
+            margin: 0 auto;
+            padding: 0.75in;
+            position: relative;
+        }
+        
+        .author-bio-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            text-align: center;
+            margin: 1rem 0 2rem 0;
+            color: #2d3748;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .author-bio-content p {
+            margin-bottom: 1.2rem;
+            line-height: 1.6;
+            text-align: justify;
+            hyphens: auto;
+        }
+        
+        /* Footer Styles */
+        .footer {
+            display: none; /* Hide footer in print */
         }
     </style>
 </head>
@@ -235,12 +296,15 @@
         <!-- Cover Page -->
         <div class="book-page" style="padding: 0; position: relative;">
             <div class="cover-page">
-                <h1 class="cover-title">{{ project.name }}</h1>
-                <p class="cover-topic">{{ project.topic }}</p>
-                <div class="cover-footer">
-                    <p>Generated with BookGenPro</p>
-                    <p>Language: {{ project.language }}</p>
-                    <p>{{ project.chapters|length if project.chapters else 0 }} Chapters</p>
+                <div class="cover-overlay"></div>
+                <div class="cover-content">
+                    <h1 class="cover-title">{{ project.name }}</h1>
+                    <p class="cover-topic">{{ project.topic }}</p>
+                    <div class="cover-footer">
+                        <p>Generated with BookGenPro</p>
+                        <p>Language: {{ project.language }}</p>
+                        <p>{{ project.chapters|length if project.chapters else 0 }} Chapters</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -252,16 +316,22 @@
                 {% for chapter in project.chapters %}
                 <li class="toc-item">
                     <span>Chapter {{ chapter.number }}: {{ chapter.title }}</span>
-                    <span>{{ loop.index }}</span>
+                    <span>{{ loop.index + 2 }}</span> <!-- +2 to account for cover and TOC pages -->
                 </li>
                 {% endfor %}
+                {% if project.author_bio and project.author_bio.strip() %}
+                <li class="toc-item">
+                    <span>About the Author</span>
+                    <span>{{ project.chapters|length + 3 }}</span>
+                </li>
+                {% endif %}
             </ul>
         </div>
         
         <!-- Chapters -->
         {% for chapter in project.chapters %}
         <div class="book-page" style="page-break-before: always;">
-            <div class="chapter-number">CHAPTER {{ chapter.number }}</div>
+            <div class="chapter-number">Chapter {{ chapter.number }}</div>
             <h1 class="chapter-title">{{ chapter.title }}</h1>
             <div class="chapter-content">
                 {% if chapter.cleaned_paragraphs %}
@@ -278,33 +348,24 @@
                     {% endfor %}
                 {% endif %}
             </div>
-            <div class="page-number">{{ loop.index }}</div>
+            <div class="page-number"></div>
         </div>
         {% endfor %}
         
         <!-- Author Bio Section -->
         {% if project.author_bio and project.author_bio.strip() %}
-        <div class="author-bio-page" style="page-break-before: always; padding: 3rem 2rem; text-align: center;">
-            <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #2d3748; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem;">About the Author</h2>
-            <div style="font-size: 1.1rem; line-height: 1.8; text-align: justify; color: #4a5568; margin-bottom: 2rem;">
+        <div class="author-bio-page" style="page-break-before: always;">
+            <h2 class="author-bio-title">About the Author</h2>
+            <div class="author-bio-content">
                 {% for paragraph in project.author_bio.split('\n\n') %}
                     {% if paragraph.strip() %}
-                        <p style="margin-bottom: 1.5rem;">{{ paragraph.strip() }}</p>
+                        <p>{{ paragraph.strip() }}</p>
                     {% endif %}
                 {% endfor %}
             </div>
+            <div class="page-number"></div>
         </div>
         {% endif %}
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>This book was generated using BookGenPro - AI-Powered Book Generation</p>
-            <p>Developed by ECPMind | www.ecertifpro.com</p>
-            <p>Generated on {{ project.last_modified[:10] if project.last_modified else 'Unknown Date' }}</p>
-            {% if project.author_bio and project.author_bio.strip() %}
-            <p style="margin-top: 1rem; font-style: italic; color: #666;">Author bio included</p>
-            {% endif %}
-        </div>
     </div>
 </body>
 </html>
