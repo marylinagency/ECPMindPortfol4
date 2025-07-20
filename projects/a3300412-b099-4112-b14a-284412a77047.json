@@ -1,59 +1,68 @@
 {
   "id": "a3300412-b099-4112-b14a-284412a77047",
-  "name": null,
+  "name": "AI for Creatives",
   "topic": "Book Topic: AI for Creatives: Harnessing Artificial Intelligence to Supercharge Your Art, Writing, and Ideas\nDescription:\nA beginner-friendly guide for artists, writers, and creatives looking to understand how AI tools can amplify their work. From generating ideas to automating tasks, this book walks you through real-world use cases of AI in creative industries.\n\n",
   "language": "English",
   "chapters": [
     {
       "id": "1",
+      "number": 1,
       "title": "Chapter 1",
       "content": "Content for Chapter 1 will be generated here.",
       "status": "completed"
     },
     {
       "id": "2",
+      "number": 2,
       "title": "Chapter 2",
       "content": "Content for Chapter 2 will be generated here.",
       "status": "completed"
     },
     {
       "id": "3",
+      "number": 3,
       "title": "Chapter 3",
       "content": "Content for Chapter 3 will be generated here.",
       "status": "completed"
     },
     {
       "id": "4",
+      "number": 4,
       "title": "Chapter 4",
       "content": "Content for Chapter 4 will be generated here.",
       "status": "completed"
     },
     {
       "id": "5",
+      "number": 5,
       "title": "Chapter 5",
       "content": "Content for Chapter 5 will be generated here.",
       "status": "completed"
     },
     {
       "id": "6",
+      "number": 6,
       "title": "Chapter 6",
       "content": "Content for Chapter 6 will be generated here.",
       "status": "completed"
     },
     {
       "id": "7",
+      "number": 7,
       "title": "Chapter 7",
       "content": "Content for Chapter 7 will be generated here.",
       "status": "completed"
     },
     {
       "id": "8",
+      "number": 8,
       "title": "Chapter 8",
       "content": "Content for Chapter 8 will be generated here.",
       "status": "completed"
     }
   ],
-  "status": "completed",
+  "generation_status": "completed",
+  "num_chapters": 8,
   "author_bio": "",
   "created_at": "2025-07-20T19:21:06.618829",
   "last_modified": "2025-07-20T19:21:06.618836",
