@@ -61,7 +61,7 @@ def load_config():
         # Create default config
         default_config = {
             "openrouter_api_key": "",
-            "selected_model": "openai/gpt-3.5-turbo",
+            "selected_model": "meta-llama/llama-3.2-3b-instruct:free",
             "license_activated": False,
             "license_key": "",
             "email": "",

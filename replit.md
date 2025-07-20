@@ -121,3 +121,15 @@ Preferred communication style: Simple, everyday language.
 - **Filename Security**: Werkzeug secure_filename for uploaded files
 - **License Verification**: Machine ID binding prevents license sharing
 - **Session Management**: Secure session handling with configurable keys
+
+## Recent Changes: Latest modifications with dates
+
+### 2025-07-20: Enhanced AI Model Selection & License System
+- Added comprehensive list of free AI models from OpenRouter
+- Organized models into Free and Premium sections with clear visual distinction
+- Set default model to Llama 3.2 3B Instruct (free) for better user experience
+- Updated cost optimization guidance to highlight free model benefits
+- Enhanced Machine ID generation with better system fingerprinting
+- Simplified license activation to only require email and license key input
+- Improved user interface with automatic Machine ID display
+- Added 15+ free models including Llama, Phi-3, Mistral, and OpenChat variants

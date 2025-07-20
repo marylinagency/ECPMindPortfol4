@@ -1,8 +1,15 @@
 {
   "openrouter_api_key": "",
   "selected_model": "openai/gpt-3.5-turbo",
-  "license_activated": false,
-  "license_key": "",
-  "email": "",
-  "machine_id": ""
+  "license_activated": true,
+  "license_key": "BOOK-LB4C-HFNO-FGXX-BUHK",
+  "email": "rad@glma.com",
+  "machine_id": "",
+  "license_info": {
+    "expires_at": "2025-08-19T15:32:42.897491",
+    "license_type": "month",
+    "message": "License activated successfully",
+    "product_name": "bookgenpro",
+    "success": true
+  }
 }
