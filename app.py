@@ -1715,8 +1715,6 @@ Create the author biography now:"""
     except Exception as e:
         raise Exception(f"OpenRouter API error: {str(e)}")
 
-
-
 @app.route('/check_generation_status/<project_id>')
 def check_generation_status(project_id):
     try:
@@ -1731,6 +1729,480 @@ def check_generation_status(project_id):
         })
     except:
         return jsonify({'status': 'error'})
+
+# Session storage for standalone generation
+standalone_sessions = {}
+
+@app.route('/standalone_generation')
+def standalone_generation():
+    """Standalone AI book generation page"""
+    return render_template('standalone_generation.html')
+
+@app.route('/api/standalone_generation', methods=['POST'])
+def api_standalone_generation():
+    """Start standalone book generation"""
+    try:
+        config = load_config()
+        if not config.get('license_activated', False):
+            return jsonify({'success': False, 'message': 'License not activated'})
+            
+        data = request.get_json()
+        session_id = str(uuid.uuid4())
+        
+        # Store session data
+        standalone_sessions[session_id] = {
+            'status': 'starting',
+            'currentStep': 'enhancing',
+            'completedSteps': [],
+            'book': {
+                'title': '',
+                'description': data.get('topic', ''),
+                'authorBio': data.get('authorBio', ''),
+                'language': data.get('language', 'English'),
+                'chapters': []
+            },
+            'params': data,
+            'error': None
+        }
+        
+        # Start background generation
+        thread = threading.Thread(target=standalone_generation_background, 
+                                args=(session_id, data, config))
+        thread.daemon = True
+        thread.start()
+        
+        return jsonify({'success': True, 'session_id': session_id})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/standalone_status/<session_id>')
+def api_standalone_status(session_id):
+    """Get standalone generation status"""
+    if session_id not in standalone_sessions:
+        return jsonify({'status': 'not_found'})
+        
+    return jsonify(standalone_sessions[session_id])
+
+@app.route('/api/standalone_export_pdf', methods=['POST'])
+def api_standalone_export_pdf():
+    """Export standalone book as PDF"""
+    try:
+        book_data = json.loads(request.form.get('book_data', '{}'))
+        
+        # Generate HTML for PDF
+        html_content = render_template('book_export.html', project=book_data)
+        
+        # Convert to PDF
+        pdf_filename = f"{book_data['title']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        pdf_path = os.path.join(EXPORTS_FOLDER, pdf_filename)
+        
+        weasyprint.HTML(string=html_content, base_url=request.url_root).write_pdf(pdf_path)
+        
+        return send_file(pdf_path, as_attachment=True, download_name=pdf_filename)
+        
+    except Exception as e:
+        flash(f'Error exporting PDF: {str(e)}', 'error')
+        return redirect(url_for('standalone_generation'))
+
+@app.route('/api/standalone_export_docx', methods=['POST'])
+def api_standalone_export_docx():
+    """Export standalone book as DOCX"""
+    try:
+        from docx import Document
+        from docx.shared import Inches, Pt
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        
+        book_data = json.loads(request.form.get('book_data', '{}'))
+        
+        # Create DOCX document
+        doc = Document()
+        
+        # Set margins
+        sections = doc.sections
+        for section in sections:
+            section.top_margin = Inches(1)
+            section.bottom_margin = Inches(1)
+            section.left_margin = Inches(1)
+            section.right_margin = Inches(1)
+        
+        # Title page
+        title_paragraph = doc.add_paragraph()
+        title_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        title_run = title_paragraph.add_run(book_data['title'])
+        title_run.font.size = Pt(24)
+        title_run.font.bold = True
+        
+        doc.add_paragraph()
+        
+        # Author bio
+        if book_data.get('authorBio'):
+            author_paragraph = doc.add_paragraph()
+            author_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            author_run = author_paragraph.add_run(f"By: {book_data['authorBio']}")
+            author_run.font.size = Pt(14)
+            author_run.font.italic = True
+        
+        doc.add_page_break()
+        
+        # Table of contents
+        toc_heading = doc.add_paragraph()
+        toc_run = toc_heading.add_run("Table of Contents")
+        toc_run.font.size = Pt(18)
+        toc_run.font.bold = True
+        doc.add_paragraph()
+        
+        for i, chapter in enumerate(book_data.get('chapters', []), 1):
+            toc_entry = doc.add_paragraph(f"Chapter {i}: {chapter['title']}")
+            toc_entry.style = 'List Number'
+        
+        doc.add_page_break()
+        
+        # Chapters
+        for i, chapter in enumerate(book_data.get('chapters', []), 1):
+            chapter_heading = doc.add_paragraph()
+            chapter_run = chapter_heading.add_run(f"Chapter {i}: {chapter['title']}")
+            chapter_run.font.size = Pt(16)
+            chapter_run.font.bold = True
+            doc.add_paragraph()
+            
+            content = chapter['content']
+            content = content.replace('**', '').replace('*', '').replace('#', '')
+            
+            paragraphs = content.split('\n\n')
+            for paragraph_text in paragraphs:
+                if paragraph_text.strip():
+                    paragraph = doc.add_paragraph(paragraph_text.strip())
+                    paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            
+            doc.add_page_break()
+        
+        # Save DOCX
+        docx_filename = f"{book_data['title']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+        docx_path = os.path.join(EXPORTS_FOLDER, docx_filename)
+        doc.save(docx_path)
+        
+        return send_file(docx_path, as_attachment=True, download_name=docx_filename)
+        
+    except Exception as e:
+        flash(f'Error exporting DOCX: {str(e)}', 'error')
+        return redirect(url_for('standalone_generation'))
+
+def standalone_generation_background(session_id, params, config):
+    """Background process for standalone generation"""
+    try:
+        session = standalone_sessions[session_id]
+        
+        # Step 1: Enhance description
+        session['status'] = 'generating'
+        session['currentStep'] = 'enhancing'
+        
+        ai_provider = config.get('ai_provider', 'openrouter')
+        enhanced_description = enhance_description_simple(params['topic'], params['language'], config)
+        
+        session['book']['description'] = enhanced_description
+        session['completedSteps'].append('enhancing')
+        
+        # Step 2: Generate chapter titles
+        session['currentStep'] = 'titles'
+        
+        titles = generate_chapter_titles_simple(enhanced_description, params['language'], int(params['chapterCount']), config)
+        
+        # Generate book title from first title or description
+        if titles:
+            book_title = generate_book_title_from_description(enhanced_description, config)
+            session['book']['title'] = book_title
+            
+            # Initialize chapters
+            for i, title in enumerate(titles):
+                session['book']['chapters'].append({
+                    'id': str(i+1),
+                    'title': title,
+                    'content': '',
+                    'status': 'pending'
+                })
+        
+        session['completedSteps'].append('titles')
+        
+        # Step 3: Generate content if full generation requested
+        if params['type'] == 'full':
+            session['currentStep'] = 'content'
+            
+            total_chapters = len(session['book']['chapters'])
+            for i, chapter in enumerate(session['book']['chapters']):
+                session['progress'] = f"({i+1}/{total_chapters})"
+                
+                content = generate_chapter_content_simple(
+                    enhanced_description, chapter['title'], params['language'], config
+                )
+                
+                chapter['content'] = content
+                chapter['status'] = 'completed'
+        
+        session['completedSteps'].append('content')
+        session['status'] = 'completed'
+        
+        # Save to main project system
+        save_standalone_to_project(session, params)
+        
+    except Exception as e:
+        session['status'] = 'error'
+        session['error'] = str(e)
+
+def save_standalone_to_project(session, params):
+    """Save standalone generation to main project system"""
+    try:
+        project_id = str(uuid.uuid4())
+        
+        project_data = {
+            'id': project_id,
+            'name': session['book']['title'],
+            'topic': session['book']['description'],
+            'language': session['book']['language'],
+            'chapters': session['book']['chapters'],
+            'status': 'completed',
+            'author_bio': session['book']['authorBio'],
+            'created_at': datetime.now().isoformat(),
+            'last_modified': datetime.now().isoformat(),
+            'generation_type': 'ai_standalone'
+        }
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'w') as f:
+            json.dump(project_data, f, indent=2)
+            
+        session['project_id'] = project_id
+        
+    except Exception as e:
+        print(f"Error saving standalone project: {e}")
+
+def enhance_description_simple(description, language, config):
+    """Simple description enhancement"""
+    ai_provider = config.get('ai_provider', 'openrouter')
+    
+    prompt = f"""Enhance this book description for better AI generation in {language}:
+
+{description}
+
+Make it more detailed and comprehensive while maintaining the core concept. Add context that would help generate better chapter titles and content."""
+
+    try:
+        if ai_provider == 'gemini':
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=config['gemini_api_key'])
+                client = genai.GenerativeModel(config.get('gemini_model', 'gemini-1.5-flash'))
+                response = client.generate_content(prompt)
+                return response.text.strip()
+            except:
+                pass
+        
+        # OpenRouter fallback
+        headers = {
+            "Authorization": f"Bearer {config['openrouter_api_key']}",
+            "Content-Type": "application/json",
+        }
+        
+        data = {
+            "model": config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free'),
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+            "max_tokens": 500
+        }
+        
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('choices') and len(result['choices']) > 0:
+                return result['choices'][0]['message']['content'].strip()
+        
+    except Exception as e:
+        print(f"Enhancement error: {e}")
+    
+    return description
+
+def generate_chapter_titles_simple(description, language, chapter_count, config):
+    """Generate chapter titles"""
+    ai_provider = config.get('ai_provider', 'openrouter')
+    
+    prompt = f"""Create {chapter_count} engaging chapter titles in {language} for a book about:
+
+{description}
+
+Requirements:
+- Each title should be compelling and descriptive
+- Arrange them in logical order
+- Make them flow well together
+- Return only the titles, one per line
+- No numbering or formatting
+
+Chapter titles:"""
+
+    try:
+        if ai_provider == 'gemini':
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=config['gemini_api_key'])
+                client = genai.GenerativeModel(config.get('gemini_model', 'gemini-1.5-flash'))
+                response = client.generate_content(prompt)
+                titles = response.text.strip().split('\n')
+                return [title.strip() for title in titles if title.strip()]
+            except:
+                pass
+        
+        # OpenRouter fallback
+        headers = {
+            "Authorization": f"Bearer {config['openrouter_api_key']}",
+            "Content-Type": "application/json",
+        }
+        
+        data = {
+            "model": config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free'),
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+            "max_tokens": 800
+        }
+        
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('choices') and len(result['choices']) > 0:
+                titles = result['choices'][0]['message']['content'].strip().split('\n')
+                return [title.strip() for title in titles if title.strip()]
+        
+    except Exception as e:
+        print(f"Title generation error: {e}")
+    
+    return [f"Chapter {i+1}" for i in range(chapter_count)]
+
+def generate_chapter_content_simple(description, chapter_title, language, config):
+    """Generate chapter content"""
+    ai_provider = config.get('ai_provider', 'openrouter')
+    
+    prompt = f"""Write comprehensive chapter content in {language} for:
+
+Book Description: {description}
+Chapter Title: {chapter_title}
+
+Requirements:
+- Write 800-1200 words
+- Make it engaging and informative
+- Use clear paragraphs
+- Match the book's overall theme
+- Don't include chapter title in the content
+- Write in a natural, flowing style
+
+Chapter content:"""
+
+    try:
+        if ai_provider == 'gemini':
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=config['gemini_api_key'])
+                client = genai.GenerativeModel(config.get('gemini_model', 'gemini-1.5-flash'))
+                response = client.generate_content(prompt)
+                return response.text.strip()
+            except:
+                pass
+        
+        # OpenRouter fallback
+        headers = {
+            "Authorization": f"Bearer {config['openrouter_api_key']}",
+            "Content-Type": "application/json",
+        }
+        
+        data = {
+            "model": config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free'),
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+            "max_tokens": 2000
+        }
+        
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('choices') and len(result['choices']) > 0:
+                return result['choices'][0]['message']['content'].strip()
+        
+    except Exception as e:
+        print(f"Content generation error: {e}")
+    
+    return f"Content for {chapter_title} will be generated here."
+
+def generate_book_title_from_description(description, config):
+    """Generate book title from description"""
+    try:
+        ai_provider = config.get('ai_provider', 'openrouter')
+        
+        prompt = f"""Create a compelling book title based on this description:
+        
+{description}
+
+Requirements:
+- Make it catchy and professional
+- Keep it under 60 characters
+- Make it marketable and appealing
+- Don't use quotes around the title
+- Just return the title only
+
+Title:"""
+
+        if ai_provider == 'gemini':
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=config['gemini_api_key'])
+                client = genai.GenerativeModel(config.get('gemini_model', 'gemini-1.5-flash'))
+                response = client.generate_content(prompt)
+                return response.text.strip()
+            except ImportError:
+                pass
+        else:
+            headers = {
+                "Authorization": f"Bearer {config['openrouter_api_key']}",
+                "Content-Type": "application/json",
+            }
+            
+            data = {
+                "model": config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free'),
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.7,
+                "max_tokens": 100
+            }
+            
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json=data,
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('choices') and len(result['choices']) > 0:
+                    return result['choices'][0]['message']['content'].strip()
+            
+            return "Generated Book"
+            
+    except Exception as e:
+        return "Generated Book"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

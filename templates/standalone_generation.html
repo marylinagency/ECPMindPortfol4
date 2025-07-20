@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Book Generation - BookGenPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            backdrop-filter: blur(20px);
+            animation: float 6s ease-in-out infinite;
+        }
+        .floating-orb:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        .floating-orb:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+        .floating-orb:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            left: 70%;
+            animation-delay: 4s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+        .generation-step {
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+        .generation-step.active {
+            opacity: 1;
+            transform: scale(1.02);
+        }
+        .generation-step.completed {
+            opacity: 1;
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        .chapter-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .chapter-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        .edit-mode .chapter-card {
+            cursor: pointer;
+            border-color: #f59e0b;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg overflow-x-hidden">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="floating-orb"></div>
+        <div class="floating-orb"></div>
+        <div class="floating-orb"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="relative z-10 bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-white hover:text-gray-200 flex items-center space-x-2">
+                        <i data-feather="arrow-left" class="w-5 h-5"></i>
+                        <span>Back to Home</span>
+                    </a>
+                </div>
+                <h1 class="text-2xl font-bold text-white">AI Book Generation</h1>
+                <div class="flex items-center space-x-4">
+                    <button id="edit-mode-toggle" class="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors">
+                        <i data-feather="edit-2" class="w-4 h-4 inline mr-2"></i>
+                        Edit Mode
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Generation Setup -->
+        <div id="setup-section" class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 mb-8">
+            <h2 class="text-2xl font-bold text-white mb-6">Book Generation Setup</h2>
+            
+            <form id="generation-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-white text-sm font-medium mb-2">Book Topic/Description</label>
+                    <textarea id="book-topic" rows="3" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent" placeholder="Describe your book topic in detail..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-white text-sm font-medium mb-2">Author Bio (Optional)</label>
+                    <textarea id="author-bio" rows="3" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent" placeholder="Brief author biography..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-white text-sm font-medium mb-2">Language</label>
+                    <select id="book-language" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:ring-2 focus:ring-blue-400">
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="German">German</option>
+                        <option value="Italian">Italian</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-white text-sm font-medium mb-2">Number of Chapters</label>
+                    <input type="number" id="chapter-count" min="3" max="20" value="8" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:ring-2 focus:ring-blue-400">
+                </div>
+            </form>
+            
+            <div class="flex space-x-4 mt-6">
+                <button id="generate-titles-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <i data-feather="list" class="w-5 h-5 mr-2"></i>
+                    Generate Chapter Titles
+                </button>
+                <button id="generate-full-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                    <i data-feather="book" class="w-5 h-5 mr-2"></i>
+                    Generate Full Book
+                </button>
+            </div>
+        </div>
+
+        <!-- Generation Progress -->
+        <div id="progress-section" class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 mb-8 hidden">
+            <h2 class="text-2xl font-bold text-white mb-6">Generation Progress</h2>
+            
+            <div class="space-y-4">
+                <div id="step-enhancing" class="generation-step flex items-center p-4 bg-white/20 rounded-lg">
+                    <div class="loading-spinner mr-4 hidden"></div>
+                    <i data-feather="zap" class="w-6 h-6 text-white mr-4"></i>
+                    <span class="text-white">Enhancing description...</span>
+                    <i data-feather="check" class="w-6 h-6 text-green-400 ml-auto hidden"></i>
+                </div>
+                
+                <div id="step-titles" class="generation-step flex items-center p-4 bg-white/20 rounded-lg">
+                    <div class="loading-spinner mr-4 hidden"></div>
+                    <i data-feather="list" class="w-6 h-6 text-white mr-4"></i>
+                    <span class="text-white">Generating chapter titles...</span>
+                    <i data-feather="check" class="w-6 h-6 text-green-400 ml-auto hidden"></i>
+                </div>
+                
+                <div id="step-content" class="generation-step flex items-center p-4 bg-white/20 rounded-lg">
+                    <div class="loading-spinner mr-4 hidden"></div>
+                    <i data-feather="file-text" class="w-6 h-6 text-white mr-4"></i>
+                    <span class="text-white">Generating chapter content...</span>
+                    <span id="content-progress" class="text-gray-300 ml-2"></span>
+                    <i data-feather="check" class="w-6 h-6 text-green-400 ml-auto hidden"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generated Content -->
+        <div id="content-section" class="hidden">
+            <!-- Book Title -->
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 mb-8">
+                <div class="text-center">
+                    <h1 id="book-title" class="text-4xl font-bold text-white mb-4 cursor-pointer hover:bg-white/10 p-2 rounded-lg transition-colors" onclick="editBookTitle()">Book Title</h1>
+                    <p id="book-description" class="text-xl text-gray-200 cursor-pointer hover:bg-white/10 p-2 rounded-lg transition-colors" onclick="editBookDescription()">Book description will appear here</p>
+                </div>
+            </div>
+
+            <!-- Chapters -->
+            <div id="chapters-container" class="space-y-6 mb-8">
+                <!-- Chapters will be dynamically added here -->
+            </div>
+
+            <!-- Export Options -->
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                <h2 class="text-2xl font-bold text-white mb-6">Export Your Book</h2>
+                <div class="flex flex-wrap gap-4">
+                    <button id="export-pdf-btn" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center">
+                        <i data-feather="file-text" class="w-5 h-5 mr-2"></i>
+                        Export PDF
+                    </button>
+                    <button id="export-docx-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        <i data-feather="file" class="w-5 h-5 mr-2"></i>
+                        Export DOCX
+                    </button>
+                    <button id="preview-book-btn" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                        <i data-feather="eye" class="w-5 h-5 mr-2"></i>
+                        Preview Book
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        feather.replace();
+        
+        let currentBook = {
+            title: '',
+            description: '',
+            authorBio: '',
+            language: 'English',
+            chapters: []
+        };
+        
+        let isEditMode = false;
+
+        // Event Listeners
+        document.getElementById('generate-titles-btn').addEventListener('click', generateTitles);
+        document.getElementById('generate-full-btn').addEventListener('click', generateFullBook);
+        document.getElementById('edit-mode-toggle').addEventListener('click', toggleEditMode);
+        document.getElementById('export-pdf-btn').addEventListener('click', exportPDF);
+        document.getElementById('export-docx-btn').addEventListener('click', exportDOCX);
+        document.getElementById('preview-book-btn').addEventListener('click', previewBook);
+
+        function generateTitles() {
+            const topic = document.getElementById('book-topic').value;
+            const language = document.getElementById('book-language').value;
+            const chapterCount = document.getElementById('chapter-count').value;
+            const authorBio = document.getElementById('author-bio').value;
+
+            if (!topic.trim()) {
+                alert('Please enter a book topic');
+                return;
+            }
+
+            startGeneration('titles', {
+                topic: topic,
+                language: language,
+                chapterCount: chapterCount,
+                authorBio: authorBio
+            });
+        }
+
+        function generateFullBook() {
+            const topic = document.getElementById('book-topic').value;
+            const language = document.getElementById('book-language').value;
+            const chapterCount = document.getElementById('chapter-count').value;
+            const authorBio = document.getElementById('author-bio').value;
+
+            if (!topic.trim()) {
+                alert('Please enter a book topic');
+                return;
+            }
+
+            startGeneration('full', {
+                topic: topic,
+                language: language,
+                chapterCount: chapterCount,
+                authorBio: authorBio
+            });
+        }
+
+        function startGeneration(type, params) {
+            document.getElementById('setup-section').style.display = 'none';
+            document.getElementById('progress-section').classList.remove('hidden');
+
+            // Start generation process
+            fetch('/api/standalone_generation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: type,
+                    ...params
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    pollGenerationStatus(data.session_id);
+                } else {
+                    alert('Error starting generation: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        function pollGenerationStatus(sessionId) {
+            const interval = setInterval(() => {
+                fetch(`/api/standalone_status/${sessionId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateProgress(data);
+                        
+                        if (data.status === 'completed') {
+                            clearInterval(interval);
+                            // Redirect to project view in main system
+                            if (data.project_id) {
+                                window.location.href = `/project/${data.project_id}`;
+                            } else {
+                                showGeneratedContent(data.book);
+                            }
+                        } else if (data.status === 'error') {
+                            clearInterval(interval);
+                            alert('Generation failed: ' + data.error);
+                        }
+                    });
+            }, 2000);
+        }
+
+        function updateProgress(data) {
+            // Update progress indicators based on current step
+            const steps = ['enhancing', 'titles', 'content'];
+            
+            steps.forEach(step => {
+                const element = document.getElementById(`step-${step}`);
+                const spinner = element.querySelector('.loading-spinner');
+                const check = element.querySelector('.feather-check');
+                
+                if (data.currentStep === step) {
+                    element.classList.add('active');
+                    spinner.classList.remove('hidden');
+                    check.classList.add('hidden');
+                } else if (data.completedSteps && data.completedSteps.includes(step)) {
+                    element.classList.add('completed');
+                    spinner.classList.add('hidden');
+                    check.classList.remove('hidden');
+                } else {
+                    element.classList.remove('active');
+                    spinner.classList.add('hidden');
+                    check.classList.add('hidden');
+                }
+            });
+
+            // Update content progress
+            if (data.currentStep === 'content' && data.progress) {
+                document.getElementById('content-progress').textContent = data.progress;
+            }
+        }
+
+        function showGeneratedContent(book) {
+            currentBook = book;
+            
+            document.getElementById('progress-section').classList.add('hidden');
+            document.getElementById('content-section').classList.remove('hidden');
+            
+            // Update book title and description
+            document.getElementById('book-title').textContent = book.title;
+            document.getElementById('book-description').textContent = book.description;
+            
+            // Render chapters
+            const chaptersContainer = document.getElementById('chapters-container');
+            chaptersContainer.innerHTML = '';
+            
+            book.chapters.forEach((chapter, index) => {
+                const chapterElement = createChapterElement(chapter, index + 1);
+                chaptersContainer.appendChild(chapterElement);
+            });
+            
+            feather.replace();
+        }
+
+        function createChapterElement(chapter, number) {
+            const div = document.createElement('div');
+            div.className = 'chapter-card bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20';
+            div.innerHTML = `
+                <h3 class="text-xl font-bold text-white mb-4 cursor-pointer hover:bg-white/10 p-2 rounded-lg transition-colors" onclick="editChapterTitle(${number - 1})">
+                    Chapter ${number}: ${chapter.title}
+                </h3>
+                <div class="text-gray-200 cursor-pointer hover:bg-white/10 p-2 rounded-lg transition-colors line-clamp-3" onclick="editChapterContent(${number - 1})">
+                    ${chapter.content.substring(0, 300)}...
+                </div>
+                <button onclick="viewFullChapter(${number - 1})" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <i data-feather="eye" class="w-4 h-4 mr-2"></i>
+                    View Full Chapter
+                </button>
+            `;
+            return div;
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const button = document.getElementById('edit-mode-toggle');
+            const contentSection = document.getElementById('content-section');
+            
+            if (isEditMode) {
+                button.innerHTML = '<i data-feather="save" class="w-4 h-4 inline mr-2"></i>Exit Edit';
+                button.classList.add('bg-green-600', 'hover:bg-green-700');
+                button.classList.remove('bg-white/20', 'hover:bg-white/30');
+                contentSection.classList.add('edit-mode');
+            } else {
+                button.innerHTML = '<i data-feather="edit-2" class="w-4 h-4 inline mr-2"></i>Edit Mode';
+                button.classList.remove('bg-green-600', 'hover:bg-green-700');
+                button.classList.add('bg-white/20', 'hover:bg-white/30');
+                contentSection.classList.remove('edit-mode');
+            }
+            
+            feather.replace();
+        }
+
+        function editBookTitle() {
+            const newTitle = prompt('Edit Book Title:', currentBook.title);
+            if (newTitle && newTitle !== currentBook.title) {
+                currentBook.title = newTitle;
+                document.getElementById('book-title').textContent = newTitle;
+            }
+        }
+
+        function editBookDescription() {
+            const newDescription = prompt('Edit Book Description:', currentBook.description);
+            if (newDescription && newDescription !== currentBook.description) {
+                currentBook.description = newDescription;
+                document.getElementById('book-description').textContent = newDescription;
+            }
+        }
+
+        function editChapterTitle(index) {
+            const newTitle = prompt('Edit Chapter Title:', currentBook.chapters[index].title);
+            if (newTitle && newTitle !== currentBook.chapters[index].title) {
+                currentBook.chapters[index].title = newTitle;
+                location.reload(); // Refresh to show changes
+            }
+        }
+
+        function editChapterContent(index) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-4xl w-full max-h-full overflow-hidden flex flex-col">
+                    <div class="flex justify-between items-center p-6 border-b">
+                        <h2 class="text-2xl font-bold text-gray-900">Edit Chapter Content</h2>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600 p-2">
+                            <i data-feather="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <textarea id="edit-content-textarea" rows="20" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none">${currentBook.chapters[index].content}</textarea>
+                    </div>
+                    <div class="p-6 border-t flex justify-end space-x-4">
+                        <button onclick="this.closest('.fixed').remove()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button onclick="saveChapterContent(${index}, this)" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            feather.replace();
+        }
+
+        function saveChapterContent(index, button) {
+            const content = document.getElementById('edit-content-textarea').value;
+            currentBook.chapters[index].content = content;
+            button.closest('.fixed').remove();
+            location.reload(); // Refresh to show changes
+        }
+
+        function viewFullChapter(index) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-4xl w-full max-h-full overflow-hidden flex flex-col">
+                    <div class="flex justify-between items-center p-6 border-b">
+                        <h2 class="text-2xl font-bold text-gray-900">Chapter ${index + 1}: ${currentBook.chapters[index].title}</h2>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600 p-2">
+                            <i data-feather="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <div class="prose max-w-none">
+                            <div class="text-gray-700 whitespace-pre-wrap leading-relaxed">${currentBook.chapters[index].content}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            feather.replace();
+        }
+
+        function exportPDF() {
+            if (!currentBook.title) {
+                alert('No book content to export');
+                return;
+            }
+            
+            // Create form and submit for PDF export
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/api/standalone_export_pdf';
+            form.style.display = 'none';
+            
+            const bookData = document.createElement('input');
+            bookData.type = 'hidden';
+            bookData.name = 'book_data';
+            bookData.value = JSON.stringify(currentBook);
+            
+            form.appendChild(bookData);
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+
+        function exportDOCX() {
+            if (!currentBook.title) {
+                alert('No book content to export');
+                return;
+            }
+            
+            // Create form and submit for DOCX export
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/api/standalone_export_docx';
+            form.style.display = 'none';
+            
+            const bookData = document.createElement('input');
+            bookData.type = 'hidden';
+            bookData.name = 'book_data';
+            bookData.value = JSON.stringify(currentBook);
+            
+            form.appendChild(bookData);
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+
+        function previewBook() {
+            if (!currentBook.title) {
+                alert('No book content to preview');
+                return;
+            }
+            
+            // Open preview in new window
+            const previewWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes');
+            
+            // Generate preview HTML
+            let previewHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${currentBook.title} - Preview</title>
+                    <style>
+                        body { font-family: Georgia, serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
+                        .title-page { text-align: center; margin-bottom: 60px; }
+                        .book-title { font-size: 2.5em; margin-bottom: 20px; }
+                        .book-description { font-size: 1.2em; color: #666; margin-bottom: 40px; }
+                        .chapter { margin-bottom: 40px; page-break-before: always; }
+                        .chapter-title { font-size: 1.8em; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+                        .chapter-content { text-align: justify; white-space: pre-wrap; }
+                    </style>
+                </head>
+                <body>
+                    <div class="title-page">
+                        <h1 class="book-title">${currentBook.title}</h1>
+                        <p class="book-description">${currentBook.description}</p>
+                        ${currentBook.authorBio ? `<p><strong>Author:</strong> ${currentBook.authorBio}</p>` : ''}
+                    </div>
+            `;
+            
+            currentBook.chapters.forEach((chapter, index) => {
+                previewHTML += `
+                    <div class="chapter">
+                        <h2 class="chapter-title">Chapter ${index + 1}: ${chapter.title}</h2>
+                        <div class="chapter-content">${chapter.content}</div>
+                    </div>
+                `;
+            });
+            
+            previewHTML += '</body></html>';
+            
+            previewWindow.document.write(previewHTML);
+            previewWindow.document.close();
+        }
+    </script>
+</body>
+</html>
