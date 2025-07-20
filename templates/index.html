@@ -281,37 +281,63 @@
                 </div>
             </div>
             
-            <!-- Recent Projects -->
+            <!-- Recent Projects with Modern Effects -->
             {% if recent_projects %}
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-8">Recent Projects</h2>
+            <div class="mb-12 slide-in-up animate-delay-800">
+                <h2 class="text-3xl font-bold text-white mb-8 text-center">Recent Projects</h2>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {% for project in recent_projects %}
-                    <div class="bg-white rounded-lg shadow-lg overflow-hidden card-interactive scroll-reveal tooltip-dynamic" data-tooltip="Click to open project">
+                    <div class="glass-card overflow-hidden cursor-pointer" onclick="location.href='{{ url_for('project_view', project_id=project.id) }}'">
                         {% if project.cover_image %}
-                            <div class="h-48 bg-cover bg-center book-cover" 
+                            <div class="h-48 bg-cover bg-center" 
                                  style="background-image: url('{{ url_for('static', filename='../uploads/' + project.cover_image) }}');">
+                                <div class="h-full bg-gradient-to-t from-black/50 to-transparent flex items-end">
+                                    <div class="p-4 text-white">
+                                        <h3 class="text-xl font-bold mb-1">{{ project.name }}</h3>
+                                    </div>
+                                </div>
                             </div>
                         {% else %}
-                            <div class="h-48 book-cover flex items-center justify-center">
-                                <i data-feather="book" class="w-16 h-16 text-white opacity-80"></i>
+                            <div class="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    <i data-feather="book" class="w-16 h-16 mx-auto mb-2 opacity-80"></i>
+                                    <h3 class="text-xl font-bold">{{ project.name }}</h3>
+                                </div>
                             </div>
                         {% endif %}
                         
                         <div class="p-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ project.name }}</h3>
-                            <p class="text-gray-600 mb-4 line-clamp-2">{{ project.topic }}</p>
+                            {% if not project.cover_image %}
+                            <h3 class="text-xl font-bold text-white mb-2">{{ project.name }}</h3>
+                            {% endif %}
+                            <p class="text-gray-200 mb-4 line-clamp-2">{{ project.topic }}</p>
                             
-                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                <span>{{ project.chapters|length }} chapters</span>
-                                <span>{{ project.language }}</span>
+                            <div class="flex items-center justify-between text-sm text-gray-300 mb-4">
+                                <span class="flex items-center">
+                                    <i data-feather="file-text" class="w-4 h-4 mr-1"></i>
+                                    {{ project.chapters|length }} chapters
+                                </span>
+                                <span class="flex items-center">
+                                    <i data-feather="globe" class="w-4 h-4 mr-1"></i>
+                                    {{ project.language }}
+                                </span>
                             </div>
                             
-                            <a href="{{ url_for('project_view', project_id=project.id) }}" 
-                               class="w-full btn-dynamic text-white py-2 px-4 rounded-lg text-center block">
-                                <i data-feather="arrow-right" class="w-4 h-4 inline mr-2"></i>
-                                Open Project
-                            </a>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-400">
+                                    {% if project.generation_status == 'completed' %}
+                                        <span class="text-green-400">✓ Complete</span>
+                                    {% elif project.generation_status == 'generating' %}
+                                        <span class="text-yellow-400">⟳ Generating</span>
+                                    {% else %}
+                                        <span class="text-gray-400">○ Draft</span>
+                                    {% endif %}
+                                </span>
+                                <div class="modern-button bg-clear-blue text-white px-4 py-2 rounded-lg text-sm">
+                                    <i data-feather="arrow-right" class="w-4 h-4 inline mr-2"></i>
+                                    Open Project
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
