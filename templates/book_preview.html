@@ -410,7 +410,7 @@ function renderPage(pageNum) {
                 tocItems += `
                     <li class="toc-item">
                         <span>Chapter ${chapter.number}: ${chapter.title}</span>
-                        <span>${index + 3}</span>
+                        <span>${index + 1}</span>
                     </li>
                 `;
             });
@@ -420,7 +420,6 @@ function renderPage(pageNum) {
             <div class="book-page">
                 <h2 class="toc-title">Table of Contents</h2>
                 <ul class="toc-list">${tocItems}</ul>
-                <div class="page-number">2</div>
             </div>
         `;
     } else {
@@ -445,7 +444,7 @@ function renderPage(pageNum) {
                     <div class="chapter-number">CHAPTER ${chapter.number}</div>
                     <h1 class="chapter-title">${chapter.title}</h1>
                     <div class="chapter-content">${paragraphs}</div>
-                    <div class="page-number">${pageNum}</div>
+                    <div class="page-number">${chapterIndex + 1}</div>
                 </div>
             `;
         } else {

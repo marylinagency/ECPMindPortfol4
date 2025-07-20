@@ -839,11 +839,16 @@ def export_pdf(project_id):
         # Generate HTML content
         html_content = render_template('book_export.html', project=project)
         
+        # Fix relative URLs to absolute paths for PDF generation
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        static_path = os.path.join(current_dir, 'static', 'uploads')
+        html_content = html_content.replace('/static/uploads/', f'file://{static_path}/')
+        
         # Convert to PDF
         pdf_filename = f"{project['name']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         pdf_path = os.path.join(EXPORTS_FOLDER, pdf_filename)
         
-        weasyprint.HTML(string=html_content).write_pdf(pdf_path)
+        weasyprint.HTML(string=html_content, base_url=request.url_root).write_pdf(pdf_path)
         
         return send_file(pdf_path, as_attachment=True, download_name=pdf_filename)
         

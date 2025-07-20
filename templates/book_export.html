@@ -30,7 +30,7 @@
             text-align: center;
             padding: 4rem 2rem;
             {% if project.cover_image %}
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/static/uploads/{{ project.cover_image }}') center/cover;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}') center/cover;
             {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             {% endif %}
@@ -189,6 +189,27 @@
             }
         }
         
+        /* Reset counter for chapters */
+        .chapter {
+            counter-increment: chapterpage;
+        }
+        
+        .chapter:first-child {
+            counter-reset: chapterpage 1;
+        }
+        
+        .cover-page, .table-of-contents {
+            counter-reset: chapterpage 0;
+        }
+        
+        .chapter::after {
+            content: "";
+            position: absolute;
+            bottom: 0.5in;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
         @media print {
             body {
                 font-size: 11pt;
@@ -225,7 +246,7 @@
         <!-- Cover Page -->
         <div class="cover-page">
             {% if project.cover_image %}
-            <img src="{{ url_for('static', filename='../uploads/' + project.cover_image) }}" 
+            <img src="{{ url_for('static', filename='uploads/' + project.cover_image) }}" 
                  alt="Book Cover" class="cover-image">
             {% endif %}
             
@@ -246,7 +267,7 @@
                 {% for chapter in project.chapters %}
                 <li class="toc-item">
                     <span class="toc-chapter">Chapter {{ chapter.number }}: {{ chapter.title }}</span>
-                    <span class="toc-page">{{ loop.index + 2 }}</span>
+                    <span class="toc-page">{{ loop.index }}</span>
                 </li>
                 {% endfor %}
             </ul>
