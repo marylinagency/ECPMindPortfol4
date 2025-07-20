@@ -911,12 +911,73 @@ def edit_chapter(project_id, chapter_id):
         flash(f'Error updating chapter: {str(e)}', 'error')
         return redirect(url_for('project_view', project_id=project_id))
 
+def clean_chapter_content(content):
+    """Clean and format chapter content for export"""
+    if not content:
+        return []
+    
+    lines = content.split('\n')
+    cleaned_lines = []
+    
+    for line in lines:
+        line = line.strip()
+        # Skip empty lines, markdown headers, and duplicate titles
+        if (line and 
+            not line.startswith('#') and 
+            not line.startswith('Chapter') and 
+            not line.startswith('CHAPTER') and 
+            not line.startswith('hapitre') and
+            not (len(line) > 10 and line.isupper())):  # Skip all-caps lines
+            
+            # Clean markdown formatting
+            line = line.replace('**', '').replace('*', '').replace('_', '').replace('##', '').replace('###', '')
+            line = line.strip()
+            if line and len(line) > 10:  # Only keep substantial content
+                cleaned_lines.append(line)
+    
+    # Join all text and create proper paragraphs
+    full_text = ' '.join(cleaned_lines)
+    
+    # Split into sentences roughly
+    sentences = []
+    current_sentence = ""
+    
+    for char in full_text:
+        current_sentence += char
+        if char in '.!?' and len(current_sentence.strip()) > 15:
+            sentences.append(current_sentence.strip())
+            current_sentence = ""
+    
+    if current_sentence.strip():
+        sentences.append(current_sentence.strip())
+    
+    # Group sentences into paragraphs (3-4 sentences per paragraph)
+    paragraphs = []
+    current_paragraph = []
+    
+    for sentence in sentences:
+        if sentence and len(sentence) > 10:
+            current_paragraph.append(sentence)
+            if len(current_paragraph) >= 3:
+                paragraphs.append(' '.join(current_paragraph))
+                current_paragraph = []
+    
+    if current_paragraph:
+        paragraphs.append(' '.join(current_paragraph))
+    
+    return paragraphs
+
 @app.route('/export_pdf/<project_id>')
 def export_pdf(project_id):
     try:
         project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
         with open(project_file, 'r') as f:
             project = json.load(f)
+        
+        # Clean chapter content for better formatting
+        if project.get('chapters'):
+            for chapter in project['chapters']:
+                chapter['cleaned_paragraphs'] = clean_chapter_content(chapter.get('content', ''))
         
         # Generate HTML content
         html_content = render_template('book_export.html', project=project)

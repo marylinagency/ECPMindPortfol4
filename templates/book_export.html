@@ -45,7 +45,10 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 2rem;
+            margin: -0.75in -0.625in;
+            width: calc(6in + 1.25in);
+            height: calc(9in + 1.5in);
             {% if project.cover_image %}
             background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}') center/cover;
             {% else %}
@@ -53,9 +56,10 @@
             {% endif %}
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             color: white;
-            border-radius: 8px;
             page-break-after: always;
+            position: relative;
         }
         
         .cover-page > * {
@@ -176,15 +180,28 @@
             }
             
             .cover-page {
-                padding: 2rem 1rem;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 3rem 2rem;
+                position: relative;
+                box-sizing: border-box;
             }
             
             .cover-title {
-                font-size: 2rem;
+                font-size: 2.2rem;
+                margin-bottom: 2rem;
             }
             
             .chapter-title {
-                font-size: 1.3rem;
+                font-size: 1.4rem;
+                margin-bottom: 2.5rem;
+            }
+            
+            .chapter-content p {
+                margin-bottom: 1.3rem;
+                text-align: justify;
+                hyphens: auto;
             }
         }
     </style>
@@ -221,12 +238,19 @@
             <div class="chapter-number">CHAPTER {{ chapter.number }}</div>
             <h1 class="chapter-title">{{ chapter.title }}</h1>
             <div class="chapter-content">
-                {% set clean_content = chapter.content.replace('##', '').replace('###', '').replace('**', '').replace('*', '').replace('_', '') %}
-                {% for paragraph in clean_content.split('\n\n') %}
-                    {% if paragraph.strip() and not paragraph.strip().startswith('#') %}
-                        <p>{{ paragraph.strip() }}</p>
-                    {% endif %}
-                {% endfor %}
+                {% if chapter.cleaned_paragraphs %}
+                    {% for paragraph in chapter.cleaned_paragraphs %}
+                        <p>{{ paragraph }}</p>
+                    {% endfor %}
+                {% else %}
+                    {# Fallback if cleaning didn't work #}
+                    {% set clean_content = chapter.content.replace('##', '').replace('###', '').replace('**', '').replace('*', '').replace('_', '') %}
+                    {% for paragraph in clean_content.split('\n\n') %}
+                        {% if paragraph.strip() and not paragraph.strip().startswith('#') and not paragraph.strip().startswith('Chapter') %}
+                            <p>{{ paragraph.strip() }}</p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </div>
             <div class="page-number">{{ loop.index }}</div>
         </div>
