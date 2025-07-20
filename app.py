@@ -1479,22 +1479,53 @@ def export_docx(project_id):
         # Set document margins
         sections = doc.sections
         for section in sections:
-            section.top_margin = Inches(1)
-            section.bottom_margin = Inches(1)
-            section.left_margin = Inches(1)
-            section.right_margin = Inches(1)
+            section.top_margin = Inches(0.5)
+            section.bottom_margin = Inches(0.5)
+            section.left_margin = Inches(0.5)
+            section.right_margin = Inches(0.5)
         
-        # Title page
+        # Cover page with image if available
+        if project.get('cover_image'):
+            cover_image_path = os.path.join(UPLOADS_FOLDER, project['cover_image'])
+            if os.path.exists(cover_image_path):
+                # Add cover image
+                cover_paragraph = doc.add_paragraph()
+                cover_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cover_run = cover_paragraph.add_run()
+                try:
+                    # Add image with full width
+                    cover_run.add_picture(cover_image_path, width=Inches(6))
+                except Exception as e:
+                    # If image fails, fall back to text cover
+                    pass
+        
+        # Title overlay or regular title
+        doc.add_paragraph()  # Space
         title_paragraph = doc.add_paragraph()
         title_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
         title_run = title_paragraph.add_run(project['name'])
         title_run.font.size = Pt(24)
         title_run.font.bold = True
         
+        # Subtitle/topic
+        if project.get('topic'):
+            topic_paragraph = doc.add_paragraph()
+            topic_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            topic_run = topic_paragraph.add_run(project['topic'])
+            topic_run.font.size = Pt(16)
+            topic_run.font.italic = True
+        
         doc.add_paragraph()  # Empty line
+        
+        # Book metadata
+        meta_paragraph = doc.add_paragraph()
+        meta_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        meta_run = meta_paragraph.add_run(f"Generated with BookGenPro\nLanguage: {project.get('language', 'English')}\n{len(project.get('chapters', []))} Chapters")
+        meta_run.font.size = Pt(12)
         
         # Add author bio if present
         if project.get('author_bio'):
+            doc.add_paragraph()
             author_paragraph = doc.add_paragraph()
             author_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
             author_run = author_paragraph.add_run(f"By: {project['author_bio']}")
@@ -1845,22 +1876,53 @@ def api_standalone_export_docx():
         # Set margins
         sections = doc.sections
         for section in sections:
-            section.top_margin = Inches(1)
-            section.bottom_margin = Inches(1)
-            section.left_margin = Inches(1)
-            section.right_margin = Inches(1)
+            section.top_margin = Inches(0.5)
+            section.bottom_margin = Inches(0.5)
+            section.left_margin = Inches(0.5)
+            section.right_margin = Inches(0.5)
         
-        # Title page
+        # Cover page with image if available
+        if book_data.get('cover_image'):
+            cover_image_path = os.path.join(UPLOADS_FOLDER, book_data['cover_image'])
+            if os.path.exists(cover_image_path):
+                # Add cover image
+                cover_paragraph = doc.add_paragraph()
+                cover_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cover_run = cover_paragraph.add_run()
+                try:
+                    # Add image with full width
+                    cover_run.add_picture(cover_image_path, width=Inches(6))
+                except Exception as e:
+                    # If image fails, fall back to text cover
+                    pass
+        
+        # Title overlay or regular title
+        doc.add_paragraph()  # Space
         title_paragraph = doc.add_paragraph()
         title_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
         title_run = title_paragraph.add_run(book_data['title'])
         title_run.font.size = Pt(24)
         title_run.font.bold = True
         
-        doc.add_paragraph()
+        # Subtitle/description
+        if book_data.get('description'):
+            topic_paragraph = doc.add_paragraph()
+            topic_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            topic_run = topic_paragraph.add_run(book_data['description'])
+            topic_run.font.size = Pt(16)
+            topic_run.font.italic = True
+        
+        doc.add_paragraph()  # Empty line
+        
+        # Book metadata
+        meta_paragraph = doc.add_paragraph()
+        meta_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        meta_run = meta_paragraph.add_run(f"Generated with BookGenPro\nLanguage: {book_data.get('language', 'English')}\n{len(book_data.get('chapters', []))} Chapters")
+        meta_run.font.size = Pt(12)
         
         # Author bio
         if book_data.get('authorBio'):
+            doc.add_paragraph()
             author_paragraph = doc.add_paragraph()
             author_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
             author_run = author_paragraph.add_run(f"By: {book_data['authorBio']}")
