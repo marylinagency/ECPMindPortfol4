@@ -1021,3 +1021,211 @@ function loadSavedFormData(form) {
         console.error('Error loading saved form data:', e);
     }
 }
+
+// Template functions for quick generation
+function fillTemplate(type) {
+    const templates = {
+        business: {
+            topic: "A comprehensive business guide covering entrepreneurship fundamentals, market research, business planning, digital marketing strategies, financial management, leadership skills, and scaling operations. Target audience: aspiring entrepreneurs and small business owners looking to start or grow their business.",
+            chapters: 12,
+            style: "professional"
+        },
+        tech: {
+            topic: "A complete programming tutorial covering modern web development, including HTML/CSS fundamentals, JavaScript programming, React framework, backend development with Node.js, database design, API development, deployment strategies, and best practices for code quality and testing.",
+            chapters: 15,
+            style: "technical"
+        },
+        fiction: {
+            topic: "An engaging fiction novel about a young protagonist who discovers they have unique abilities and must navigate a hidden world while facing personal challenges, making difficult choices, and ultimately finding their true purpose. Genre: contemporary fantasy with elements of coming-of-age.",
+            chapters: 20,
+            style: "creative"
+        },
+        educational: {
+            topic: "An educational guide for effective learning techniques, covering cognitive science principles, memory enhancement strategies, study methods, time management, critical thinking skills, research techniques, and practical applications for students and lifelong learners.",
+            chapters: 10,
+            style: "academic"
+        }
+    };
+    
+    const template = templates[type];
+    if (!template) return;
+    
+    // Fill both forms (project creation and generation)
+    const forms = ['#new-project-form', '#generate-book-form'];
+    forms.forEach(formSelector => {
+        const form = document.querySelector(formSelector);
+        if (form) {
+            // Fill topic fields
+            const topicFields = form.querySelectorAll('[name="topic"], [name="book_topic"]');
+            topicFields.forEach(field => {
+                field.value = template.topic;
+                // Trigger validation
+                validateFieldRealTime(field);
+            });
+            
+            // Fill chapters
+            const chaptersField = form.querySelector('[name="chapters"], [name="num_chapters"]');
+            if (chaptersField) {
+                chaptersField.value = template.chapters;
+            }
+            
+            // Fill style if available
+            const styleField = form.querySelector('[name="style"]');
+            if (styleField) {
+                styleField.value = template.style;
+            }
+        }
+    });
+    
+    // Scroll to generation form
+    document.querySelector('#generate-book-form')?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+    });
+    
+    // Show notification
+    showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} template loaded! You can now generate the book.`, 'success', 4000);
+}
+
+// Book generation management
+function startGeneration(action) {
+    const statusDiv = document.querySelector('#generation-status');
+    const progressBar = document.querySelector('#progress-bar');
+    const progressText = document.querySelector('#progress-text');
+    const currentChapter = document.querySelector('#current-chapter');
+    
+    if (statusDiv) {
+        statusDiv.classList.remove('hidden');
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Starting generation...';
+        currentChapter.textContent = '';
+    }
+    
+    // Simulate generation progress (replace with actual API calls)
+    simulateGenerationProgress(action);
+}
+
+function simulateGenerationProgress(action) {
+    const progressBar = document.querySelector('#progress-bar');
+    const progressText = document.querySelector('#progress-text');
+    const currentChapter = document.querySelector('#current-chapter');
+    
+    const chapters = parseInt(document.querySelector('#gen_chapters').value) || 8;
+    const isFullGeneration = action === 'generate_full';
+    
+    let currentChapterNum = 0;
+    let progress = 0;
+    
+    const interval = setInterval(() => {
+        if (isFullGeneration) {
+            progress = (currentChapterNum / chapters) * 100;
+            progressText.textContent = `Generating chapter ${currentChapterNum + 1} of ${chapters}`;
+            currentChapter.textContent = `Working on: Chapter ${currentChapterNum + 1}`;
+        } else {
+            progress = (currentChapterNum / chapters) * 100;
+            progressText.textContent = `Creating chapter titles... ${currentChapterNum + 1}/${chapters}`;
+            currentChapter.textContent = `Generating title for chapter ${currentChapterNum + 1}`;
+        }
+        
+        progressBar.style.width = progress + '%';
+        
+        currentChapterNum++;
+        
+        if (currentChapterNum >= chapters) {
+            clearInterval(interval);
+            completeGeneration();
+        }
+    }, 2000);
+    
+    // Store interval ID for stopping
+    window.generationInterval = interval;
+}
+
+function completeGeneration() {
+    const progressText = document.querySelector('#progress-text');
+    const currentChapter = document.querySelector('#current-chapter');
+    const progressBar = document.querySelector('#progress-bar');
+    
+    if (progressBar) {
+        progressBar.style.width = '100%';
+    }
+    
+    if (progressText) {
+        progressText.textContent = 'Generation completed!';
+    }
+    
+    if (currentChapter) {
+        currentChapter.textContent = 'All chapters generated successfully';
+    }
+    
+    // Show completion effects
+    showCompletionEffect();
+    
+    // Hide status after delay
+    setTimeout(() => {
+        const statusDiv = document.querySelector('#generation-status');
+        if (statusDiv) {
+            statusDiv.classList.add('hidden');
+        }
+    }, 5000);
+}
+
+function stopGeneration() {
+    if (window.generationInterval) {
+        clearInterval(window.generationInterval);
+        window.generationInterval = null;
+    }
+    
+    const progressText = document.querySelector('#progress-text');
+    const currentChapter = document.querySelector('#current-chapter');
+    
+    if (progressText) {
+        progressText.textContent = 'Generation stopped';
+    }
+    
+    if (currentChapter) {
+        currentChapter.textContent = 'User cancelled generation';
+    }
+    
+    showNotification('Book generation stopped', 'warning');
+    
+    setTimeout(() => {
+        const statusDiv = document.querySelector('#generation-status');
+        if (statusDiv) {
+            statusDiv.classList.add('hidden');
+        }
+    }, 2000);
+}
+
+// Enhanced form submission handling
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle generation form submission
+    const genForm = document.querySelector('#generate-book-form');
+    if (genForm) {
+        genForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const action = e.submitter?.value || 'generate_full';
+            const topic = document.querySelector('#gen_topic').value.trim();
+            
+            if (!topic) {
+                showNotification('Please enter a book topic first', 'error');
+                document.querySelector('#gen_topic').focus();
+                return;
+            }
+            
+            // Check if API is configured
+            const apiConfigured = document.querySelector('.text-green-600');
+            if (!apiConfigured) {
+                showNotification('Please configure OpenRouter API in Settings first', 'warning');
+                setTimeout(() => {
+                    window.location.href = '/settings';
+                }, 2000);
+                return;
+            }
+            
+            startGeneration(action);
+            showNotification(`Starting ${action === 'generate_titles' ? 'chapter title' : 'full book'} generation...`, 'info');
+        });
+    }
+});
