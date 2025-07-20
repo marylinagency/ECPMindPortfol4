@@ -2022,6 +2022,42 @@ function selectManualMood(mood, emoji) {
     }
 }
 
+// Modal functions for action cards
+function showAIGenerationModal() {
+    // Scroll to the existing AI generation form
+    const formSection = document.getElementById('generate-book-form');
+    if (formSection) {
+        formSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+        
+        // Add highlight effect
+        formSection.parentElement.classList.add('pulse-glow');
+        setTimeout(() => {
+            formSection.parentElement.classList.remove('pulse-glow');
+        }, 2000);
+    }
+}
+
+function showManualCreationModal() {
+    // Show the manual creation form
+    const manualFormContainer = document.getElementById('manual-form-container');
+    const showButton = document.getElementById('manual-show-button');
+    
+    if (manualFormContainer && showButton) {
+        showManualForm();
+        
+        // Scroll to the form
+        setTimeout(() => {
+            manualFormContainer.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }, 100);
+    }
+}
+
 // Auto-load project mood history when on project page
 document.addEventListener('DOMContentLoaded', function() {
     const projectElement = document.querySelector('[data-project-id]');
