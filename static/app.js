@@ -1966,6 +1966,62 @@ function calculateProjectMoodStreak(moods) {
     }
 }
 
+// AI Generation mood selection functions
+let selectedAIMood = null;
+
+function selectAIMood(mood, emoji) {
+    // Remove previous selection
+    document.querySelectorAll('.ai-mood-emoji').forEach(element => {
+        element.classList.remove('selected');
+    });
+    
+    // Add selection to clicked mood
+    const moodElement = document.querySelector(`[data-mood="${mood}"]`);
+    if (moodElement && moodElement.classList.contains('ai-mood-emoji')) {
+        moodElement.classList.add('selected');
+    }
+    
+    // Store selected mood
+    selectedAIMood = {
+        mood: mood,
+        emoji: emoji
+    };
+    
+    // Update hidden input
+    const hiddenInput = document.getElementById('ai_generation_mood');
+    if (hiddenInput) {
+        hiddenInput.value = mood;
+    }
+}
+
+// Manual Creation mood selection functions
+let selectedManualMood = null;
+
+function selectManualMood(mood, emoji) {
+    // Remove previous selection
+    document.querySelectorAll('.manual-mood-emoji').forEach(element => {
+        element.classList.remove('selected');
+    });
+    
+    // Add selection to clicked mood
+    const moodElement = document.querySelector(`[data-mood="${mood}"].manual-mood-emoji`);
+    if (moodElement) {
+        moodElement.classList.add('selected');
+    }
+    
+    // Store selected mood
+    selectedManualMood = {
+        mood: mood,
+        emoji: emoji
+    };
+    
+    // Update hidden input
+    const hiddenInput = document.getElementById('manual_generation_mood');
+    if (hiddenInput) {
+        hiddenInput.value = mood;
+    }
+}
+
 // Auto-load project mood history when on project page
 document.addEventListener('DOMContentLoaded', function() {
     const projectElement = document.querySelector('[data-project-id]');

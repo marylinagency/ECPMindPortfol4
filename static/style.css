@@ -221,6 +221,59 @@ body {
     margin-top: 1px;
 }
 
+/* AI Generation mood styles */
+.ai-mood-emoji, .manual-mood-emoji {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 60px;
+    color: #374151;
+}
+
+.ai-mood-emoji:hover, .manual-mood-emoji:hover {
+    border-color: #ec4899;
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.2);
+}
+
+.ai-mood-emoji.selected, .manual-mood-emoji.selected {
+    border-color: #ec4899;
+    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+    box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
+    transform: scale(1.05);
+}
+
+.ai-mood-emoji span:first-child, .manual-mood-emoji span:first-child {
+    margin-bottom: 4px;
+    filter: grayscale(10%);
+    transition: filter 0.3s ease;
+}
+
+.ai-mood-emoji:hover span:first-child,
+.ai-mood-emoji.selected span:first-child,
+.manual-mood-emoji:hover span:first-child,
+.manual-mood-emoji.selected span:first-child {
+    filter: grayscale(0%);
+}
+
+.manual-mood-emoji {
+    min-height: 50px;
+    padding: 0.4rem;
+}
+
+.manual-mood-emoji span:first-child {
+    margin-bottom: 2px;
+}
+
 .mood-note-modal {
     position: fixed;
     top: 0;

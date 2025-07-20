@@ -144,6 +144,10 @@ Preferred communication style: Simple, everyday language.
 - Added dynamic mood streak counter that changes colors based on consecutive days (pink < 3, blue 3-6, green 7+)
 - Implemented responsive grid layout that adapts to different screen sizes (3 cols mobile, 5 tablet, 8 desktop)
 - Enhanced mood history visualization with proper emoji mapping and improved tooltips
+- Integrated mood tracking into AI book generation and manual book creation forms
+- Added generation mood storage to both project creation workflows with backend data persistence
+- Enhanced recent projects display with improved cover image handling and hover effects
+- Fixed cover image paths and added professional gradient overlays for better visual presentation
 
 ### 2025-07-20: Enhanced AI Provider Management & Manual Generation System
 - Added comprehensive AI provider status display on main page with real-time configuration checking

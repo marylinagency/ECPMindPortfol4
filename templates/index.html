@@ -110,6 +110,47 @@
                                       placeholder="Tell us about yourself as the author - your background, expertise, credentials, and what makes you qualified to write this book..."></textarea>
                         </div>
                         
+                        <!-- Writing Mood Selection for AI Generation -->
+                        <div class="mb-8">
+                            <label class="block text-lg font-semibold text-white mb-4 text-center">Your Writing Mood Today</label>
+                            <div class="grid grid-cols-4 md:grid-cols-8 gap-3">
+                                <div class="ai-mood-emoji" data-mood="excited" onclick="selectAIMood('excited', '🤩')">
+                                    <span class="text-2xl">🤩</span>
+                                    <span class="text-xs">Excited</span>
+                                </div>
+                                <div class="ai-mood-emoji" data-mood="focused" onclick="selectAIMood('focused', '🎯')">
+                                    <span class="text-2xl">🎯</span>
+                                    <span class="text-xs">Focused</span>
+                                </div>
+                                <div class="ai-mood-emoji" data-mood="creative" onclick="selectAIMood('creative', '🎨')">
+                                    <span class="text-2xl">🎨</span>
+                                    <span class="text-xs">Creative</span>
+                                </div>
+                                <div class="ai-mood-emoji" data-mood="motivated" onclick="selectAIMood('motivated', '💪')">
+                                    <span class="text-2xl">💪</span>
+                                    <span class="text-xs">Motivated</span>
+                                </div>
+                                <div class="ai-mood-emoji" data-mood="inspired" onclick="selectAIMood('inspired', '💡')">
+                                    <span class="text-2xl">💡</span>
+                                    <span class="text-xs">Inspired</span>
+                                </div>
+                                <div class="ai-mood-emoji" data-mood="tired" onclick="selectAIMood('tired', '😴')">
+                                    <span class="text-2xl">😴</span>
+                                    <span class="text-xs">Tired</span>
+                                </div>
+                                <div class="ai-mood-emoji" data-mood="blocked" onclick="selectAIMood('blocked', '🧱')">
+                                    <span class="text-2xl">🧱</span>
+                                    <span class="text-xs">Blocked</span>
+                                </div>
+                                <div class="ai-mood-emoji" data-mood="stressed" onclick="selectAIMood('stressed', '😰')">
+                                    <span class="text-2xl">😰</span>
+                                    <span class="text-xs">Stressed</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="ai_generation_mood" name="generation_mood" value="">
+                            <p class="text-center text-white/80 text-sm mt-3">This helps tailor the AI's writing style to match your current energy</p>
+                        </div>
+                        
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                             <div>
                                 <label for="gen_language" class="block text-sm font-semibold text-white mb-3">Language</label>
@@ -395,6 +436,47 @@
                                 </select>
                             </div>
                             
+                            <!-- Writing Mood Selection for Manual Creation -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-white mb-2">Your Writing Mood Today</label>
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="manual-mood-emoji" data-mood="excited" onclick="selectManualMood('excited', '🤩')">
+                                        <span class="text-lg">🤩</span>
+                                        <span class="text-xs">Excited</span>
+                                    </div>
+                                    <div class="manual-mood-emoji" data-mood="focused" onclick="selectManualMood('focused', '🎯')">
+                                        <span class="text-lg">🎯</span>
+                                        <span class="text-xs">Focused</span>
+                                    </div>
+                                    <div class="manual-mood-emoji" data-mood="creative" onclick="selectManualMood('creative', '🎨')">
+                                        <span class="text-lg">🎨</span>
+                                        <span class="text-xs">Creative</span>
+                                    </div>
+                                    <div class="manual-mood-emoji" data-mood="motivated" onclick="selectManualMood('motivated', '💪')">
+                                        <span class="text-lg">💪</span>
+                                        <span class="text-xs">Motivated</span>
+                                    </div>
+                                    <div class="manual-mood-emoji" data-mood="inspired" onclick="selectManualMood('inspired', '💡')">
+                                        <span class="text-lg">💡</span>
+                                        <span class="text-xs">Inspired</span>
+                                    </div>
+                                    <div class="manual-mood-emoji" data-mood="tired" onclick="selectManualMood('tired', '😴')">
+                                        <span class="text-lg">😴</span>
+                                        <span class="text-xs">Tired</span>
+                                    </div>
+                                    <div class="manual-mood-emoji" data-mood="blocked" onclick="selectManualMood('blocked', '🧱')">
+                                        <span class="text-lg">🧱</span>
+                                        <span class="text-xs">Blocked</span>
+                                    </div>
+                                    <div class="manual-mood-emoji" data-mood="stressed" onclick="selectManualMood('stressed', '😰')">
+                                        <span class="text-lg">😰</span>
+                                        <span class="text-xs">Stressed</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="manual_generation_mood" name="generation_mood" value="">
+                                <p class="text-center text-white/80 text-xs mt-2">Helps set the right tone for your manual project</p>
+                            </div>
+                            
                             <div class="flex space-x-3 pt-2">
                                 <button type="submit" class="flex-1 bg-blue-600/80 backdrop-blur text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 border border-blue-500/50">
                                     <i data-feather="book" class="w-4 h-4 inline mr-2"></i>
@@ -425,14 +507,13 @@
                 <h2 class="text-3xl font-bold text-white mb-8 text-center">Recent Projects</h2>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {% for project in recent_projects %}
-                    <div class="glass-card overflow-hidden cursor-pointer" onclick="location.href='{{ url_for('project_view', project_id=project.id) }}'">
+                    <div class="glass-card overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-300 hover:shadow-2xl" onclick="location.href='{{ url_for('project_view', project_id=project.id) }}'">
                         {% if project.cover_image %}
-                            <div class="h-48 bg-cover bg-center" 
-                                 style="background-image: url('{{ url_for('static', filename='../uploads/' + project.cover_image) }}');">
-                                <div class="h-full bg-gradient-to-t from-black/50 to-transparent flex items-end">
-                                    <div class="p-4 text-white">
-                                        <h3 class="text-xl font-bold mb-1">{{ project.name }}</h3>
-                                    </div>
+                            <div class="h-48 bg-cover bg-center relative overflow-hidden" 
+                                 style="background-image: url('{{ url_for('static', filename='uploads/' + project.cover_image) }}');">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 right-0 p-4">
+                                    <h3 class="text-xl font-bold text-white mb-1 drop-shadow-lg">{{ project.name }}</h3>
                                 </div>
                             </div>
                         {% else %}
@@ -448,7 +529,7 @@
                             {% if not project.cover_image %}
                             <h3 class="text-xl font-bold text-white mb-2">{{ project.name }}</h3>
                             {% endif %}
-                            <p class="text-gray-200 mb-4 line-clamp-2">{{ project.topic }}</p>
+                            <p class="text-gray-200 mb-4 line-clamp-2">{{ project.topic or project.description[:100] + '...' if project.description else 'No description available' }}</p>
                             
                             <div class="flex items-center justify-between text-sm text-gray-300 mb-4">
                                 <span class="flex items-center">

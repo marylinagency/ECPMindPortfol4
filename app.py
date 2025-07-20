@@ -358,6 +358,7 @@ def create_manual_book():
         language = request.form.get('language', 'English')
         num_chapters = int(request.form.get('chapters', 8))
         style = request.form.get('style', 'professional')
+        generation_mood = request.form.get('generation_mood', '')
         
         if not topic:
             flash('Please provide a book topic', 'error')
@@ -377,7 +378,9 @@ def create_manual_book():
             'generation_status': 'manual',
             'created_at': datetime.now().isoformat(),
             'last_modified': datetime.now().isoformat(),
-            'chapters': []
+            'chapters': [],
+            'generation_mood': generation_mood,
+            'cover_image': None
         }
         
         # Create empty chapters for manual editing
@@ -715,6 +718,7 @@ def create_ai_book():
     chapters = int(request.form.get('chapters', 8))
     style = request.form.get('style', 'professional')
     action = request.form.get('action', 'generate_titles')
+    generation_mood = request.form.get('generation_mood', '')
     
     if not book_title or not topic:
         flash('Book title and topic are required', 'error')
@@ -748,7 +752,8 @@ def create_ai_book():
         'last_modified': datetime.now().isoformat(),
         'generation_status': 'pending',
         'ai_generated': True,
-        'generation_action': action
+        'generation_action': action,
+        'generation_mood': generation_mood
     }
     
     # Save project
