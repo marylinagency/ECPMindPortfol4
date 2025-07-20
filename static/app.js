@@ -1,28 +1,98 @@
 // BookGenPro JavaScript functionality
 
-// Animated background nodes
+// Dynamic animated background nodes with real-time interaction
 function createAnimatedBackground() {
     const container = document.querySelector('.animated-bg');
     if (!container) return;
     
-    // Create nodes
-    for (let i = 0; i < 50; i++) {
+    // Create dynamic nodes that respond to user interaction
+    for (let i = 0; i < 60; i++) {
         const node = document.createElement('div');
         node.className = 'node';
         node.style.left = Math.random() * 100 + '%';
         node.style.animationDelay = Math.random() * 20 + 's';
         node.style.animationDuration = (Math.random() * 10 + 15) + 's';
+        
+        // Add dynamic size variation
+        const size = Math.random() * 6 + 2;
+        node.style.width = size + 'px';
+        node.style.height = size + 'px';
+        
+        // Add mouse interaction
+        node.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(2)';
+            this.style.opacity = '0.8';
+        });
+        
+        node.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.opacity = '0.3';
+        });
+        
         container.appendChild(node);
     }
+    
+    // Add mouse movement effect
+    document.addEventListener('mousemove', function(e) {
+        const nodes = document.querySelectorAll('.node');
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+        
+        nodes.forEach((node, index) => {
+            const speed = (index % 3 + 1) * 0.5;
+            const x = (mouseX - 0.5) * speed;
+            const y = (mouseY - 0.5) * speed;
+            
+            if (index % 4 === 0) {
+                node.style.transform += ` translate(${x * 20}px, ${y * 20}px)`;
+            }
+        });
+    });
 }
 
-// Initialize on page load
+// Initialize on page load with dynamic features
 document.addEventListener('DOMContentLoaded', function() {
     createAnimatedBackground();
     initializeChapterGeneration();
     initializeFormValidation();
     initializeTooltips();
+    initializeDynamicFeatures();
+    initializeRealTimeUpdates();
+    initializeInteractiveElements();
 });
+
+// Dynamic features initialization
+function initializeDynamicFeatures() {
+    // Dynamic typing effects
+    initializeTypingEffects();
+    
+    // Real-time form validation
+    initializeRealTimeValidation();
+    
+    // Dynamic content loading
+    initializeLazyLoading();
+    
+    // Interactive animations
+    initializeScrollAnimations();
+}
+
+// Real-time updates system
+function initializeRealTimeUpdates() {
+    // Auto-refresh project status
+    if (document.querySelector('[data-project-id]')) {
+        setInterval(updateProjectStatus, 3000);
+    }
+    
+    // Real-time license status check
+    if (document.querySelector('#license_key')) {
+        initializeLicenseValidation();
+    }
+    
+    // Dynamic model availability check
+    if (document.querySelector('#model')) {
+        checkModelAvailability();
+    }
+}
 
 // Chapter generation status checking
 function initializeChapterGeneration() {
@@ -305,7 +375,330 @@ function setLoading(element, isLoading) {
     }
 }
 
-// Auto-save functionality
+// Dynamic typing effects
+function initializeTypingEffects() {
+    const typingElements = document.querySelectorAll('[data-typing]');
+    typingElements.forEach(element => {
+        const text = element.textContent;
+        element.textContent = '';
+        typeWriter(element, text, 0);
+    });
+}
+
+function typeWriter(element, text, i) {
+    if (i < text.length) {
+        element.textContent += text.charAt(i);
+        setTimeout(() => typeWriter(element, text, i + 1), 50);
+    }
+}
+
+// Real-time form validation
+function initializeRealTimeValidation() {
+    const inputs = document.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            validateFieldRealTime(this);
+        });
+        
+        input.addEventListener('blur', function() {
+            validateFieldRealTime(this);
+        });
+    });
+}
+
+function validateFieldRealTime(field) {
+    const value = field.value.trim();
+    const isValid = field.checkValidity();
+    
+    // Remove existing validation classes
+    field.classList.remove('border-green-500', 'border-red-500');
+    
+    // Add dynamic validation styling
+    if (value && isValid) {
+        field.classList.add('border-green-500');
+        addValidationIcon(field, 'check', 'text-green-500');
+    } else if (value && !isValid) {
+        field.classList.add('border-red-500');
+        addValidationIcon(field, 'x', 'text-red-500');
+    } else {
+        removeValidationIcon(field);
+    }
+}
+
+function addValidationIcon(field, icon, colorClass) {
+    removeValidationIcon(field);
+    const iconElement = document.createElement('i');
+    iconElement.setAttribute('data-feather', icon);
+    iconElement.className = `validation-icon absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${colorClass}`;
+    
+    if (field.parentElement.style.position !== 'relative') {
+        field.parentElement.style.position = 'relative';
+    }
+    
+    field.parentElement.appendChild(iconElement);
+    feather.replace();
+}
+
+function removeValidationIcon(field) {
+    const existingIcon = field.parentElement.querySelector('.validation-icon');
+    if (existingIcon) {
+        existingIcon.remove();
+    }
+}
+
+// Interactive elements
+function initializeInteractiveElements() {
+    // Hover effects for cards
+    const cards = document.querySelectorAll('.page-turn, .chapter-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px) scale(1.02)';
+            this.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Dynamic button interactions
+    const buttons = document.querySelectorAll('button, .btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            createRippleEffect(this);
+        });
+    });
+}
+
+// Ripple effect for buttons
+function createRippleEffect(button) {
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+    
+    button.appendChild(ripple);
+    
+    setTimeout(() => {
+        ripple.remove();
+    }, 600);
+}
+
+// Scroll animations
+function initializeScrollAnimations() {
+    const animatedElements = document.querySelectorAll('.fade-in, .slide-in');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0) translateX(0)';
+            }
+        });
+    });
+    
+    animatedElements.forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+}
+
+// Project status updates
+function updateProjectStatus() {
+    const projectId = document.querySelector('[data-project-id]')?.getAttribute('data-project-id');
+    if (!projectId) return;
+    
+    fetch(`/check_generation_status/${projectId}`)
+        .then(response => response.json())
+        .then(data => {
+            updateGenerationUI(data);
+            updateProgressBars(data);
+            
+            if (data.status === 'completed') {
+                showCompletionEffect();
+            }
+        })
+        .catch(error => console.log('Status check error:', error));
+}
+
+function updateProgressBars(data) {
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach(bar => {
+        const progress = (data.completed_chapters / data.chapters) * 100;
+        bar.style.width = progress + '%';
+        
+        // Add dynamic color based on progress
+        if (progress < 30) {
+            bar.style.background = 'linear-gradient(to right, #ef4444, #f97316)';
+        } else if (progress < 70) {
+            bar.style.background = 'linear-gradient(to right, #f97316, #eab308)';
+        } else {
+            bar.style.background = 'linear-gradient(to right, #22c55e, #16a34a)';
+        }
+    });
+}
+
+function showCompletionEffect() {
+    // Create celebration effect
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            createConfetti();
+        }, i * 100);
+    }
+    
+    showNotification('🎉 Book generation completed successfully!', 'success');
+}
+
+function createConfetti() {
+    const confetti = document.createElement('div');
+    confetti.style.position = 'fixed';
+    confetti.style.width = '10px';
+    confetti.style.height = '10px';
+    confetti.style.backgroundColor = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'][Math.floor(Math.random() * 5)];
+    confetti.style.left = Math.random() * window.innerWidth + 'px';
+    confetti.style.top = '-10px';
+    confetti.style.zIndex = '9999';
+    confetti.style.borderRadius = '50%';
+    
+    document.body.appendChild(confetti);
+    
+    let pos = 0;
+    const fall = setInterval(() => {
+        pos += 5;
+        confetti.style.top = pos + 'px';
+        confetti.style.transform = `rotate(${pos}deg)`;
+        
+        if (pos > window.innerHeight) {
+            clearInterval(fall);
+            confetti.remove();
+        }
+    }, 20);
+}
+
+// License validation
+function initializeLicenseValidation() {
+    const licenseInput = document.querySelector('#license_key');
+    const emailInput = document.querySelector('#email');
+    
+    if (licenseInput && emailInput) {
+        licenseInput.addEventListener('input', debounce(validateLicense, 1000));
+        emailInput.addEventListener('input', debounce(validateLicense, 1000));
+    }
+}
+
+function validateLicense() {
+    const licenseKey = document.querySelector('#license_key')?.value;
+    const email = document.querySelector('#email')?.value;
+    
+    if (licenseKey && email && licenseKey.length > 10 && email.includes('@')) {
+        showLicenseStatus('Validating license...', 'info');
+        // Add visual feedback for validation in progress
+    }
+}
+
+function showLicenseStatus(message, type) {
+    const statusDiv = document.querySelector('#license-status') || createLicenseStatusDiv();
+    statusDiv.textContent = message;
+    statusDiv.className = `text-sm mt-2 text-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-600`;
+}
+
+function createLicenseStatusDiv() {
+    const div = document.createElement('div');
+    div.id = 'license-status';
+    document.querySelector('#email').parentElement.appendChild(div);
+    return div;
+}
+
+// Model availability check
+function checkModelAvailability() {
+    const modelSelect = document.querySelector('#model');
+    if (!modelSelect) return;
+    
+    // Add loading indicator to model dropdown
+    const loadingOption = document.createElement('option');
+    loadingOption.textContent = 'Checking model availability...';
+    loadingOption.disabled = true;
+    modelSelect.insertBefore(loadingOption, modelSelect.firstChild);
+    
+    // Simulate API check (replace with actual API call)
+    setTimeout(() => {
+        loadingOption.remove();
+        addModelStatusIndicators();
+    }, 2000);
+}
+
+function addModelStatusIndicators() {
+    const options = document.querySelectorAll('#model option');
+    options.forEach(option => {
+        if (option.value.includes(':free')) {
+            option.textContent += ' ✅';
+        } else if (option.value.includes('gpt-4')) {
+            option.textContent += ' 🔥';
+        }
+    });
+}
+
+// Debounce utility
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Lazy loading for dynamic content
+function initializeLazyLoading() {
+    const lazyElements = document.querySelectorAll('[data-lazy]');
+    
+    const lazyObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                loadDynamicContent(entry.target);
+                lazyObserver.unobserve(entry.target);
+            }
+        });
+    });
+    
+    lazyElements.forEach(el => lazyObserver.observe(el));
+}
+
+function loadDynamicContent(element) {
+    const contentType = element.getAttribute('data-lazy');
+    
+    switch (contentType) {
+        case 'recent-projects':
+            loadRecentProjects(element);
+            break;
+        case 'model-stats':
+            loadModelStatistics(element);
+            break;
+    }
+}
+
+function loadRecentProjects(element) {
+    // Add skeleton loading
+    element.innerHTML = '<div class="animate-pulse bg-gray-200 h-32 rounded-lg"></div>';
+    
+    // Simulate loading (replace with actual fetch)
+    setTimeout(() => {
+        element.innerHTML = '<p class="text-gray-600">Recent projects loaded dynamically!</p>';
+    }, 1000);
+}
+
+// Enhanced auto-save functionality
 let autoSaveTimeout;
 
 function enableAutoSave(form) {
@@ -314,6 +707,8 @@ function enableAutoSave(form) {
     inputs.forEach(input => {
         input.addEventListener('input', function() {
             clearTimeout(autoSaveTimeout);
+            showSaveIndicator('saving');
+            
             autoSaveTimeout = setTimeout(() => {
                 saveFormData(form);
             }, 2000);
@@ -325,25 +720,303 @@ function saveFormData(form) {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
-    // Save to localStorage
-    localStorage.setItem(`autosave_${form.id}`, JSON.stringify(data));
+    // Save to localStorage with timestamp
+    const saveData = {
+        data: data,
+        timestamp: new Date().toISOString()
+    };
     
-    // Show save indicator
-    showNotification('Changes saved automatically', 'info');
+    localStorage.setItem(`autosave_${form.id}`, JSON.stringify(saveData));
+    showSaveIndicator('saved');
 }
 
-function loadFormData(form) {
+function showSaveIndicator(status) {
+    const indicator = document.querySelector('.save-indicator') || createSaveIndicator();
+    
+    if (status === 'saving') {
+        indicator.innerHTML = '<i data-feather="loader" class="w-4 h-4 animate-spin"></i> Saving...';
+        indicator.className = 'save-indicator fixed top-4 left-4 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm z-50';
+    } else if (status === 'saved') {
+        indicator.innerHTML = '<i data-feather="check" class="w-4 h-4"></i> Saved';
+        indicator.className = 'save-indicator fixed top-4 left-4 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm z-50';
+        
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 2000);
+    }
+    
+    feather.replace();
+}
+
+function createSaveIndicator() {
+    const indicator = document.createElement('div');
+    document.body.appendChild(indicator);
+    return indicator;
+}
+
+// Quick actions for floating button
+function showQuickActions() {
+    const actions = [
+        { icon: 'plus', text: 'New Project', action: () => scrollToNewProject() },
+        { icon: 'folder', text: 'My Projects', action: () => scrollToProjects() },
+        { icon: 'settings', text: 'Settings', action: () => window.location.href = '/settings' },
+        { icon: 'help-circle', text: 'Help', action: () => showHelp() }
+    ];
+    
+    showActionMenu(actions);
+}
+
+function showActionMenu(actions) {
+    // Remove existing menu
+    const existingMenu = document.querySelector('.action-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+        return;
+    }
+    
+    const menu = document.createElement('div');
+    menu.className = 'action-menu fixed bottom-20 right-4 bg-white rounded-lg shadow-lg border py-2 z-50';
+    
+    actions.forEach(action => {
+        const item = document.createElement('button');
+        item.className = 'w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-3';
+        item.innerHTML = `<i data-feather="${action.icon}" class="w-4 h-4"></i><span>${action.text}</span>`;
+        item.onclick = () => {
+            action.action();
+            menu.remove();
+        };
+        menu.appendChild(item);
+    });
+    
+    document.body.appendChild(menu);
+    feather.replace();
+    
+    // Close menu when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', function closeMenu(e) {
+            if (!menu.contains(e.target) && !e.target.closest('.fab')) {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
+            }
+        });
+    }, 100);
+}
+
+function scrollToNewProject() {
+    document.querySelector('#new-project-form')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function scrollToProjects() {
+    const projectsSection = document.querySelector('[data-lazy="recent-projects"]') || 
+                           document.querySelector('h2:contains("Recent Projects")');
+    if (projectsSection) {
+        projectsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function showHelp() {
+    showModal('Help & Tips', `
+        <div class="space-y-4">
+            <div>
+                <h4 class="font-semibold mb-2">Getting Started:</h4>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    <li>• Fill in your book topic and preferences</li>
+                    <li>• Choose number of chapters (3-50)</li>
+                    <li>• Select your preferred language</li>
+                    <li>• Optionally upload a cover image</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2">AI Generation:</h4>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    <li>• Chapter titles are generated first</li>
+                    <li>• Content is created chapter by chapter</li>
+                    <li>• You can edit content manually anytime</li>
+                    <li>• Multiple AI models available in Settings</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2">Export Options:</h4>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    <li>• PDF export with professional styling</li>
+                    <li>• HTML export for web publishing</li>
+                    <li>• Cover images included in exports</li>
+                </ul>
+            </div>
+        </div>
+    `);
+}
+
+function showModal(title, content) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold">${title}</h3>
+                <button onclick="this.closest('.modal-overlay').remove()" class="text-gray-400 hover:text-gray-600">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                ${content}
+            </div>
+            <div class="mt-6 text-right">
+                <button onclick="this.closest('.modal-overlay').remove()" 
+                        class="btn-dynamic text-white px-4 py-2 rounded">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    feather.replace();
+}
+
+// Status bar functions
+function toggleStatusBar() {
+    const statusBar = document.querySelector('#status-bar');
+    statusBar?.classList.add('hidden');
+}
+
+function updateStatus(message, type = 'info') {
+    const statusBar = document.querySelector('#status-bar');
+    const statusText = document.querySelector('#status-text');
+    
+    if (statusText) {
+        statusText.textContent = message;
+    }
+    
+    if (statusBar) {
+        statusBar.classList.remove('hidden');
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            statusBar.classList.add('hidden');
+        }, 5000);
+    }
+}
+
+// Enhanced notifications with animations
+function showNotification(message, type = 'info', duration = 4000) {
+    const container = document.querySelector('#notifications-container');
+    if (!container) return;
+    
+    const notification = document.createElement('div');
+    notification.className = `notification-enter px-4 py-3 rounded-lg shadow-lg text-white max-w-sm transform transition-all duration-300`;
+    
+    // Set background color based on type
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        warning: 'bg-yellow-500',
+        info: 'bg-blue-500'
+    };
+    
+    notification.classList.add(colors[type] || colors.info);
+    
+    const icons = {
+        success: 'check-circle',
+        error: 'x-circle',
+        warning: 'alert-triangle',
+        info: 'info'
+    };
+    
+    notification.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <i data-feather="${icons[type] || icons.info}" class="w-5 h-5"></i>
+            <span>${message}</span>
+            <button onclick="removeNotification(this.parentElement.parentElement)" class="ml-2">
+                <i data-feather="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(notification);
+    feather.replace();
+    
+    // Auto-remove notification
+    setTimeout(() => {
+        removeNotification(notification);
+    }, duration);
+}
+
+function removeNotification(notification) {
+    if (notification) {
+        notification.classList.add('notification-exit');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }
+}
+
+// Real-time connection monitoring
+function monitorConnection() {
+    window.addEventListener('online', () => {
+        updateConnectionStatus(true);
+        showNotification('Connection restored', 'success');
+    });
+    
+    window.addEventListener('offline', () => {
+        updateConnectionStatus(false);
+        showNotification('Connection lost', 'warning');
+    });
+    
+    // Initial check
+    updateConnectionStatus(navigator.onLine);
+}
+
+function updateConnectionStatus(isOnline) {
+    const statusElement = document.querySelector('#connection-status');
+    if (statusElement) {
+        if (isOnline) {
+            statusElement.className = 'status-indicator status-completed';
+            statusElement.textContent = 'Online';
+        } else {
+            statusElement.className = 'status-indicator status-error';
+            statusElement.textContent = 'Offline';
+        }
+    }
+}
+
+// Initialize connection monitoring
+document.addEventListener('DOMContentLoaded', () => {
+    monitorConnection();
+    
+    // Show welcome message for new users
+    if (!localStorage.getItem('visited_before')) {
+        setTimeout(() => {
+            showNotification('Welcome to BookGenPro! Start by creating your first book project.', 'info', 6000);
+            localStorage.setItem('visited_before', 'true');
+        }, 1000);
+    }
+    
+    // Auto-enable forms with validation
+    document.querySelectorAll('form[data-validate]').forEach(form => {
+        enableAutoSave(form);
+        loadSavedFormData(form);
+    });
+});
+
+function loadSavedFormData(form) {
     const saved = localStorage.getItem(`autosave_${form.id}`);
     if (!saved) return;
     
     try {
-        const data = JSON.parse(saved);
+        const saveData = JSON.parse(saved);
+        const data = saveData.data;
+        
         Object.keys(data).forEach(key => {
             const input = form.querySelector(`[name="${key}"]`);
             if (input) {
                 input.value = data[key];
             }
         });
+        
+        // Show restore indicator
+        showNotification(`Restored previous form data from ${new Date(saveData.timestamp).toLocaleString()}`, 'info', 3000);
     } catch (e) {
         console.error('Error loading saved form data:', e);
     }

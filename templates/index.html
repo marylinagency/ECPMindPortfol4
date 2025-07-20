@@ -60,11 +60,11 @@
         <!-- Main Dashboard -->
         <div class="fade-in">
             <!-- Hero Section -->
-            <div class="text-center mb-12">
-                <h1 class="text-4xl md:text-6xl font-bold gradient-text mb-4">
+            <div class="text-center mb-12 scroll-reveal">
+                <h1 class="text-4xl md:text-6xl font-bold text-shimmer mb-4" data-typing>
                     BookGenPro
                 </h1>
-                <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto scroll-reveal">
                     Transform your ideas into complete books with AI-powered chapter generation, 
                     professional styling, and seamless export capabilities.
                 </p>
@@ -73,7 +73,7 @@
             <!-- Quick Actions -->
             <div class="grid md:grid-cols-2 gap-8 mb-12">
                 <!-- Create New Project -->
-                <div class="bg-white rounded-xl shadow-lg p-8 page-turn">
+                <div class="bg-white rounded-xl shadow-lg p-8 card-interactive scroll-reveal">
                     <div class="flex items-center mb-6">
                         <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center mr-4">
                             <i data-feather="plus-circle" class="w-6 h-6 text-white"></i>
@@ -81,7 +81,7 @@
                         <h3 class="text-2xl font-bold text-gray-900">Create New Book</h3>
                     </div>
                     
-                    <form method="POST" action="{{ url_for('create_project') }}" enctype="multipart/form-data" data-validate>
+                    <form method="POST" action="{{ url_for('create_project') }}" enctype="multipart/form-data" id="new-project-form" data-validate>
                         <div class="space-y-4">
                             <div>
                                 <label for="project_name" class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
@@ -129,7 +129,7 @@
                             </div>
                             
                             <button type="submit" 
-                                    class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">
+                                    class="w-full btn-dynamic text-white py-3 rounded-lg font-medium">
                                 <i data-feather="book-open" class="w-5 h-5 inline mr-2"></i>
                                 Create Book Project
                             </button>
@@ -194,7 +194,7 @@
                 <h2 class="text-3xl font-bold text-gray-900 mb-8">Recent Projects</h2>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {% for project in recent_projects %}
-                    <div class="bg-white rounded-lg shadow-lg overflow-hidden page-turn">
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden card-interactive scroll-reveal tooltip-dynamic" data-tooltip="Click to open project">
                         {% if project.cover_image %}
                             <div class="h-48 bg-cover bg-center book-cover" 
                                  style="background-image: url('{{ url_for('static', filename='../uploads/' + project.cover_image) }}');">
@@ -215,7 +215,7 @@
                             </div>
                             
                             <a href="{{ url_for('project_view', project_id=project.id) }}" 
-                               class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center block">
+                               class="w-full btn-dynamic text-white py-2 px-4 rounded-lg text-center block">
                                 <i data-feather="arrow-right" class="w-4 h-4 inline mr-2"></i>
                                 Open Project
                             </a>
@@ -227,9 +227,9 @@
             {% endif %}
             
             <!-- About Section -->
-            <div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-12 card-interactive scroll-reveal">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-6">About BookGenPro</h2>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-shimmer">About BookGenPro</h2>
                     <div class="max-w-4xl mx-auto">
                         <p class="text-lg text-gray-600 mb-8">
                             BookGenPro is an innovative AI-powered book generation tool that transforms your ideas into 
@@ -278,6 +278,35 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Floating Action Button -->
+        <button class="fab tooltip-dynamic" data-tooltip="Quick actions" onclick="showQuickActions()">
+            <i data-feather="plus" class="w-6 h-6"></i>
+        </button>
+        
+        <!-- Dynamic loading overlay -->
+        <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 text-center">
+                <div class="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p class="text-gray-700 font-medium">Processing your request...</p>
+            </div>
+        </div>
     {% endif %}
+</div>
+
+<!-- Real-time notifications container -->
+<div id="notifications-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+<!-- Dynamic status bar -->
+<div id="status-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 text-sm text-gray-600 hidden">
+    <div class="flex items-center justify-between">
+        <span id="status-text">Ready</span>
+        <div class="flex items-center space-x-4">
+            <span id="connection-status" class="status-indicator status-completed">Online</span>
+            <button onclick="toggleStatusBar()" class="text-gray-400 hover:text-gray-600">
+                <i data-feather="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,6 +1,6 @@
 {
-  "openrouter_api_key": "",
-  "selected_model": "openai/gpt-3.5-turbo",
+  "openrouter_api_key": "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",
+  "selected_model": "openrouter/auto",
   "license_activated": true,
   "license_key": "BOOK-LB4C-HFNO-FGXX-BUHK",
   "email": "rad@glma.com",
