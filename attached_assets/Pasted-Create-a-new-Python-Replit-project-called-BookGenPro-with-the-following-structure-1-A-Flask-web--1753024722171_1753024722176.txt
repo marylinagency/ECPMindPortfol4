@@ -1,0 +1,84 @@
+Create a new Python Replit project called "BookGenPro" with the following structure:
+1. A Flask web application with these features: ui in english
+- AI-powered book generation multi language using OpenRouter API  : generate chapter and generate content for chapter (can edit chapter title and content ) can uplaod image background for book cover page 
+- Settings panel to configure API key and model selection
+- Project management (create, save, load projects)
+- Chapter editing and enhancement manual or with ai 
+- PDF and HTML export (style of book with html css tewind and convert to pdf for better design ) 
+- Licensing system with machine ID  
+# إعدادات ثابتة
+API_URL = "https://key.ecertifpro.com/api/activate"
+PROTECTION_BYPASS_TOKEN = "3f2a6d8c6f89e4d67a7d4427b9c048ad"
+REQUIRED_PRODUCT = "bookgenpro"
+
+# دالة التفعيل
+def activate_license():
+    license_key = entry_license.get().strip()
+    email = entry_email.get().strip()
+    machine_id = entry_machine.get().strip()
+
+    if not (license_key and email and machine_id):
+        messagebox.showerror("خطأ", "يرجى ملء جميع الحقول")
+        return
+
+    try:
+        headers = {
+            "x-vercel-protection-bypass": PROTECTION_BYPASS_TOKEN,
+            "Content-Type": "application/json"
+        }
+        data = {
+            "license_key": license_key,
+            "email": email,
+            "machine_id": machine_id
+        }
+        response = requests.post(API_URL, json=data, headers=headers)
+        res_json = response.json()
+
+        if response.status_code == 200 and res_json.get("success"):
+            # التحقق من اسم المنتج
+            product_name = res_json.get("product_name", "")
+            if product_name.lower() != REQUIRED_PRODUCT:
+                messagebox.showerror("خطأ في المنتج", f"هذا الترخيص ليس خاصًا بـ {REQUIRED_PRODUCT}")
+                return
+
+            message = (
+                f"✅ تم التفعيل بنجاح!\n"
+                f"نوع الترخيص: {res_json['license_type']}\n"
+                f"ينتهي في: {res_json.get('expires_at', 'غير محدد')}\n"
+                f"المنتج: {product_name}"
+            )
+            messagebox.showinfo("تم التفعيل", message)
+        else:
+            messagebox.showerror("خطأ", res_json.get("error", "فشل في التفعيل"))
+
+    except Exception as e:
+        messagebox.showerror("خطأ تقني", str(e))
+
+
+# واجهة المستخدم
+- Professional UI with animations
+
+2. File structure:
+- app.py (main Flask application)
+- config.json (configuration file)
+- requirements.txt (dependencies)
+- static/ (with favicon.ico and logo.png)
+- templates/ (with index.html)
+- projects/ (empty directory for storage)
+
+3. Specific requirements:
+- Use Tailwind CSS for styling
+- Include animated background nodes
+- Add page-turn hover effects
+- Implement responsive design
+- Include all necessary JavaScript for functionality
+- Ready for production deployment
+
+4. When  is created:
+- Install all Python dependencies automatically
+- Set up the proper file structure
+- Include placeholder logo and favicon
+- Initialize with default config.json
+- Make sure it runs immediately when launched
+can convert to .exe for lunch in widows 
+The application should be a complete, production-ready book generation tool with all the described features working out of the box.
