@@ -1439,14 +1439,13 @@ def export_pdf(project_id):
             for chapter in project['chapters']:
                 chapter['cleaned_paragraphs'] = clean_chapter_content(chapter.get('content', ''))
         
-        # Prepare cover image path for WeasyPrint
-        cover_image_path = None
-        if project.get('cover_image'):
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            cover_image_path = os.path.join(current_dir, 'static', 'uploads', project['cover_image'])
-        
         # Generate HTML content
-        html_content = render_template('book_export.html', project=project, cover_image_path=cover_image_path)
+        html_content = render_template('book_export.html', project=project)
+        
+        # Fix relative URLs to absolute paths for PDF generation
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        static_path = os.path.join(current_dir, 'static', 'uploads')
+        html_content = html_content.replace('/static/uploads/', f'file://{static_path}/')
         
         # Convert to PDF
         pdf_filename = f"{project['name']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
