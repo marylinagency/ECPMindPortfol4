@@ -118,9 +118,14 @@
                     
                     {% if chapter.status == 'completed' %}
                     <button onclick="editChapter('{{ chapter.id }}')" 
-                            class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                            class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors mr-2"
                             data-tooltip="Edit Chapter">
                         <i data-feather="edit-2" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="regenerateChapter('{{ project.id }}', '{{ chapter.id }}')" 
+                            class="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors"
+                            data-tooltip="Regenerate Chapter">
+                        <i data-feather="refresh-cw" class="w-5 h-5"></i>
                     </button>
                     {% endif %}
                 </div>
@@ -172,6 +177,9 @@
 </div>
 
 <script>
+let statusCheckInterval;
+let isGenerating = false;
+
 function toggleChapterContent(button) {
     const fullContent = button.nextElementSibling;
     const preview = button.parentElement.querySelector('.line-clamp-4');
@@ -186,5 +194,172 @@ function toggleChapterContent(button) {
         button.textContent = 'Show full content';
     }
 }
+
+function regenerateChapter(projectId, chapterId) {
+    if (confirm('Are you sure you want to regenerate this chapter? The current content will be replaced.')) {
+        window.location.href = `/regenerate_chapter/${projectId}/${chapterId}`;
+    }
+}
+
+function editChapter(chapterId) {
+    // Find the chapter content div
+    const chapterCard = document.querySelector(`[data-chapter-id="${chapterId}"]`);
+    const contentDiv = chapterCard.querySelector('.chapter-content .full-content');
+    
+    if (!contentDiv) return;
+    
+    const currentContent = contentDiv.textContent;
+    
+    // Create textarea for editing
+    const textarea = document.createElement('textarea');
+    textarea.value = currentContent;
+    textarea.className = 'w-full h-64 p-4 border border-gray-300 rounded-lg resize-none';
+    
+    // Create save and cancel buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'flex space-x-4 mt-4';
+    
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = 'Save Changes';
+    saveBtn.className = 'bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700';
+    saveBtn.onclick = () => saveChapter(chapterId, textarea.value);
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.className = 'bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700';
+    cancelBtn.onclick = () => location.reload();
+    
+    buttonContainer.appendChild(saveBtn);
+    buttonContainer.appendChild(cancelBtn);
+    
+    // Replace content with editor
+    const contentContainer = chapterCard.querySelector('.chapter-content');
+    contentContainer.innerHTML = '';
+    contentContainer.appendChild(textarea);
+    contentContainer.appendChild(buttonContainer);
+}
+
+function saveChapter(chapterId, content) {
+    // You'll need to implement this API endpoint
+    fetch(`/save_chapter/${chapterId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({content: content})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error saving chapter: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error saving chapter: ' + error.message);
+    });
+}
+
+function checkGenerationStatus() {
+    const projectId = document.querySelector('[data-project-id]').dataset.projectId;
+    
+    fetch(`/api/project_status/${projectId}`)
+        .then(response => response.json())
+        .then(data => {
+            updateGenerationStatus(data);
+            
+            // Keep checking if still generating
+            if (data.status === 'generating_titles' || data.status === 'generating_content') {
+                isGenerating = true;
+                setTimeout(checkGenerationStatus, 2000);
+            } else {
+                isGenerating = false;
+                if (data.status === 'completed') {
+                    // Reload page to show completed chapters
+                    setTimeout(() => location.reload(), 1000);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error checking status:', error);
+            isGenerating = false;
+        });
+}
+
+function updateGenerationStatus(data) {
+    // Update status badge
+    const statusBadge = document.getElementById('generation-status');
+    if (statusBadge) {
+        let statusText = '';
+        let statusClass = 'status-pending';
+        
+        switch(data.status) {
+            case 'pending':
+                statusText = 'Ready to generate';
+                statusClass = 'status-pending';
+                break;
+            case 'generating_titles':
+                statusText = 'Generating titles...';
+                statusClass = 'status-generating';
+                break;
+            case 'generating_content':
+                statusText = `Generating content... (${data.completed_chapters}/${data.total_chapters} completed)`;
+                statusClass = 'status-generating';
+                break;
+            case 'completed':
+                statusText = 'Generation completed';
+                statusClass = 'status-completed';
+                break;
+            default:
+                if (data.status.startsWith('error:')) {
+                    statusText = 'Generation failed';
+                    statusClass = 'status-error';
+                } else {
+                    statusText = data.status;
+                    statusClass = 'status-pending';
+                }
+        }
+        
+        statusBadge.textContent = statusText;
+        statusBadge.className = `status-badge ${statusClass}`;
+    }
+    
+    // Update progress bar
+    const progressBar = document.getElementById('generation-progress');
+    const progressText = document.getElementById('progress-text');
+    if (progressBar && data.progress !== undefined) {
+        progressBar.style.width = data.progress + '%';
+        if (progressText) {
+            progressText.textContent = Math.round(data.progress) + '%';
+        }
+    }
+    
+    // Update individual chapters
+    if (data.chapters) {
+        data.chapters.forEach(chapter => {
+            const chapterCard = document.querySelector(`[data-chapter-id="${chapter.id}"]`);
+            if (chapterCard) {
+                const statusBadge = chapterCard.querySelector('.status-badge');
+                if (statusBadge) {
+                    let statusText = chapter.status === 'completed' ? 'Completed' : 
+                                   chapter.status === 'generating' ? 'Generating...' : 
+                                   chapter.status === 'error' ? 'Error' : 'Pending';
+                    statusBadge.textContent = statusText;
+                    statusBadge.className = `status-badge status-${chapter.status}`;
+                }
+            }
+        });
+    }
+}
+
+// Check for ongoing generation when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const currentStatus = '{{ project.generation_status }}';
+    if (currentStatus === 'generating_titles' || currentStatus === 'generating_content') {
+        isGenerating = true;
+        checkGenerationStatus();
+    }
+});
 </script>
 {% endblock %}

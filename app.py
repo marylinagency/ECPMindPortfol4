@@ -425,6 +425,110 @@ def generate_chapters_background(project_id, project, api_key, model):
         with open(project_file, 'w') as f:
             json.dump(project, f, indent=2)
 
+@app.route('/api/project_status/<project_id>')
+def project_status(project_id):
+    """Get project generation status via AJAX"""
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        completed_chapters = len([c for c in project.get('chapters', []) if c.get('status') == 'completed'])
+        total_chapters = len(project.get('chapters', []))
+        
+        return jsonify({
+            'status': project.get('generation_status', 'pending'),
+            'chapters': project.get('chapters', []),
+            'progress': (completed_chapters / total_chapters * 100) if total_chapters > 0 else 0,
+            'completed_chapters': completed_chapters,
+            'total_chapters': total_chapters
+        })
+    except FileNotFoundError:
+        return jsonify({'status': 'error', 'message': 'Project not found'}), 404
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/regenerate_chapter/<project_id>/<chapter_id>')
+def regenerate_chapter(project_id, chapter_id):
+    """Regenerate a specific chapter"""
+    config = load_config()
+    api_key = config.get('openrouter_api_key', '')
+    model = config.get('selected_model', 'openai/gpt-3.5-turbo')
+    
+    if not api_key:
+        flash('Please configure your OpenRouter API key in settings', 'error')
+        return redirect(url_for('project_view', project_id=project_id))
+    
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        # Find the chapter
+        chapter = None
+        for c in project['chapters']:
+            if c['id'] == chapter_id:
+                chapter = c
+                break
+        
+        if not chapter:
+            flash('Chapter not found', 'error')
+            return redirect(url_for('project_view', project_id=project_id))
+        
+        # Start background regeneration
+        thread = threading.Thread(target=regenerate_single_chapter, 
+                                args=(project_id, chapter_id, project, api_key, model))
+        thread.daemon = True
+        thread.start()
+        
+        flash(f'Chapter "{chapter["title"]}" regeneration started!', 'info')
+        return redirect(url_for('project_view', project_id=project_id))
+        
+    except Exception as e:
+        flash(f'Error starting regeneration: {str(e)}', 'error')
+        return redirect(url_for('project_view', project_id=project_id))
+
+def regenerate_single_chapter(project_id, chapter_id, project, api_key, model):
+    """Background task to regenerate a single chapter"""
+    project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+    
+    try:
+        # Find and update the chapter
+        for chapter in project['chapters']:
+            if chapter['id'] == chapter_id:
+                chapter['status'] = 'generating'
+                with open(project_file, 'w') as f:
+                    json.dump(project, f, indent=2)
+                
+                content_prompt = f"""Write comprehensive content for Chapter {chapter['number']}: "{chapter['title']}" 
+                for a book about "{project['topic']}" in {project['language']}. 
+                The content should be detailed, engaging, and approximately 1000-1500 words. 
+                Use proper formatting with paragraphs and sections where appropriate."""
+                
+                success, content_result = generate_with_openrouter(content_prompt, api_key, model)
+                
+                if success:
+                    chapter['content'] = content_result.strip()
+                    chapter['status'] = 'completed'
+                else:
+                    chapter['content'] = f"Error generating content: {content_result}"
+                    chapter['status'] = 'error'
+                
+                project['last_modified'] = datetime.now().isoformat()
+                with open(project_file, 'w') as f:
+                    json.dump(project, f, indent=2)
+                break
+                
+    except Exception as e:
+        # Update chapter with error
+        for chapter in project['chapters']:
+            if chapter['id'] == chapter_id:
+                chapter['status'] = 'error'
+                chapter['content'] = f"Error: {str(e)}"
+                with open(project_file, 'w') as f:
+                    json.dump(project, f, indent=2)
+                break
+
 @app.route('/edit_chapter/<project_id>/<chapter_id>', methods=['POST'])
 def edit_chapter(project_id, chapter_id):
     try:
@@ -474,6 +578,36 @@ def export_pdf(project_id):
     except Exception as e:
         flash(f'Error exporting PDF: {str(e)}', 'error')
         return redirect(url_for('project_view', project_id=project_id))
+
+@app.route('/save_chapter/<chapter_id>', methods=['POST'])
+def save_chapter_content(chapter_id):
+    """Save edited chapter content via API"""
+    try:
+        data = request.get_json()
+        content = data.get('content', '')
+        
+        # Find the project containing this chapter
+        for filename in os.listdir(PROJECTS_FOLDER):
+            if filename.endswith('.json'):
+                project_file = os.path.join(PROJECTS_FOLDER, filename)
+                with open(project_file, 'r') as f:
+                    project = json.load(f)
+                
+                # Find and update the chapter
+                for chapter in project.get('chapters', []):
+                    if chapter['id'] == chapter_id:
+                        chapter['content'] = content
+                        project['last_modified'] = datetime.now().isoformat()
+                        
+                        with open(project_file, 'w') as f:
+                            json.dump(project, f, indent=2)
+                        
+                        return jsonify({'success': True})
+        
+        return jsonify({'success': False, 'message': 'Chapter not found'}), 404
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/check_generation_status/<project_id>')
 def check_generation_status(project_id):
