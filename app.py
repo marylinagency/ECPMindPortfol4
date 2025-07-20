@@ -1241,13 +1241,11 @@ def regenerate_chapter(project_id, chapter_id):
     if ai_provider == 'gemini':
         api_key = config.get('gemini_api_key', '')
         if not api_key:
-            flash('Please configure your Gemini API key in settings', 'error')
-            return redirect(url_for('project_view', project_id=project_id))
+            return jsonify({'error': 'Please configure your Gemini API key in settings'}), 400
     else:
         api_key = config.get('openrouter_api_key', '')
         if not api_key:
-            flash('Please configure your OpenRouter API key in settings', 'error')
-            return redirect(url_for('project_view', project_id=project_id))
+            return jsonify({'error': 'Please configure your OpenRouter API key in settings'}), 400
     
     try:
         project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
@@ -1262,8 +1260,7 @@ def regenerate_chapter(project_id, chapter_id):
                 break
         
         if not chapter:
-            flash('Chapter not found', 'error')
-            return redirect(url_for('project_view', project_id=project_id))
+            return jsonify({'error': 'Chapter not found'}), 404
         
         # Start background regeneration
         thread = threading.Thread(target=regenerate_single_chapter, 
@@ -1271,12 +1268,39 @@ def regenerate_chapter(project_id, chapter_id):
         thread.daemon = True
         thread.start()
         
-        flash(f'Chapter "{chapter["title"]}" regeneration started!', 'info')
-        return redirect(url_for('project_view', project_id=project_id))
+        return jsonify({'success': True, 'message': f'Chapter "{chapter["title"]}" regeneration started!'})
         
     except Exception as e:
-        flash(f'Error starting regeneration: {str(e)}', 'error')
-        return redirect(url_for('project_view', project_id=project_id))
+        return jsonify({'error': f'Error starting regeneration: {str(e)}'}), 500
+
+@app.route('/api/chapter_status/<project_id>/<chapter_id>')
+def chapter_status(project_id, chapter_id):
+    """Get status of a specific chapter"""
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        # Find the chapter
+        chapter = None
+        for c in project['chapters']:
+            if c['id'] == chapter_id:
+                chapter = c
+                break
+        
+        if not chapter:
+            return jsonify({'error': 'Chapter not found'}), 404
+        
+        return jsonify({
+            'status': chapter.get('status', 'pending'),
+            'title': chapter.get('title', ''),
+            'content_length': len(chapter.get('content', ''))
+        })
+        
+    except FileNotFoundError:
+        return jsonify({'error': 'Project not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 def regenerate_single_chapter(project_id, chapter_id, project, config):
     """Background task to regenerate a single chapter"""
