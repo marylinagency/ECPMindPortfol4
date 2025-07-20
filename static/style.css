@@ -249,6 +249,193 @@ body {
     51%, 100% { border-color: #f97316; }
 }
 
+.enhanced-title {
+    background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+    background-size: 400% 400%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 4s ease-in-out infinite, textGlow 3s ease-in-out infinite alternate;
+    position: relative;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-shadow: none;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes textGlow {
+    from {
+        filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.4));
+    }
+    to {
+        filter: drop-shadow(0 0 40px rgba(118, 75, 162, 0.6)) drop-shadow(0 0 60px rgba(240, 147, 251, 0.3));
+    }
+}
+
+.enhanced-subtitle {
+    background: linear-gradient(135deg, #1f2937, #374151, #4b5563);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: subtitleFade 2s ease-in-out infinite alternate;
+    position: relative;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+@keyframes subtitleFade {
+    0% { opacity: 0.8; transform: translateY(0); }
+    100% { opacity: 1; transform: translateY(-2px); }
+}
+
+.title-container {
+    position: relative;
+    display: inline-block;
+}
+
+.title-container::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 50%, transparent 70%);
+    border-radius: 50%;
+    animation: pulseAura 3s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes pulseAura {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.6; }
+}
+
+.enhanced-hero-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.enhanced-hero-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23667eea' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    animation: patternMove 20s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes patternMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(60px, 60px); }
+}
+
+.word-animation {
+    display: inline-block;
+    animation: wordFloat 3s ease-in-out infinite;
+}
+
+.word-animation:nth-child(2) { animation-delay: 0.2s; }
+.word-animation:nth-child(3) { animation-delay: 0.4s; }
+.word-animation:nth-child(4) { animation-delay: 0.6s; }
+.word-animation:nth-child(5) { animation-delay: 0.8s; }
+.word-animation:nth-child(6) { animation-delay: 1.0s; }
+.word-animation:nth-child(7) { animation-delay: 1.2s; }
+.word-animation:nth-child(8) { animation-delay: 1.4s; }
+.word-animation:nth-child(9) { animation-delay: 1.6s; }
+
+@keyframes wordFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.particle-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border-radius: 50%;
+    animation: particleFloat 8s infinite linear;
+    opacity: 0.6;
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translateY(100vh) translateX(0) scale(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    90% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(50px) scale(1);
+        opacity: 0;
+    }
+}
+
+.enhanced-title:hover {
+    animation-duration: 2s, 1s;
+    transform: scale(1.05) rotateX(5deg) rotateY(-5deg);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    text-shadow: 0 10px 30px rgba(102, 126, 234, 0.3),
+                 0 20px 60px rgba(118, 75, 162, 0.2),
+                 0 30px 90px rgba(240, 147, 251, 0.1);
+}
+
+.enhanced-subtitle:hover .word-animation {
+    color: #667eea;
+    transform: translateY(-3px) scale(1.05);
+    transition: all 0.3s ease;
+}
+
+.title-glow-effect {
+    position: relative;
+}
+
+.title-glow-effect::before {
+    content: 'BookGenPro';
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: blur(8px);
+    opacity: 0.3;
+    animation: glowPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes glowPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.02); }
+}
+
 .progress-bar {
     transition: width 0.3s ease;
 }

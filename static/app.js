@@ -53,6 +53,8 @@ function createAnimatedBackground() {
 // Initialize on page load with dynamic features
 document.addEventListener('DOMContentLoaded', function() {
     createAnimatedBackground();
+    createTitleParticles();
+    initializeTitleTracking();
     initializeChapterGeneration();
     initializeFormValidation();
     initializeTooltips();
@@ -60,6 +62,84 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeRealTimeUpdates();
     initializeInteractiveElements();
 });
+
+// Create floating particles around the title
+function createTitleParticles() {
+    const container = document.getElementById('title-particles');
+    if (!container) return;
+    
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+            
+            // Random colors
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.background = color;
+            particle.style.boxShadow = `0 0 10px ${color}`;
+            
+            container.appendChild(particle);
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 8000);
+        }, i * 200);
+    }
+    
+    // Continuously create new particles
+    setInterval(() => {
+        if (container.children.length < 15) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = '0s';
+            particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+            
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.background = color;
+            particle.style.boxShadow = `0 0 10px ${color}`;
+            
+            container.appendChild(particle);
+            
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 8000);
+        }
+    }, 400);
+}
+
+// Add mouse tracking effect to title
+function initializeTitleTracking() {
+    const title = document.querySelector('.enhanced-title');
+    if (!title) return;
+    
+    title.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = (y - centerY) / centerY * -10;
+        const rotateY = (x - centerX) / centerX * 10;
+        
+        this.style.transform = `scale(1.05) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+    
+    title.addEventListener('mouseleave', function() {
+        this.style.transform = '';
+    });
+}
 
 // Sparkle effect for hover interactions
 function createSparkles(element) {
