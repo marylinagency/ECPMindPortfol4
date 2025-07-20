@@ -45,12 +45,12 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 3rem 2rem;
-            margin: -0.75in -0.625in;
-            width: 7.25in;
-            height: 10.5in;
+            padding: 0.75in;
+            width: 6in;
+            height: 9in;
+            margin: 0;
             {% if project.cover_image %}
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}');
+            background: url('{{ url_for("static", filename="uploads/" + project.cover_image) }}');
             {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             {% endif %}
@@ -59,10 +59,17 @@
             background-repeat: no-repeat;
             color: white;
             page-break-after: always;
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: relative;
             box-sizing: border-box;
+        }
+        
+        .cover-page::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            {% if project.cover_image %}
+            background: rgba(0,0,0,0.6);
+            {% endif %}
         }
         
         .cover-page > * {
@@ -75,25 +82,24 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
-            text-align: center;
-            color: white;
+            position: relative;
+            z-index: 1;
         }
         
         .cover-topic {
             font-size: 1.1rem;
             margin-bottom: 2rem;
             opacity: 0.9;
-            text-align: center;
-            max-width: 80%;
-            color: white;
+            position: relative;
+            z-index: 1;
         }
         
         .cover-footer {
             margin-top: 2rem;
             font-size: 0.9rem;
             opacity: 0.8;
-            text-align: center;
-            color: white;
+            position: relative;
+            z-index: 1;
         }
         
         .toc-title {
@@ -227,15 +233,13 @@
 <body>
     <div class="book-container">
         <!-- Cover Page -->
-        <div class="book-page" style="position: relative; padding: 0;">
-            <div class="cover-page">
-                <h1 class="cover-title">{{ project.name }}</h1>
-                <p class="cover-topic">{{ project.topic }}</p>
-                <div class="cover-footer">
-                    <p>Generated with BookGenPro</p>
-                    <p>Language: {{ project.language }}</p>
-                    <p>{{ project.chapters|length if project.chapters else 0 }} Chapters</p>
-                </div>
+        <div class="book-page cover-page">
+            <h1 class="cover-title">{{ project.name }}</h1>
+            <p class="cover-topic">{{ project.topic }}</p>
+            <div class="cover-footer">
+                <p>Generated with BookGenPro</p>
+                <p>Language: {{ project.language }}</p>
+                <p>{{ project.chapters|length if project.chapters else 0 }} Chapters</p>
             </div>
         </div>
         
