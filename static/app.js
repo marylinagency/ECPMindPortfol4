@@ -254,6 +254,9 @@ function showManualForm() {
                             <option value="German">German</option>
                             <option value="Italian">Italian</option>
                             <option value="Portuguese">Portuguese</option>
+                            <option value="Arabic">Arabic</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Japanese">Japanese</option>
                         </select>
                     </div>
                     
