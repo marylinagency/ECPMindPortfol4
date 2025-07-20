@@ -1,0 +1,61 @@
+{
+  "id": "8164fa2a-9060-4f66-a61c-4192959bbfea",
+  "name": null,
+  "topic": "Book Topic: AI for Creatives: Harnessing Artificial Intelligence to Supercharge Your Art, Writing, and Ideas\nDescription:\nA beginner-friendly guide for artists, writers, and creatives looking to understand how AI tools can amplify their work. From generating ideas to automating tasks, this book walks you through real-world use cases of AI in creative industries.",
+  "language": "English",
+  "chapters": [
+    {
+      "id": "1",
+      "title": "Chapter 1",
+      "content": "",
+      "status": "pending"
+    },
+    {
+      "id": "2",
+      "title": "Chapter 2",
+      "content": "",
+      "status": "pending"
+    },
+    {
+      "id": "3",
+      "title": "Chapter 3",
+      "content": "",
+      "status": "pending"
+    },
+    {
+      "id": "4",
+      "title": "Chapter 4",
+      "content": "",
+      "status": "pending"
+    },
+    {
+      "id": "5",
+      "title": "Chapter 5",
+      "content": "",
+      "status": "pending"
+    },
+    {
+      "id": "6",
+      "title": "Chapter 6",
+      "content": "",
+      "status": "pending"
+    },
+    {
+      "id": "7",
+      "title": "Chapter 7",
+      "content": "",
+      "status": "pending"
+    },
+    {
+      "id": "8",
+      "title": "Chapter 8",
+      "content": "",
+      "status": "pending"
+    }
+  ],
+  "status": "completed",
+  "author_bio": "",
+  "created_at": "2025-07-20T19:20:43.398412",
+  "last_modified": "2025-07-20T19:20:43.398424",
+  "generation_type": "ai_standalone"
+}
