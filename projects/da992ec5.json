@@ -1,0 +1,81 @@
+{
+  "id": "da992ec5",
+  "name": "A comprehensive business guide covering entreprene...",
+  "topic": "A comprehensive business guide covering entrepreneurship fundamentals, market research, business planning, digital marketing strategies, financial management, leadership skills, and scaling operations. Target audience: aspiring entrepreneurs and small business owners looking to start or grow their business.",
+  "author_bio": "I am Radhwen Daly Hamdouni, a passionate entrepreneur and expert in Artificial Intelligence and Digital Transformation. Holding a Master\u2019s degree in Mechatronic Systems and strong project management experience, I bridge the gap between engineering, AI innovation, and digital strategy to drive sustainable business growth.\r\n\r\nAs the founder of ECPMind (ecertifpro.com), we specialize in bridging the gap between mechanical engineering and advanced software solutions. Our team combines expertise in 3D machine design, industrial automation, and artificial intelligence to deliver comprehensive technical solutions for modern industrial challenges.\r\n\r\nWith deep knowledge in both hardware and software domains, we create integrated systems that enhance productivity, optimize processes, and drive innovation across manufacturing and engineering sectors.\r\n\r\nWe also provide advanced AI training and consulting services to help professionals and organizations effectively integrate AI tools into their operations. I have developed innovative AI-powered software solutions such as SearchGenPro AI and BookGenPro AI, demonstrating a commitment to practical and impactful technology.\r\n\r\nAdditionally, I founded Master Cup, a company focused on smart and sustainable packaging solutions, showcasing my versatility across both industrial and digital fields.\r\n\r\nMy mission is to empower entrepreneurs and businesses with customized, actionable strategies fueled by AI and digital technologies. I emphasize clarity, creativity, and critical thinking to ensure long-term, measurable success.",
+  "language": "English",
+  "style": "professional",
+  "num_chapters": 8,
+  "creation_method": "manual",
+  "generation_status": "manual",
+  "created_at": "2025-07-20T18:42:03.674364",
+  "last_modified": "2025-07-20T18:42:57.000434",
+  "chapters": [
+    {
+      "id": "e5b3988a",
+      "number": 1,
+      "title": "Chapter 1",
+      "content": "Content for Chapter 1 - Click to edit and add your own content here.",
+      "status": "manual",
+      "word_count": 0
+    },
+    {
+      "id": "a9262169",
+      "number": 2,
+      "title": "Chapter 2",
+      "content": "Content for Chapter 2 - Click to edit and add your own content here.",
+      "status": "manual",
+      "word_count": 0
+    },
+    {
+      "id": "f9800c2d",
+      "number": 3,
+      "title": "Chapter 3",
+      "content": "Content for Chapter 3 - Click to edit and add your own content here.",
+      "status": "manual",
+      "word_count": 0
+    },
+    {
+      "id": "f4026556",
+      "number": 4,
+      "title": "Chapter 4",
+      "content": "Content for Chapter 4 - Click to edit and add your own content here.",
+      "status": "manual",
+      "word_count": 0
+    },
+    {
+      "id": "37cbeebc",
+      "number": 5,
+      "title": "Chapter 5",
+      "content": "Content for Chapter 5 - Click to edit and add your own content here.",
+      "status": "manual",
+      "word_count": 0
+    },
+    {
+      "id": "3d5ec8d3",
+      "number": 6,
+      "title": "Chapter 6",
+      "content": "Content for Chapter 6 - Click to edit and add your own content here.",
+      "status": "manual",
+      "word_count": 0
+    },
+    {
+      "id": "3021018d",
+      "number": 7,
+      "title": "Chapter 7",
+      "content": "Content for Chapter 7 - Click to edit and add your own content here.",
+      "status": "manual",
+      "word_count": 0
+    },
+    {
+      "id": "2fdfbf0e",
+      "number": 8,
+      "title": "Chapter 8",
+      "content": "Content for Chapter 8 - Click to edit and add your own content here.",
+      "status": "manual",
+      "word_count": 0
+    }
+  ],
+  "generation_mood": "focused",
+  "cover_image": "da992ec5_490445337_122211665726056445_7902886426459789405_n.jpg"
+}
