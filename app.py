@@ -1130,6 +1130,40 @@ def generate_chapters_background(project_id, project, config):
         with open(project_file, 'w') as f:
             json.dump(project, f, indent=2)
 
+@app.route('/api/projects')
+def api_projects():
+    """Get all projects for the homepage"""
+    try:
+        projects = []
+        if os.path.exists(PROJECTS_FOLDER):
+            for filename in os.listdir(PROJECTS_FOLDER):
+                if filename.endswith('.json'):
+                    project_file = os.path.join(PROJECTS_FOLDER, filename)
+                    try:
+                        with open(project_file, 'r') as f:
+                            project = json.load(f)
+                        
+                        # Add project ID from filename
+                        project['id'] = filename[:-5]  # Remove .json extension
+                        
+                        # Add created_at if not present
+                        if 'created_at' not in project:
+                            # Use file modification time as fallback
+                            project['created_at'] = datetime.fromtimestamp(os.path.getmtime(project_file)).isoformat()
+                        
+                        projects.append(project)
+                    except Exception as e:
+                        logging.warning(f"Error reading project file {filename}: {e}")
+                        continue
+        
+        # Sort by creation date (newest first)
+        projects.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        
+        return jsonify(projects)
+    except Exception as e:
+        logging.error(f"Error fetching projects: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/project_status/<project_id>')
 def project_status(project_id):
     """Get project generation status via AJAX"""

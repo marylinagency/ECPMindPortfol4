@@ -2058,6 +2058,100 @@ function showManualCreationModal() {
     }
 }
 
+// Load completed projects function
+function loadCompletedProjects() {
+    fetch('/api/projects')
+        .then(response => response.json())
+        .then(projects => {
+            const grid = document.getElementById('completed-projects-grid');
+            const emptyState = document.getElementById('empty-projects-state');
+            const projectCount = document.getElementById('project-count');
+            
+            // Filter only completed projects
+            const completedProjects = projects.filter(project => 
+                project.status === 'completed' && project.chapters && project.chapters.length > 0
+            );
+            
+            if (completedProjects.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                projectCount.textContent = '0';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            projectCount.textContent = completedProjects.length;
+            
+            grid.innerHTML = completedProjects.map(project => {
+                const coverImage = project.cover_image ? 
+                    `/static/uploads/${project.cover_image}` : 
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQwIiBoZWlnaHQ9IjMyMCIgdmlld0JveD0iMCAwIDI0MCAzMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNDAiIGhlaWdodD0iMzIwIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMF8xKSIvPgo8cGF0aCBkPSJNMTIwIDEwMEM5Mi4zODU4IDEwMCA3MCAxMjIuMzg2IDcwIDE1MEM3MCAxNzcuNjE0IDkyLjM4NTggMjAwIDEyMCAyMDBDMTQ3LjYxNCAyMDAgMTcwIDE3Ny42MTQgMTcwIDE1MEMxNzAgMTIyLjM4NiAxNDcuNjE0IDEwMCAxMjAgMTAwWiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4yIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMF8xIiB4MT0iMCIgeTE9IjAiIHgyPSIyNDAiIHkyPSIzMjAiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzY2N0VFQSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3NjRCQTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K';
+                
+                const createdDate = new Date(project.created_at || Date.now()).toLocaleDateString();
+                const chapterCount = project.chapters ? project.chapters.length : 0;
+                
+                return `
+                    <div class="project-card" onclick="window.location.href='/project/${project.id}'">
+                        <div class="project-cover">
+                            <img src="${coverImage}" alt="${project.topic}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQwIiBoZWlnaHQ9IjMyMCIgdmlld0JveD0iMCAwIDI0MCAzMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNDAiIGhlaWdodD0iMzIwIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMF8xKSIvPgo8cGF0aCBkPSJNMTIwIDEwMEM5Mi4zODU4IDEwMCA3MCAxMjIuMzg2IDcwIDE1MEM3MCAxNzcuNjE0IDkyLjM4NTggMjAwIDEyMCAyMDBDMTQ3LjYxNCAyMDAgMTcwIDE3Ny42MTQgMTcwIDE1MEMxNzAgMTIyLjM4NiAxNDcuNjE0IDEwMCAxMjAgMTAwWiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4yIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMF8xIiB4MT0iMCIgeTE9IjAiIHgyPSIyNDAiIHkyPSIzMjAiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzY2N0VFQSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3NjRCQTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K'">
+                            <div class="project-cover-gradient"></div>
+                        </div>
+                        <div class="project-info">
+                            <h3 class="project-title">${project.topic}</h3>
+                            <div class="project-meta">
+                                <span><i data-feather="calendar" class="w-4 h-4 inline"></i> ${createdDate}</span>
+                                <span><i data-feather="file-text" class="w-4 h-4 inline"></i> ${chapterCount} chapters</span>
+                            </div>
+                            <div class="project-status">
+                                <i data-feather="check-circle" class="w-3 h-3"></i>
+                                Completed
+                            </div>
+                            <div class="project-actions mt-4" onclick="event.stopPropagation()">
+                                <button class="project-action-btn btn-primary" onclick="window.location.href='/project/${project.id}'">
+                                    <i data-feather="eye" class="w-4 h-4 inline mr-1"></i>
+                                    View
+                                </button>
+                                <button class="project-action-btn btn-secondary" onclick="window.location.href='/book-preview/${project.id}'">
+                                    <i data-feather="book-open" class="w-4 h-4 inline mr-1"></i>
+                                    Preview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Re-initialize Feather icons for the new content
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading projects:', error);
+            const grid = document.getElementById('completed-projects-grid');
+            const emptyState = document.getElementById('empty-projects-state');
+            
+            grid.style.display = 'none';
+            emptyState.style.display = 'block';
+        });
+}
+
+// Load projects when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Load completed projects if on homepage
+    if (document.getElementById('completed-projects-grid')) {
+        loadCompletedProjects();
+    }
+    
+    // Existing mood tracker loading for project pages
+    const projectElement = document.querySelector('[data-project-id]');
+    if (projectElement) {
+        const projectId = projectElement.dataset.projectId;
+        loadProjectMoodHistory(projectId);
+    }
+});
+
 // Auto-load project mood history when on project page
 document.addEventListener('DOMContentLoaded', function() {
     const projectElement = document.querySelector('[data-project-id]');

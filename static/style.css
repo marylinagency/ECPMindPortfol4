@@ -1060,7 +1060,170 @@ body {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
-.enhanced-cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+/* New Homepage Styles */
+.project-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.project-cover {
+    width: 100%;
+    height: 280px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.project-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.project-cover-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.project-info {
+    padding: 1.5rem;
+    position: relative;
+}
+
+.project-title {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.project-meta {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.project-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(34, 197, 94, 0.2);
+    color: rgb(34, 197, 94);
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.project-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.project-action-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Template Buttons Styling */
+.template-btn {
+    width: 100%;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.template-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(4px);
+}
+
+.template-title {
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.template-desc {
+    font-size: 0.75rem;
+    opacity: 0.75;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .grid.grid-cols-12 {
+        grid-template-columns: 1fr;
+    }
+    
+    .col-span-4,
+    .col-span-8 {
+        grid-column: 1;
+    }
+    
+    #completed-projects-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    #completed-projects-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .project-cover {
+        height: 200px;
+    }
+}
+
