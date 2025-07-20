@@ -124,6 +124,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes: Latest modifications with dates
 
+### 2025-07-20: Enhanced AI Provider Management & Manual Generation System
+- Added comprehensive AI provider status display on main page with real-time configuration checking
+- Implemented dynamic provider status updates showing green/red indicators and current model information
+- Created complete manual book generation system with expandable form interface
+- Added manual project creation route with customizable chapter structure and professional settings
+- Enhanced settings page with improved dual AI provider setup guides (OpenRouter + Gemini)
+- Built real-time provider status checking API endpoint for seamless user experience
+- Updated API usage guidelines with detailed setup instructions, cost management tips, and quality recommendations
+- Added professional gradient card design for both OpenRouter and Gemini configuration sections
+- Integrated expandable manual creation form with smooth animations and validation
+- Enhanced JavaScript form handling with better error messages and provider-specific validation
+
 ### 2025-07-20: AI-Powered Author Bio Enhancement System
 - Added comprehensive AI author bio enhancement feature in settings page using Gemini or OpenRouter
 - Implemented professional bio generator with multiple style options (professional, conversational, academic, creative)
