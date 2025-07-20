@@ -45,12 +45,12 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 3rem 2rem;
-            margin: -0.75in -0.625in;
-            width: calc(6in + 1.25in);
-            height: calc(9in + 1.5in);
+            padding: 0;
+            margin: 0;
+            width: 6in;
+            height: 9in;
             {% if project.cover_image %}
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}') center/cover;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}');
             {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             {% endif %}
@@ -60,6 +60,7 @@
             color: white;
             page-break-after: always;
             position: relative;
+            box-sizing: border-box;
         }
         
         .cover-page > * {
@@ -71,18 +72,18 @@
             font-family: 'Playfair Display', serif;
             font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 1.5rem;
+            margin: 0 3rem 1.5rem 3rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
         .cover-topic {
             font-size: 1.1rem;
-            margin-bottom: 2rem;
+            margin: 0 3rem 2rem 3rem;
             opacity: 0.9;
         }
         
         .cover-footer {
-            margin-top: 2rem;
+            margin: 2rem 3rem 0 3rem;
             font-size: 0.9rem;
             opacity: 0.8;
         }
@@ -166,6 +167,7 @@
         }
         
         @page:first {
+            margin: 0;
             @bottom-center {
                 content: none;
             }
@@ -209,7 +211,7 @@
 <body>
     <div class="book-container">
         <!-- Cover Page -->
-        <div class="book-page cover-page">
+        <div class="cover-page">
             <h1 class="cover-title">{{ project.name }}</h1>
             <p class="cover-topic">{{ project.topic }}</p>
             <div class="cover-footer">
