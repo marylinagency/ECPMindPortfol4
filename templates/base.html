@@ -26,7 +26,7 @@
     
     <!-- Navigation -->
     <nav class="bg-white shadow-lg relative z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="container-desktop">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="{{ url_for('index') }}" class="flex items-center space-x-3">
@@ -55,7 +55,7 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                <div class="container-desktop mt-4">
                     <div class="alert alert-{{ 'danger' if category == 'error' else category }} bg-{{ 'red' if category == 'error' else 'green' if category == 'success' else 'blue' }}-100 border border-{{ 'red' if category == 'error' else 'green' if category == 'success' else 'blue' }}-400 text-{{ 'red' if category == 'error' else 'green' if category == 'success' else 'blue' }}-700 px-4 py-3 rounded relative fade-in" role="alert">
                         <span class="block sm:inline">{{ message }}</span>
                         <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" onclick="this.parentElement.style.display='none'">

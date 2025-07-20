@@ -61,6 +61,153 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeInteractiveElements();
 });
 
+// Sparkle effect for hover interactions
+function createSparkles(element) {
+    const sparkleCount = 15;
+    for (let i = 0; i < sparkleCount; i++) {
+        setTimeout(() => {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'absolute w-1 h-1 bg-yellow-400 rounded-full animate-ping pointer-events-none';
+            sparkle.style.left = Math.random() * 100 + '%';
+            sparkle.style.top = Math.random() * 100 + '%';
+            sparkle.style.animationDelay = Math.random() * 0.5 + 's';
+            sparkle.style.zIndex = '10';
+            
+            element.style.position = 'relative';
+            element.appendChild(sparkle);
+            
+            setTimeout(() => sparkle.remove(), 1500);
+        }, i * 50);
+    }
+}
+
+function removeSparkles(element) {
+    const sparkles = element.querySelectorAll('.animate-ping');
+    sparkles.forEach(sparkle => sparkle.remove());
+}
+
+// Template filling functions
+function fillTemplate(type) {
+    const templates = {
+        business: {
+            topic: "A comprehensive guide to starting and scaling a successful online business. Cover market research, business planning, digital marketing strategies, customer acquisition, financial management, and scaling operations for modern entrepreneurs.",
+            chapters: 12,
+            style: "professional"
+        },
+        tech: {
+            topic: "A practical guide to modern web development, covering HTML5, CSS3, JavaScript ES6+, React framework, API integration, database design, deployment strategies, and best practices for building scalable web applications.",
+            chapters: 15,
+            style: "technical"
+        },
+        fiction: {
+            topic: "An epic fantasy adventure following a young hero's journey through mystical lands, ancient prophecies, magical creatures, political intrigue, personal growth, friendship, betrayal, and the ultimate battle between good and evil.",
+            chapters: 20,
+            style: "creative"
+        },
+        educational: {
+            topic: "An interactive learning guide for mathematics fundamentals, covering algebra, geometry, statistics, problem-solving techniques, real-world applications, study strategies, and practical exercises for students and lifelong learners.",
+            chapters: 10,
+            style: "academic"
+        }
+    };
+    
+    const template = templates[type];
+    if (template) {
+        document.getElementById('gen_topic').value = template.topic;
+        document.getElementById('gen_chapters').value = template.chapters;
+        document.getElementById('gen_style').value = template.style;
+        
+        // Add visual feedback
+        const textarea = document.getElementById('gen_topic');
+        textarea.style.transform = 'scale(1.02)';
+        textarea.style.boxShadow = '0 0 20px rgba(249, 115, 22, 0.3)';
+        setTimeout(() => {
+            textarea.style.transform = 'scale(1)';
+            textarea.style.boxShadow = '';
+        }, 300);
+    }
+}
+
+// Show manual project form
+function showManualForm() {
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Create Manual Project</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <form method="POST" action="/create_project" enctype="multipart/form-data" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+                    <input type="text" name="project_name" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                           placeholder="Enter project name">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Book Topic/Theme</label>
+                    <textarea name="book_topic" rows="4" required
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              placeholder="Describe your book topic, genre, and main themes..."></textarea>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                        <select name="language" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="English">English</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="French">French</option>
+                            <option value="German">German</option>
+                            <option value="Italian">Italian</option>
+                            <option value="Portuguese">Portuguese</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Number of Chapters</label>
+                        <input type="number" name="num_chapters" value="10" min="3" max="50"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cover Image (Optional)</label>
+                    <input type="file" name="cover_image" accept="image/*"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button type="button" onclick="closeModal()" 
+                            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Create Project
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    feather.replace(); // Re-initialize feather icons
+}
+
+function closeModal() {
+    const modal = document.querySelector('.fixed.inset-0');
+    if (modal) {
+        modal.remove();
+    }
+}
+
 // Dynamic features initialization
 function initializeDynamicFeatures() {
     // Dynamic typing effects
