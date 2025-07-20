@@ -49,8 +49,8 @@
             margin: -0.75in -0.625in;
             width: 7.25in;
             height: 10.5in;
-            {% if project.cover_image %}
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('file://{{ cover_image_path }}');
+            {% if cover_image_path %}
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('file://{{ cover_image_path }}');
             {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             {% endif %}
@@ -76,21 +76,27 @@
             font-weight: 700;
             margin: 0 2rem 1.5rem 2rem;
             text-align: center;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         }
         
         .cover-topic {
             font-size: 1.1rem;
             margin: 0 2rem 2rem 2rem;
-            opacity: 0.9;
+            opacity: 0.95;
             text-align: center;
             max-width: 80%;
+            color: white;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
         }
         
         .cover-footer {
             margin: 2rem 2rem 0 2rem;
             font-size: 0.9rem;
-            opacity: 0.8;
+            opacity: 0.9;
             text-align: center;
+            color: white;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
         }
         
         .toc-title {
