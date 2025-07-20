@@ -13,7 +13,12 @@
                     <a href="{{ url_for('index') }}" class="text-gray-500 hover:text-gray-700">
                         <i data-feather="arrow-left" class="w-5 h-5"></i>
                     </a>
-                    <h1 class="text-3xl font-bold text-gray-900">{{ project.name }}</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors" 
+                        onclick="editProjectTitle('{{ project.id }}', '{{ project.name }}')" 
+                        title="Click to edit title">
+                        {{ project.name }}
+                        <i data-feather="edit-2" class="w-4 h-4 inline ml-2 text-gray-400"></i>
+                    </h1>
                     <span id="generation-status" class="status-badge status-{{ project.generation_status.replace('_', '-') if project.generation_status else 'pending' }}">
                         {% if project.generation_status == 'pending' %}Ready to generate
                         {% elif project.generation_status == 'generating_titles' %}Generating titles...
@@ -25,7 +30,12 @@
                     </span>
                 </div>
                 
-                <p class="text-gray-600 mb-4">{{ project.topic }}</p>
+                <p class="text-gray-600 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors" 
+                   onclick="editProjectDescription('{{ project.id }}', '{{ project.topic }}')" 
+                   title="Click to edit description">
+                    {{ project.topic }}
+                    <i data-feather="edit-2" class="w-4 h-4 inline ml-2 text-gray-400"></i>
+                </p>
                 
                 <div class="flex flex-wrap gap-4 text-sm text-gray-500">
                     <span class="flex items-center">
@@ -201,6 +211,12 @@
             <i data-feather="download" class="w-5 h-5 inline mr-2"></i>
             Export as PDF
         </a>
+        
+        <a href="{{ url_for('export_docx', project_id=project.id) }}" 
+           class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">
+            <i data-feather="file-text" class="w-5 h-5 inline mr-2"></i>
+            Export as DOCX
+        </a>
         {% endif %}
         
         <!-- Delete Project Button -->
@@ -262,14 +278,19 @@
                 
                 {% if chapter.content %}
                 <div class="chapter-content prose max-w-none">
-                    <div class="text-gray-700 line-clamp-4">
+                    <div class="text-gray-700 line-clamp-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors" 
+                         onclick="editChapterContent('{{ project.id }}', '{{ chapter.id }}', '{{ chapter.title|replace("'", "\\'") }}', this)"
+                         title="Click to edit content">
                         {{ chapter.content[:300] }}...
+                        <i data-feather="edit-2" class="w-4 h-4 inline ml-2 text-gray-400"></i>
                     </div>
                     {% if chapter.content|length > 300 %}
                     <button class="text-blue-600 hover:text-blue-800 text-sm mt-2" onclick="toggleChapterContent(this)">
                         Show full content
                     </button>
-                    <div class="hidden full-content mt-4 text-gray-700 whitespace-pre-wrap">{{ chapter.content }}</div>
+                    <div class="hidden full-content mt-4 text-gray-700 whitespace-pre-wrap cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors" 
+                         onclick="editChapterContent('{{ project.id }}', '{{ chapter.id }}', '{{ chapter.title|replace("'", "\\'") }}', this)"
+                         title="Click to edit content">{{ chapter.content }}<i data-feather="edit-2" class="w-4 h-4 inline ml-2 text-gray-400"></i></div>
                     {% endif %}
                 </div>
                 {% elif chapter.status == 'generating' %}
@@ -448,6 +469,133 @@ function previewBook() {
     // Open book preview in new window/tab
     const previewUrl = `/book_preview/${projectId}`;
     window.open(previewUrl, '_blank', 'width=1200,height=800,scrollbars=yes');
+}
+
+function editProjectTitle(projectId, currentTitle) {
+    const newTitle = prompt('Edit Project Title:', currentTitle);
+    if (newTitle && newTitle !== currentTitle) {
+        fetch(`/api/update_project/${projectId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                title: newTitle
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating title: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error updating title: ' + error.message);
+        });
+    }
+}
+
+function editProjectDescription(projectId, currentDescription) {
+    const newDescription = prompt('Edit Project Description:', currentDescription);
+    if (newDescription && newDescription !== currentDescription) {
+        fetch(`/api/update_project/${projectId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                topic: newDescription
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating description: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error updating description: ' + error.message);
+        });
+    }
+}
+
+function editChapterContent(projectId, chapterId, chapterTitle, element) {
+    // Get current content
+    const currentContent = element.textContent.replace(/✏️/g, '').trim();
+    
+    // Create modal for editing
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-full overflow-hidden flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-2xl font-bold text-gray-900">Edit Chapter: ${chapterTitle}</h2>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600 p-2">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chapter Content</label>
+                        <textarea id="edit-chapter-content" rows="20" 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+                                  placeholder="Enter chapter content here...">${currentContent}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t flex justify-end space-x-4">
+                <button onclick="this.closest('.fixed').remove()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button onclick="saveChapterContent('${projectId}', '${chapterId}', this)" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    feather.replace();
+}
+
+function saveChapterContent(projectId, chapterId, button) {
+    const content = document.getElementById('edit-chapter-content').value;
+    
+    button.disabled = true;
+    button.textContent = 'Saving...';
+    
+    fetch(`/api/update_chapter`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            project_id: projectId,
+            chapter_id: chapterId,
+            content: content
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            button.closest('.fixed').remove();
+            location.reload();
+        } else {
+            alert('Error saving chapter: ' + data.message);
+            button.disabled = false;
+            button.textContent = 'Save Changes';
+        }
+    })
+    .catch(error => {
+        alert('Error saving chapter: ' + error.message);
+        button.disabled = false;
+        button.textContent = 'Save Changes';
+    });
 }
 
 function editChapter(chapterId) {

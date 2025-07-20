@@ -924,7 +924,18 @@ def update_project_content(project_id):
         with open(project_file, 'r') as f:
             project = json.load(f)
         
-        edit_type = request.form.get('editType')
+        data = request.get_json()
+        
+        # Update title if provided
+        if 'title' in data:
+            project['name'] = data['title']
+        
+        # Update topic/description if provided
+        if 'topic' in data:
+            project['topic'] = data['topic']
+        
+        # Handle form data for legacy support
+        edit_type = request.form.get('editType') if request.form else None
         
         if edit_type == 'cover':
             project['name'] = request.form.get('name', project['name'])
@@ -943,6 +954,39 @@ def update_project_content(project_id):
             json.dump(project, f, indent=2)
         
         return jsonify({'success': True, 'message': 'Project updated successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/update_chapter', methods=['POST'])
+def update_chapter_content():
+    """Update specific chapter content"""
+    config = load_config()
+    if not config.get('license_activated', False):
+        return jsonify({'success': False, 'message': 'License not activated'})
+    
+    try:
+        data = request.get_json()
+        project_id = data.get('project_id')
+        chapter_id = data.get('chapter_id')
+        content = data.get('content')
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        # Find and update the chapter
+        for chapter in project.get('chapters', []):
+            if chapter.get('id') == chapter_id:
+                chapter['content'] = content
+                break
+        
+        project['last_modified'] = datetime.now().isoformat()
+        
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        return jsonify({'success': True, 'message': 'Chapter updated successfully'})
         
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
@@ -1389,6 +1433,103 @@ def export_pdf(project_id):
         
     except Exception as e:
         flash(f'Error exporting PDF: {str(e)}', 'error')
+        return redirect(url_for('project_view', project_id=project_id))
+
+@app.route('/export_docx/<project_id>')
+def export_docx(project_id):
+    """Export project as DOCX file"""
+    try:
+        from docx import Document
+        from docx.shared import Inches
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from docx.shared import Pt
+        from docx.enum.style import WD_STYLE_TYPE
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        # Create new Word document
+        doc = Document()
+        
+        # Set document margins
+        sections = doc.sections
+        for section in sections:
+            section.top_margin = Inches(1)
+            section.bottom_margin = Inches(1)
+            section.left_margin = Inches(1)
+            section.right_margin = Inches(1)
+        
+        # Title page
+        title_paragraph = doc.add_paragraph()
+        title_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        title_run = title_paragraph.add_run(project['name'])
+        title_run.font.size = Pt(24)
+        title_run.font.bold = True
+        
+        doc.add_paragraph()  # Empty line
+        
+        # Add author bio if present
+        if project.get('author_bio'):
+            author_paragraph = doc.add_paragraph()
+            author_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            author_run = author_paragraph.add_run(f"By: {project['author_bio']}")
+            author_run.font.size = Pt(14)
+            author_run.font.italic = True
+        
+        doc.add_page_break()
+        
+        # Table of contents
+        toc_heading = doc.add_paragraph()
+        toc_run = toc_heading.add_run("Table of Contents")
+        toc_run.font.size = Pt(18)
+        toc_run.font.bold = True
+        doc.add_paragraph()
+        
+        # Add chapters to TOC
+        for i, chapter in enumerate(project.get('chapters', []), 1):
+            if chapter.get('status') == 'completed' and chapter.get('content'):
+                toc_entry = doc.add_paragraph(f"Chapter {i}: {chapter['title']}")
+                toc_entry.style = 'List Number'
+        
+        doc.add_page_break()
+        
+        # Add chapters
+        for i, chapter in enumerate(project.get('chapters', []), 1):
+            if chapter.get('status') == 'completed' and chapter.get('content'):
+                # Chapter title
+                chapter_heading = doc.add_paragraph()
+                chapter_run = chapter_heading.add_run(f"Chapter {i}: {chapter['title']}")
+                chapter_run.font.size = Pt(16)
+                chapter_run.font.bold = True
+                doc.add_paragraph()
+                
+                # Chapter content
+                content = chapter['content']
+                
+                # Clean markdown formatting
+                content = content.replace('**', '')
+                content = content.replace('*', '')
+                content = content.replace('#', '')
+                
+                # Split content into paragraphs
+                paragraphs = content.split('\n\n')
+                for paragraph_text in paragraphs:
+                    if paragraph_text.strip():
+                        paragraph = doc.add_paragraph(paragraph_text.strip())
+                        paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+                
+                doc.add_page_break()
+        
+        # Save DOCX file
+        docx_filename = f"{project['name']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+        docx_path = os.path.join(EXPORTS_FOLDER, docx_filename)
+        doc.save(docx_path)
+        
+        return send_file(docx_path, as_attachment=True, download_name=docx_filename)
+        
+    except Exception as e:
+        flash(f'Error exporting DOCX: {str(e)}', 'error')
         return redirect(url_for('project_view', project_id=project_id))
 
 @app.route('/save_chapter/<chapter_id>', methods=['POST'])
