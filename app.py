@@ -315,8 +315,94 @@ def save_settings():
     config['selected_model'] = request.form.get('model', 'meta-llama/llama-3.2-3b-instruct:free')
     config['gemini_model'] = request.form.get('gemini_model', 'gemini-1.5-flash')
     save_config(config)
-    flash('Settings saved successfully!', 'success')
+    flash('Settings saved successfully! AI provider updated.', 'success')
     return redirect(url_for('settings'))
+
+@app.route('/check_ai_provider_status')
+def check_ai_provider_status():
+    """Check the current AI provider configuration status"""
+    config = load_config()
+    ai_provider = config.get('ai_provider', 'openrouter')
+    
+    if ai_provider == 'gemini':
+        api_key = config.get('gemini_api_key', '')
+        model = config.get('gemini_model', 'gemini-1.5-flash')
+        configured = bool(api_key)
+        provider_name = 'Google Gemini'
+    else:
+        api_key = config.get('openrouter_api_key', '')
+        model = config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free')
+        configured = bool(api_key)
+        provider_name = 'OpenRouter'
+    
+    return jsonify({
+        'provider': ai_provider,
+        'provider_name': provider_name,
+        'model': model,
+        'configured': configured,
+        'status': 'ready' if configured else 'not_configured'
+    })
+
+@app.route('/create_manual_book', methods=['POST'])
+def create_manual_book():
+    """Create a manual book project"""
+    config = load_config()
+    if not config.get('license_activated', False):
+        flash('Please activate your license first', 'error')
+        return redirect(url_for('index'))
+    
+    try:
+        # Get form data
+        topic = request.form.get('topic', '').strip()
+        author_bio = request.form.get('author_bio', '').strip()
+        language = request.form.get('language', 'English')
+        num_chapters = int(request.form.get('chapters', 8))
+        style = request.form.get('style', 'professional')
+        
+        if not topic:
+            flash('Please provide a book topic', 'error')
+            return redirect(url_for('index'))
+        
+        # Create project
+        project_id = str(uuid.uuid4())[:8]
+        project = {
+            'id': project_id,
+            'name': topic[:50] + ('...' if len(topic) > 50 else ''),
+            'topic': topic,
+            'author_bio': author_bio,
+            'language': language,
+            'style': style,
+            'num_chapters': num_chapters,
+            'creation_method': 'manual',
+            'generation_status': 'manual',
+            'created_at': datetime.now().isoformat(),
+            'last_modified': datetime.now().isoformat(),
+            'chapters': []
+        }
+        
+        # Create empty chapters for manual editing
+        for i in range(1, num_chapters + 1):
+            chapter = {
+                'id': str(uuid.uuid4())[:8],
+                'number': i,
+                'title': f'Chapter {i}',
+                'content': f'Content for Chapter {i} - Click to edit and add your own content here.',
+                'status': 'manual',
+                'word_count': 0
+            }
+            project['chapters'].append(chapter)
+        
+        # Save project
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        flash(f'Manual book project "{project["name"]}" created successfully! Start editing chapters.', 'success')
+        return redirect(url_for('project_view', project_id=project_id))
+        
+    except Exception as e:
+        flash(f'Error creating manual project: {str(e)}', 'error')
+        return redirect(url_for('index'))
 
 @app.route('/create_project', methods=['POST'])
 def create_project():

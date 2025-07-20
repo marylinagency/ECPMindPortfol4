@@ -1502,18 +1502,95 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Check if API is configured
-            const apiConfigured = document.querySelector('.text-green-600');
-            if (!apiConfigured) {
-                showNotification('Please configure OpenRouter API in Settings first', 'warning');
-                setTimeout(() => {
-                    window.location.href = '/settings';
-                }, 2000);
-                return;
-            }
-            
-            startGeneration(action);
-            showNotification(`Starting ${action === 'generate_titles' ? 'chapter title' : 'full book'} generation...`, 'info');
+            // Check if API is configured using new status check
+            checkAIProviderStatus().then(status => {
+                if (!status.configured) {
+                    showNotification(`Please configure ${status.provider_name} API in Settings first`, 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/settings';
+                    }, 2000);
+                    return;
+                }
+                
+                startGeneration(action);
+                showNotification(`Starting ${action === 'generate_titles' ? 'chapter title' : 'full book'} generation...`, 'info');
+            });
         });
     }
+    
+    // Check AI provider status on page load
+    updateAIProviderStatus();
 });
+
+// AI Provider Status Functions
+function checkAIProviderStatus() {
+    return fetch('/check_ai_provider_status')
+        .then(response => response.json())
+        .catch(error => {
+            console.error('Error checking AI provider status:', error);
+            return { configured: false, provider_name: 'AI Provider' };
+        });
+}
+
+function updateAIProviderStatus() {
+    checkAIProviderStatus().then(status => {
+        const statusContainer = document.getElementById('ai-provider-status');
+        if (!statusContainer) return;
+        
+        const statusHTML = status.configured 
+            ? `<div class="flex items-center text-green-300">
+                   <div class="w-2 h-2 bg-green-400 rounded-full mr-3 animate-pulse"></div>
+                   <span class="text-sm font-medium">${status.provider_name}</span>
+                   <span class="ml-2 text-xs bg-green-400/20 text-green-300 px-2 py-1 rounded-full">${status.model}</span>
+               </div>`
+            : `<div class="flex items-center text-red-300">
+                   <div class="w-2 h-2 bg-red-400 rounded-full mr-3"></div>
+                   <span class="text-sm">${status.provider_name} - Not Configured</span>
+               </div>`;
+        
+        statusContainer.innerHTML = statusHTML;
+    });
+}
+
+// Manual Form Functions
+function showManualForm() {
+    const container = document.getElementById('manual-form-container');
+    const button = document.getElementById('manual-show-button');
+    
+    if (container && button) {
+        container.classList.remove('hidden');
+        button.classList.add('hidden');
+        
+        // Add fade-in animation
+        container.style.opacity = '0';
+        container.style.transform = 'translateY(10px)';
+        
+        setTimeout(() => {
+            container.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            container.style.opacity = '1';
+            container.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Focus on the first input
+        document.getElementById('manual_topic')?.focus();
+    }
+}
+
+function hideManualForm() {
+    const container = document.getElementById('manual-form-container');
+    const button = document.getElementById('manual-show-button');
+    
+    if (container && button) {
+        container.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        container.style.opacity = '0';
+        container.style.transform = 'translateY(10px)';
+        
+        setTimeout(() => {
+            container.classList.add('hidden');
+            button.classList.remove('hidden');
+            
+            // Reset form
+            container.querySelector('form').reset();
+        }, 300);
+    }
+}

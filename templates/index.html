@@ -137,20 +137,61 @@
                             </div>
                         </div>
                         
+                        <!-- AI Provider Status -->
                         <div class="bg-white/20 backdrop-blur border border-white/30 rounded-2xl p-6 mb-8">
-                            <div class="flex items-start space-x-4">
-                                <div class="w-8 h-8 bg-white/30 rounded-full flex items-center justify-center">
-                                    <i data-feather="info" class="w-4 h-4 text-white"></i>
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-8 h-8 bg-white/30 rounded-full flex items-center justify-center">
+                                        <i data-feather="cpu" class="w-4 h-4 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-3">AI Provider Status</h4>
+                                        <div id="ai-provider-status" class="space-y-2">
+                                            {% if config.ai_provider == 'gemini' %}
+                                                {% if config.gemini_api_key %}
+                                                    <div class="flex items-center text-green-300">
+                                                        <div class="w-2 h-2 bg-green-400 rounded-full mr-3 animate-pulse"></div>
+                                                        <span class="text-sm font-medium">Google Gemini</span>
+                                                        <span class="ml-2 text-xs bg-green-400/20 text-green-300 px-2 py-1 rounded-full">{{ config.gemini_model or 'gemini-1.5-flash' }}</span>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="flex items-center text-red-300">
+                                                        <div class="w-2 h-2 bg-red-400 rounded-full mr-3"></div>
+                                                        <span class="text-sm">Google Gemini - Not Configured</span>
+                                                    </div>
+                                                {% endif %}
+                                            {% else %}
+                                                {% if config.openrouter_api_key %}
+                                                    <div class="flex items-center text-green-300">
+                                                        <div class="w-2 h-2 bg-green-400 rounded-full mr-3 animate-pulse"></div>
+                                                        <span class="text-sm font-medium">OpenRouter</span>
+                                                        <span class="ml-2 text-xs bg-green-400/20 text-green-300 px-2 py-1 rounded-full">{{ config.selected_model or 'auto' }}</span>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="flex items-center text-red-300">
+                                                        <div class="w-2 h-2 bg-red-400 rounded-full mr-3"></div>
+                                                        <span class="text-sm">OpenRouter - Not Configured</span>
+                                                    </div>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 class="font-semibold text-white mb-3">How It Works</h4>
-                                    <ul class="text-sm text-gray-100 space-y-2">
-                                        <li class="flex items-center"><span class="w-2 h-2 bg-orange-400 rounded-full mr-3"></span>AI analyzes your topic and creates chapter outlines</li>
-                                        <li class="flex items-center"><span class="w-2 h-2 bg-orange-400 rounded-full mr-3"></span>Content is generated chapter by chapter automatically</li>
-                                        <li class="flex items-center"><span class="w-2 h-2 bg-orange-400 rounded-full mr-3"></span>Monitor progress and edit content in real-time</li>
-                                        <li class="flex items-center"><span class="w-2 h-2 bg-orange-400 rounded-full mr-3"></span>Typically takes 2-5 minutes per chapter</li>
-                                    </ul>
-                                </div>
+                                <a href="{{ url_for('settings') }}" 
+                                   class="text-xs text-white/70 hover:text-white transition-colors bg-white/10 px-3 py-2 rounded-lg hover:bg-white/20">
+                                    <i data-feather="settings" class="w-3 h-3 inline mr-1"></i>
+                                    Configure
+                                </a>
+                            </div>
+                            
+                            <div>
+                                <h5 class="text-sm font-medium text-white mb-2">How AI Generation Works</h5>
+                                <ul class="text-xs text-gray-200 space-y-1">
+                                    <li class="flex items-center"><span class="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2"></span>AI analyzes your topic and creates chapter outlines</li>
+                                    <li class="flex items-center"><span class="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2"></span>Content is generated chapter by chapter automatically</li>
+                                    <li class="flex items-center"><span class="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2"></span>Monitor progress and edit content in real-time</li>
+                                    <li class="flex items-center"><span class="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2"></span>Typically takes 2-5 minutes per chapter</li>
+                                </ul>
                             </div>
                         </div>
                         
@@ -225,8 +266,73 @@
                 <!-- Manual Project Creation with Modern Effects -->
                 <div class="glass-card p-8 slide-in-right animate-delay-600">
                     <h3 class="text-2xl font-bold text-white mb-6 text-center">Manual Creation</h3>
-                    <p class="text-gray-300 text-center mb-6">Want more control? Create a project manually and add your own chapters.</p>
-                    <div class="text-center">
+                    <p class="text-gray-300 text-center mb-4">Want more control? Create a project manually and add your own chapters.</p>
+                    
+                    <!-- Toggle Form -->
+                    <div id="manual-form-container" class="hidden">
+                        <form method="POST" action="{{ url_for('create_manual_book') }}" class="space-y-4">
+                            <div>
+                                <label for="manual_topic" class="block text-sm font-medium text-white mb-2">Book Topic</label>
+                                <textarea id="manual_topic" name="topic" rows="3" required
+                                          class="w-full px-3 py-3 bg-white/90 backdrop-blur border-0 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none shadow-lg"
+                                          placeholder="Describe your book topic and what you want to write about..."></textarea>
+                            </div>
+                            
+                            <div>
+                                <label for="manual_author_bio" class="block text-sm font-medium text-white mb-2">Author Bio (Optional)</label>
+                                <textarea id="manual_author_bio" name="author_bio" rows="2"
+                                          class="w-full px-3 py-3 bg-white/90 backdrop-blur border-0 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none shadow-lg"
+                                          placeholder="Tell readers about yourself as the author..."></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="manual_language" class="block text-sm font-medium text-white mb-2">Language</label>
+                                    <select id="manual_language" name="language" class="w-full px-3 py-3 bg-white/90 backdrop-blur border-0 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none shadow-lg">
+                                        <option value="English">English</option>
+                                        <option value="Spanish">Spanish</option>
+                                        <option value="French">French</option>
+                                        <option value="German">German</option>
+                                        <option value="Italian">Italian</option>
+                                        <option value="Portuguese">Portuguese</option>
+                                        <option value="Arabic">Arabic</option>
+                                        <option value="Chinese">Chinese</option>
+                                        <option value="Japanese">Japanese</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="manual_chapters" class="block text-sm font-medium text-white mb-2">Chapters</label>
+                                    <input type="number" id="manual_chapters" name="chapters" value="8" min="3" max="25"
+                                           class="w-full px-3 py-3 bg-white/90 backdrop-blur border-0 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none shadow-lg">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="manual_style" class="block text-sm font-medium text-white mb-2">Writing Style</label>
+                                <select id="manual_style" name="style" class="w-full px-3 py-3 bg-white/90 backdrop-blur border-0 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none shadow-lg">
+                                    <option value="professional">Professional</option>
+                                    <option value="casual">Casual</option>
+                                    <option value="academic">Academic</option>
+                                    <option value="creative">Creative</option>
+                                    <option value="technical">Technical</option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex space-x-3 pt-2">
+                                <button type="submit" class="flex-1 bg-blue-600/80 backdrop-blur text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 border border-blue-500/50">
+                                    <i data-feather="book" class="w-4 h-4 inline mr-2"></i>
+                                    Create Manual Project
+                                </button>
+                                <button type="button" onclick="hideManualForm()" class="px-4 py-3 bg-red-600/80 backdrop-blur text-white rounded-lg hover:bg-red-700 transition-all duration-300 border border-red-500/50">
+                                    <i data-feather="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Show/Hide Button -->
+                    <div id="manual-show-button" class="text-center">
                         <button onclick="showManualForm()" 
                                class="modern-button inline-flex items-center justify-center space-x-3 bg-white/20 backdrop-blur text-white px-8 py-4 rounded-xl border border-white/30">
                             <i data-feather="edit" class="w-5 h-5"></i>
