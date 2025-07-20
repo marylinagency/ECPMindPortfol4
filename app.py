@@ -1032,6 +1032,156 @@ def save_chapter_content(chapter_id):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/api/enhance_author_bio', methods=['POST'])
+def enhance_author_bio():
+    """Enhance author bio using AI"""
+    try:
+        config = load_config()
+        data = request.get_json()
+        
+        author_info = data.get('author_info', '').strip()
+        bio_style = data.get('bio_style', 'professional')
+        bio_length = data.get('bio_length', 'medium')
+        
+        if not author_info:
+            return jsonify({'success': False, 'message': 'Author information is required'})
+        
+        # Check if AI provider is configured
+        ai_provider = config.get('ai_provider', 'openrouter')
+        
+        if ai_provider == 'gemini':
+            if not config.get('gemini_api_key'):
+                return jsonify({'success': False, 'message': 'Gemini API key not configured. Please add it in settings.'})
+            
+            enhanced_bio = generate_author_bio_gemini(author_info, bio_style, bio_length, config)
+        else:
+            if not config.get('openrouter_api_key'):
+                return jsonify({'success': False, 'message': 'OpenRouter API key not configured. Please add it in settings.'})
+            
+            enhanced_bio = generate_author_bio_openrouter(author_info, bio_style, bio_length, config)
+        
+        return jsonify({'success': True, 'enhanced_bio': enhanced_bio})
+        
+    except Exception as e:
+        logging.error(f"Error enhancing author bio: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error generating bio: {str(e)}'})
+
+def generate_author_bio_gemini(author_info, bio_style, bio_length, config):
+    """Generate author bio using Gemini AI"""
+    try:
+        import os
+        from google import genai
+        
+        # Set up Gemini client
+        client = genai.Client(api_key=config['gemini_api_key'])
+        
+        # Create style-specific prompt
+        style_prompts = {
+            'professional': 'Write in a professional, formal tone suitable for academic or business contexts',
+            'conversational': 'Write in a warm, engaging, conversational tone that connects with readers',
+            'academic': 'Write in a scholarly, academic tone with emphasis on credentials and expertise',
+            'creative': 'Write in an expressive, creative tone that showcases personality and uniqueness'
+        }
+        
+        length_instructions = {
+            'short': 'Keep it to 2-3 sentences maximum',
+            'medium': 'Write 1 paragraph (4-6 sentences)',
+            'long': 'Write 2-3 paragraphs with comprehensive details'
+        }
+        
+        prompt = f"""You are a professional biography writer. Create a compelling author biography based on the following information.
+
+AUTHOR INFORMATION:
+{author_info}
+
+STYLE REQUIREMENTS:
+- {style_prompts.get(bio_style, style_prompts['professional'])}
+- {length_instructions.get(bio_length, length_instructions['medium'])}
+- Focus on credibility, expertise, and what makes this author qualified to write
+- Include relevant achievements, background, and experience
+- Make it engaging and professional
+- Write in third person
+- Do not include any markdown formatting or special characters
+
+Create the author biography now:"""
+
+        response = client.models.generate_content(
+            model=config.get('gemini_model', 'gemini-1.5-flash'),
+            contents=prompt
+        )
+        
+        if response.text:
+            return response.text.strip()
+        else:
+            raise Exception("No response from Gemini API")
+            
+    except Exception as e:
+        raise Exception(f"Gemini API error: {str(e)}")
+
+def generate_author_bio_openrouter(author_info, bio_style, bio_length, config):
+    """Generate author bio using OpenRouter API"""
+    try:
+        # Create style-specific prompt
+        style_prompts = {
+            'professional': 'Write in a professional, formal tone suitable for academic or business contexts',
+            'conversational': 'Write in a warm, engaging, conversational tone that connects with readers',
+            'academic': 'Write in a scholarly, academic tone with emphasis on credentials and expertise',
+            'creative': 'Write in an expressive, creative tone that showcases personality and uniqueness'
+        }
+        
+        length_instructions = {
+            'short': 'Keep it to 2-3 sentences maximum',
+            'medium': 'Write 1 paragraph (4-6 sentences)',
+            'long': 'Write 2-3 paragraphs with comprehensive details'
+        }
+        
+        prompt = f"""You are a professional biography writer. Create a compelling author biography based on the following information.
+
+AUTHOR INFORMATION:
+{author_info}
+
+STYLE REQUIREMENTS:
+- {style_prompts.get(bio_style, style_prompts['professional'])}
+- {length_instructions.get(bio_length, length_instructions['medium'])}
+- Focus on credibility, expertise, and what makes this author qualified to write
+- Include relevant achievements, background, and experience
+- Make it engaging and professional
+- Write in third person
+- Do not include any markdown formatting or special characters
+
+Create the author biography now:"""
+
+        headers = {
+            "Authorization": f"Bearer {config['openrouter_api_key']}",
+            "Content-Type": "application/json",
+        }
+        
+        data = {
+            "model": config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free'),
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+            "max_tokens": 500
+        }
+        
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('choices') and len(result['choices']) > 0:
+                return result['choices'][0]['message']['content'].strip()
+            else:
+                raise Exception("No content generated")
+        else:
+            raise Exception(f"API error: {response.status_code} - {response.text}")
+            
+    except Exception as e:
+        raise Exception(f"OpenRouter API error: {str(e)}")
+
 
 
 @app.route('/check_generation_status/<project_id>')

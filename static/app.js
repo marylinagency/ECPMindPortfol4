@@ -61,7 +61,32 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDynamicFeatures();
     initializeRealTimeUpdates();
     initializeInteractiveElements();
+    loadSavedAuthorBio();
 });
+
+// Load saved author bio from settings enhancement
+function loadSavedAuthorBio() {
+    const savedBio = sessionStorage.getItem('enhanced_author_bio');
+    if (savedBio) {
+        // Auto-fill author bio fields in both AI and manual forms
+        const genAuthorBio = document.getElementById('gen_author_bio');
+        if (genAuthorBio && !genAuthorBio.value) {
+            genAuthorBio.value = savedBio;
+        }
+        
+        // Also fill manual form if it exists
+        const manualAuthorBio = document.getElementById('manual-author-bio');
+        if (manualAuthorBio && !manualAuthorBio.value) {
+            manualAuthorBio.value = savedBio;
+        }
+        
+        // Remove from session storage after use
+        sessionStorage.removeItem('enhanced_author_bio');
+        
+        // Show a brief notification
+        showNotification('Author bio loaded from AI enhancement!', 'success');
+    }
+}
 
 // Create floating particles around the title
 function createTitleParticles() {
@@ -239,9 +264,17 @@ function showManualForm() {
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Author Bio (Optional)</label>
-                    <textarea name="author_bio" rows="3"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                              placeholder="Tell readers about yourself - your background, expertise, and qualifications..."></textarea>
+                    <div class="relative">
+                        <textarea id="manual-author-bio" name="author_bio" rows="3"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                  placeholder="Tell readers about yourself - your background, expertise, and qualifications..."></textarea>
+                        <div class="mt-2 text-right">
+                            <a href="/settings" class="text-sm text-purple-600 hover:text-purple-800">
+                                <i data-feather="sparkles" class="w-4 h-4 inline mr-1"></i>
+                                Enhance with AI in Settings
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">

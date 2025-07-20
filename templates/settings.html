@@ -224,6 +224,93 @@
             </form>
         </div>
         
+        <!-- AI Author Bio Enhancement -->
+        <div class="border-t border-gray-200 pt-8 mt-8">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-6">AI Author Bio Enhancement</h2>
+            
+            <div class="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6">
+                <div class="flex items-start space-x-4 mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                        <i data-feather="user" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Professional Bio Generator</h3>
+                        <p class="text-gray-600">Transform basic information into polished, professional author biographies</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="author_info" class="block text-sm font-medium text-gray-700 mb-2">
+                            Your Information
+                        </label>
+                        <textarea id="author_info" name="author_info" rows="4" 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                  placeholder="Enter basic information about yourself: your background, experience, qualifications, achievements, education, current role, expertise areas, etc."></textarea>
+                        <p class="mt-2 text-sm text-gray-600">
+                            Enter your basic information and the AI will create a professional author biography
+                        </p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="bio_style" class="block text-sm font-medium text-gray-700 mb-2">
+                                Bio Style
+                            </label>
+                            <select id="bio_style" name="bio_style" 
+                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="professional">Professional & Formal</option>
+                                <option value="conversational">Conversational & Engaging</option>
+                                <option value="academic">Academic & Scholarly</option>
+                                <option value="creative">Creative & Expressive</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="bio_length" class="block text-sm font-medium text-gray-700 mb-2">
+                                Bio Length
+                            </label>
+                            <select id="bio_length" name="bio_length" 
+                                    class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="short">Short (2-3 sentences)</option>
+                                <option value="medium">Medium (1 paragraph)</option>
+                                <option value="long">Long (2-3 paragraphs)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-center">
+                        <button type="button" id="enhance-bio-btn" onclick="enhanceAuthorBio()" 
+                                class="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-blue-700 transition-all duration-300 flex items-center space-x-2">
+                            <i data-feather="sparkles" class="w-5 h-5"></i>
+                            <span>Enhance with AI</span>
+                        </button>
+                    </div>
+                    
+                    <div id="enhanced-bio-result" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Enhanced Author Bio
+                        </label>
+                        <div class="bg-white border border-gray-300 rounded-lg p-4">
+                            <div id="enhanced-bio-content" class="text-gray-900"></div>
+                            <div class="mt-4 flex space-x-3">
+                                <button type="button" onclick="copyToClipboard('enhanced-bio-content')" 
+                                        class="text-sm bg-gray-100 text-gray-700 px-3 py-2 rounded hover:bg-gray-200 transition-colors">
+                                    <i data-feather="copy" class="w-4 h-4 inline mr-1"></i>
+                                    Copy
+                                </button>
+                                <button type="button" onclick="useEnhancedBio()" 
+                                        class="text-sm bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors">
+                                    <i data-feather="check" class="w-4 h-4 inline mr-1"></i>
+                                    Use This Bio
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- License Information -->
         <div class="border-t border-gray-200 pt-8">
             <h2 class="text-2xl font-semibold text-gray-900 mb-6">License Information</h2>
@@ -382,5 +469,103 @@ function toggleProviderSettings() {
 document.addEventListener('DOMContentLoaded', function() {
     toggleProviderSettings();
 });
+
+// AI Author Bio Enhancement Functions
+async function enhanceAuthorBio() {
+    const authorInfo = document.getElementById('author_info').value.trim();
+    const bioStyle = document.getElementById('bio_style').value;
+    const bioLength = document.getElementById('bio_length').value;
+    const enhanceBtn = document.getElementById('enhance-bio-btn');
+    const resultDiv = document.getElementById('enhanced-bio-result');
+    const contentDiv = document.getElementById('enhanced-bio-content');
+
+    if (!authorInfo) {
+        alert('Please enter your information first');
+        return;
+    }
+
+    // Show loading state
+    enhanceBtn.innerHTML = '<i data-feather="loader" class="w-5 h-5 animate-spin"></i><span>Generating...</span>';
+    enhanceBtn.disabled = true;
+
+    try {
+        const response = await fetch('/api/enhance_author_bio', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                author_info: authorInfo,
+                bio_style: bioStyle,
+                bio_length: bioLength
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            contentDiv.innerHTML = data.enhanced_bio.replace(/\n/g, '<br>');
+            resultDiv.classList.remove('hidden');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Error enhancing bio: ' + error.message);
+    } finally {
+        // Reset button state
+        enhanceBtn.innerHTML = '<i data-feather="sparkles" class="w-5 h-5"></i><span>Enhance with AI</span>';
+        enhanceBtn.disabled = false;
+        feather.replace();
+    }
+}
+
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.innerText || element.textContent;
+    
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success feedback
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-feather="check" class="w-4 h-4 inline mr-1"></i>Copied!';
+        btn.classList.add('bg-green-500', 'text-white');
+        btn.classList.remove('bg-gray-100', 'text-gray-700');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('bg-green-500', 'text-white');
+            btn.classList.add('bg-gray-100', 'text-gray-700');
+            feather.replace();
+        }, 2000);
+    }).catch(function() {
+        alert('Failed to copy to clipboard');
+    });
+}
+
+function useEnhancedBio() {
+    const enhancedBio = document.getElementById('enhanced-bio-content').innerText || document.getElementById('enhanced-bio-content').textContent;
+    
+    // Store in sessionStorage to use in new project creation
+    sessionStorage.setItem('enhanced_author_bio', enhancedBio);
+    
+    // Show success message
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i data-feather="check" class="w-4 h-4 inline mr-1"></i>Bio Saved!';
+    btn.classList.add('bg-green-500');
+    btn.classList.remove('bg-blue-500');
+    
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('bg-green-500');
+        btn.classList.add('bg-blue-500');
+        feather.replace();
+    }, 2000);
+    
+    // Optionally redirect to home page
+    setTimeout(() => {
+        window.location.href = '/';
+    }, 2500);
+}
 </script>
 {% endblock %}
