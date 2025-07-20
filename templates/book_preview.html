@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.name }} - Full Book Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .book-content {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+        }
+        .chapter-break {
+            page-break-before: always;
+        }
+        @media print {
+            .no-print { display: none; }
+            .chapter-break { page-break-before: always; }
+        }
+        .edit-overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(59, 130, 246, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 0 0 0 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .chapter-section:hover .edit-overlay {
+            opacity: 1;
+        }
+        .edit-mode {
+            border: 2px dashed #3b82f6;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm sticky top-0 z-10 no-print">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <button onclick="window.close()" class="text-gray-600 hover:text-gray-800">
+                    <i data-feather="arrow-left" class="w-5 h-5"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-900">{{ project.name }}</h1>
+                <span class="text-sm text-gray-500">{{ project.chapters|length }} chapters</span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleEditMode()" id="edit-toggle" 
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <i data-feather="edit" class="w-4 h-4 mr-2"></i>
+                    <span id="edit-text">Enable Edit Mode</span>
+                </button>
+                
+                <button onclick="window.print()" 
+                        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                    <i data-feather="printer" class="w-4 h-4 mr-2"></i>
+                    Print
+                </button>
+                
+                <a href="/export_pdf/{{ project.id }}" target="_blank"
+                   class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center">
+                    <i data-feather="download" class="w-4 h-4 mr-2"></i>
+                    Export PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Content -->
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        <!-- Book Title Page -->
+        <div class="bg-white rounded-lg shadow-lg p-12 mb-8 text-center">
+            {% if project.cover_image %}
+            <div class="w-48 h-64 mx-auto mb-8 rounded-lg overflow-hidden shadow-lg">
+                <img src="{{ url_for('static', filename='../uploads/' + project.cover_image) }}" 
+                     alt="Book Cover" class="w-full h-full object-cover">
+            </div>
+            {% endif %}
+            
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4 book-content">{{ project.name }}</h1>
+            <div class="text-xl text-gray-600 mb-8 book-content">{{ project.topic }}</div>
+            
+            <div class="flex justify-center space-x-8 text-sm text-gray-500">
+                <span>Language: {{ project.language }}</span>
+                <span>Chapters: {{ project.chapters|length }}</span>
+                <span>Generated: {{ project.created_at[:10] }}</span>
+            </div>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 book-content">Table of Contents</h2>
+            <div class="space-y-2">
+                {% for chapter in project.chapters %}
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <a href="#chapter-{{ chapter.number }}" class="text-blue-600 hover:text-blue-800 book-content">
+                        Chapter {{ chapter.number }}: {{ chapter.title }}
+                    </a>
+                    <span class="text-gray-500 text-sm">{{ chapter.content.split()|length if chapter.content else 0 }} words</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Chapters -->
+        {% for chapter in project.chapters %}
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 chapter-section {{ 'chapter-break' if not loop.first }}" 
+             id="chapter-{{ chapter.number }}" data-chapter-id="{{ chapter.id }}">
+            
+            <!-- Edit Overlay -->
+            <div class="edit-overlay no-print">
+                <button onclick="editChapterInline('{{ chapter.id }}')" class="flex items-center">
+                    <i data-feather="edit-2" class="w-4 h-4 mr-1"></i>
+                    Edit
+                </button>
+            </div>
+            
+            <div class="chapter-content">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8 book-content chapter-title">
+                    Chapter {{ chapter.number }}: {{ chapter.title }}
+                </h2>
+                
+                {% if chapter.content %}
+                <div class="prose max-w-none book-content chapter-text">
+                    <div class="text-gray-800 whitespace-pre-wrap leading-relaxed">{{ chapter.content }}</div>
+                </div>
+                {% else %}
+                <div class="text-center py-12 text-gray-500">
+                    <i data-feather="file-text" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                    <p>Chapter content not available</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-full overflow-hidden flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h3 class="text-xl font-bold text-gray-900">Edit Chapter</h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chapter Title</label>
+                        <input type="text" id="modal-edit-title" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chapter Content</label>
+                        <textarea id="modal-edit-content" rows="15" 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t flex justify-end space-x-4">
+                <button onclick="closeEditModal()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button onclick="saveChapterFromModal()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editMode = false;
+        let currentEditingChapter = null;
+
+        // Initialize feather icons
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const editToggle = document.getElementById('edit-toggle');
+            const editText = document.getElementById('edit-text');
+            const chapterSections = document.querySelectorAll('.chapter-section');
+            
+            if (editMode) {
+                editText.textContent = 'Disable Edit Mode';
+                editToggle.className = 'bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center';
+                chapterSections.forEach(section => {
+                    section.classList.add('edit-mode');
+                });
+            } else {
+                editText.textContent = 'Enable Edit Mode';
+                editToggle.className = 'bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center';
+                chapterSections.forEach(section => {
+                    section.classList.remove('edit-mode');
+                });
+            }
+            
+            feather.replace();
+        }
+
+        function editChapterInline(chapterId) {
+            if (!editMode) {
+                alert('Please enable edit mode first');
+                return;
+            }
+            
+            const chapterSection = document.querySelector(`[data-chapter-id="${chapterId}"]`);
+            const title = chapterSection.querySelector('.chapter-title').textContent.replace(/Chapter \d+: /, '');
+            const content = chapterSection.querySelector('.chapter-text div').textContent;
+            
+            // Set modal content
+            document.getElementById('modal-edit-title').value = title;
+            document.getElementById('modal-edit-content').value = content;
+            currentEditingChapter = chapterId;
+            
+            // Show modal
+            document.getElementById('edit-modal').classList.remove('hidden');
+            feather.replace();
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+            currentEditingChapter = null;
+        }
+
+        function saveChapterFromModal() {
+            if (!currentEditingChapter) return;
+            
+            const title = document.getElementById('modal-edit-title').value;
+            const content = document.getElementById('modal-edit-content').value;
+            
+            fetch(`/save_chapter/${currentEditingChapter}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: title,
+                    content: content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the chapter in the current view
+                    const chapterSection = document.querySelector(`[data-chapter-id="${currentEditingChapter}"]`);
+                    const chapterNumber = chapterSection.querySelector('.chapter-title').textContent.match(/Chapter (\d+):/)[1];
+                    chapterSection.querySelector('.chapter-title').textContent = `Chapter ${chapterNumber}: ${title}`;
+                    chapterSection.querySelector('.chapter-text div').textContent = content;
+                    
+                    closeEditModal();
+                } else {
+                    alert('Error saving chapter: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error saving chapter: ' + error.message);
+            });
+        }
+
+        // Smooth scrolling for table of contents links
+        document.querySelectorAll('a[href^="#chapter-"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

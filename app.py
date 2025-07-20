@@ -581,10 +581,11 @@ def export_pdf(project_id):
 
 @app.route('/save_chapter/<chapter_id>', methods=['POST'])
 def save_chapter_content(chapter_id):
-    """Save edited chapter content via API"""
+    """Save edited chapter content and title via API"""
     try:
         data = request.get_json()
         content = data.get('content', '')
+        title = data.get('title', '')
         
         # Find the project containing this chapter
         for filename in os.listdir(PROJECTS_FOLDER):
@@ -597,6 +598,8 @@ def save_chapter_content(chapter_id):
                 for chapter in project.get('chapters', []):
                     if chapter['id'] == chapter_id:
                         chapter['content'] = content
+                        if title:
+                            chapter['title'] = title
                         project['last_modified'] = datetime.now().isoformat()
                         
                         with open(project_file, 'w') as f:
@@ -608,6 +611,24 @@ def save_chapter_content(chapter_id):
         
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/book_preview/<project_id>')
+def book_preview(project_id):
+    """Full book preview page"""
+    config = load_config()
+    if not config.get('license_activated', False):
+        flash('Please activate your license first', 'error')
+        return redirect(url_for('index'))
+    
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        return render_template('book_preview.html', project=project, config=config)
+    except FileNotFoundError:
+        flash('Project not found', 'error')
+        return redirect(url_for('index'))
 
 @app.route('/check_generation_status/<project_id>')
 def check_generation_status(project_id):
