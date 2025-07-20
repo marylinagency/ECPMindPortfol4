@@ -404,6 +404,80 @@ def create_manual_book():
         flash(f'Error creating manual project: {str(e)}', 'error')
         return redirect(url_for('index'))
 
+@app.route('/save_mood', methods=['POST'])
+def save_mood():
+    """Save user's writing mood for today"""
+    try:
+        data = request.get_json()
+        mood = data.get('mood')
+        note = data.get('note', '')
+        
+        if not mood:
+            return jsonify({'success': False, 'message': 'Mood is required'})
+        
+        # Load or create mood data
+        mood_file = 'mood_data.json'
+        try:
+            with open(mood_file, 'r') as f:
+                mood_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            mood_data = {'moods': []}
+        
+        # Get today's date
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        # Check if mood already exists for today
+        existing_mood_index = None
+        for i, entry in enumerate(mood_data['moods']):
+            if entry.get('date') == today:
+                existing_mood_index = i
+                break
+        
+        # Create mood entry
+        mood_entry = {
+            'date': today,
+            'mood': mood,
+            'note': note,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # Update or add mood entry
+        if existing_mood_index is not None:
+            mood_data['moods'][existing_mood_index] = mood_entry
+        else:
+            mood_data['moods'].append(mood_entry)
+        
+        # Keep only last 30 days
+        mood_data['moods'] = mood_data['moods'][-30:]
+        
+        # Save mood data
+        with open(mood_file, 'w') as f:
+            json.dump(mood_data, f, indent=2)
+        
+        return jsonify({'success': True, 'message': 'Mood saved successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error saving mood: {str(e)}'})
+
+@app.route('/get_mood_history')
+def get_mood_history():
+    """Get user's mood history"""
+    try:
+        mood_file = 'mood_data.json'
+        try:
+            with open(mood_file, 'r') as f:
+                mood_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            mood_data = {'moods': []}
+        
+        # Sort by date (newest first)
+        mood_data['moods'].sort(key=lambda x: x['date'], reverse=True)
+        
+        return jsonify({'success': True, 'moods': mood_data['moods']})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error loading mood history: {str(e)}'})
+
 @app.route('/create_project', methods=['POST'])
 def create_project():
     config = load_config()

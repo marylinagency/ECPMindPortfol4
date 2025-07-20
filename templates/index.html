@@ -235,8 +235,77 @@
                 </div>
             </div>
             
+            <!-- Writing Mood Tracker Section -->
+            <div class="mt-16 mb-8">
+                <div class="glass-card p-8 slide-in-up animate-delay-700">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-2xl">
+                            <i data-feather="heart" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-white mb-2">Writing Mood Tracker</h3>
+                        <p class="text-lg text-gray-200">How are you feeling about your writing today?</p>
+                    </div>
+                    
+                    <!-- Mood Selection -->
+                    <div class="grid grid-cols-5 gap-4 mb-6">
+                        <div class="mood-emoji" data-mood="excited" onclick="selectMood('excited', '🤩', 'Excited')">
+                            <span class="text-3xl">🤩</span>
+                            <span class="text-xs text-gray-600 font-medium">Excited</span>
+                        </div>
+                        <div class="mood-emoji" data-mood="focused" onclick="selectMood('focused', '🎯', 'Focused')">
+                            <span class="text-3xl">🎯</span>
+                            <span class="text-xs text-gray-600 font-medium">Focused</span>
+                        </div>
+                        <div class="mood-emoji" data-mood="creative" onclick="selectMood('creative', '🎨', 'Creative')">
+                            <span class="text-3xl">🎨</span>
+                            <span class="text-xs text-gray-600 font-medium">Creative</span>
+                        </div>
+                        <div class="mood-emoji" data-mood="tired" onclick="selectMood('tired', '😴', 'Tired')">
+                            <span class="text-3xl">😴</span>
+                            <span class="text-xs text-gray-600 font-medium">Tired</span>
+                        </div>
+                        <div class="mood-emoji" data-mood="blocked" onclick="selectMood('blocked', '😵‍💫', 'Blocked')">
+                            <span class="text-3xl">😵‍💫</span>
+                            <span class="text-xs text-gray-600 font-medium">Blocked</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Mood Note -->
+                    <div class="mb-6">
+                        <textarea id="mood-note" 
+                                  class="w-full px-4 py-3 bg-white/90 backdrop-blur border-0 rounded-xl text-sm focus:ring-2 focus:ring-pink-300 focus:outline-none shadow-lg resize-none"
+                                  rows="3" 
+                                  placeholder="Add a note about your writing mood today (optional)..."></textarea>
+                    </div>
+                    
+                    <!-- Save Button -->
+                    <div class="text-center mb-6">
+                        <button id="save-mood-btn" 
+                                onclick="saveMood()" 
+                                class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i data-feather="heart" class="w-4 h-4 inline mr-2"></i>
+                            Save My Mood
+                        </button>
+                    </div>
+                    
+                    <!-- Mood History -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-4 text-center">Your Writing Journey</h4>
+                        <div id="mood-history" class="flex gap-3 overflow-x-auto pb-2">
+                            <!-- History will be populated here -->
+                            <div class="flex-shrink-0 text-center text-gray-300">
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-2">
+                                    <i data-feather="calendar" class="w-6 h-6"></i>
+                                </div>
+                                <span class="text-xs">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Secondary Actions Section -->
-            <div class="mt-16 grid md:grid-cols-2 gap-8">
+            <div class="mt-8 grid md:grid-cols-2 gap-8">
                 <!-- Quick Generation Templates with Modern Effects -->
                 <div class="glass-card p-8 slide-in-left animate-delay-500">
                     <h3 class="text-2xl font-bold text-white mb-6 text-center">Quick Templates</h3>

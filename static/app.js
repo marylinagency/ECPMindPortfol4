@@ -1520,6 +1520,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check AI provider status on page load
     updateAIProviderStatus();
+    
+    // Load mood history on page load
+    loadMoodHistory();
 });
 
 // AI Provider Status Functions
@@ -1592,5 +1595,155 @@ function hideManualForm() {
             // Reset form
             container.querySelector('form').reset();
         }, 300);
+    }
+}
+
+// Writing Mood Tracker Functions
+let selectedMood = null;
+
+function selectMood(mood, emoji, name) {
+    // Remove previous selection
+    document.querySelectorAll('.mood-emoji').forEach(element => {
+        element.classList.remove('selected');
+    });
+    
+    // Add selection to clicked mood
+    const moodElement = document.querySelector(`[data-mood="${mood}"]`);
+    if (moodElement) {
+        moodElement.classList.add('selected');
+    }
+    
+    // Store selected mood
+    selectedMood = {
+        mood: mood,
+        emoji: emoji,
+        name: name
+    };
+    
+    // Enable save button
+    const saveBtn = document.getElementById('save-mood-btn');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+    }
+}
+
+async function saveMood() {
+    if (!selectedMood) {
+        showNotification('Please select a mood first', 'error');
+        return;
+    }
+    
+    const note = document.getElementById('mood-note').value.trim();
+    const saveBtn = document.getElementById('save-mood-btn');
+    
+    try {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i data-feather="loader" class="w-4 h-4 inline mr-2 animate-spin"></i>Saving...';
+        feather.replace();
+        
+        const response = await fetch('/save_mood', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                mood: selectedMood.mood,
+                note: note
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Mood saved successfully!', 'success');
+            
+            // Reset form
+            document.querySelectorAll('.mood-emoji').forEach(element => {
+                element.classList.remove('selected');
+            });
+            document.getElementById('mood-note').value = '';
+            selectedMood = null;
+            
+            // Refresh mood history
+            loadMoodHistory();
+        } else {
+            showNotification(data.message || 'Error saving mood', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error saving mood:', error);
+        showNotification('Error saving mood. Please try again.', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i data-feather="heart" class="w-4 h-4 inline mr-2"></i>Save My Mood';
+        feather.replace();
+    }
+}
+
+async function loadMoodHistory() {
+    try {
+        const response = await fetch('/get_mood_history');
+        const data = await response.json();
+        
+        if (data.success) {
+            const historyContainer = document.getElementById('mood-history');
+            if (!historyContainer) return;
+            
+            if (data.moods.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="flex-shrink-0 text-center text-gray-300">
+                        <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-2">
+                            <i data-feather="calendar" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs">No moods yet</span>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            const moodEmojis = {
+                'excited': '🤩',
+                'focused': '🎯', 
+                'creative': '🎨',
+                'tired': '😴',
+                'blocked': '😵‍💫'
+            };
+            
+            const historyHTML = data.moods.slice(0, 10).map(moodEntry => {
+                const date = new Date(moodEntry.date);
+                const isToday = moodEntry.date === today;
+                const emoji = moodEmojis[moodEntry.mood] || '😊';
+                
+                return `
+                    <div class="mood-history-item ${isToday ? 'today' : ''}" title="${moodEntry.note || 'No note'}">
+                        <div class="emoji">${emoji}</div>
+                        <div class="date">${date.getMonth() + 1}/${date.getDate()}</div>
+                        <div class="mood-name">${moodEntry.mood}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            historyContainer.innerHTML = historyHTML;
+            
+        } else {
+            console.error('Error loading mood history:', data.message);
+        }
+        
+    } catch (error) {
+        console.error('Error loading mood history:', error);
+        const historyContainer = document.getElementById('mood-history');
+        if (historyContainer) {
+            historyContainer.innerHTML = `
+                <div class="flex-shrink-0 text-center text-gray-300">
+                    <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-2">
+                        <i data-feather="alert-circle" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xs">Error loading</span>
+                </div>
+            `;
+            feather.replace();
+        }
     }
 }
