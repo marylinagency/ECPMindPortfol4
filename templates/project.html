@@ -431,6 +431,10 @@ function updateGenerationStatus(data) {
                 statusText = 'Ready to generate';
                 statusClass = 'status-pending';
                 break;
+            case 'enhancing_description':
+                statusText = 'Enhancing description...';
+                statusClass = 'status-generating';
+                break;
             case 'generating_titles':
                 statusText = 'Generating titles...';
                 statusClass = 'status-generating';

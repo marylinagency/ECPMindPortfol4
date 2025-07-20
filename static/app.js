@@ -237,6 +237,13 @@ function showManualForm() {
                               placeholder="Describe your book topic, genre, and main themes..."></textarea>
                 </div>
                 
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Author Bio (Optional)</label>
+                    <textarea name="author_bio" rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              placeholder="Tell readers about yourself - your background, expertise, and qualifications..."></textarea>
+                </div>
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Language</label>
@@ -350,7 +357,7 @@ function checkGenerationStatus(projectId) {
             updateGenerationUI(data);
             
             // Continue checking if still generating
-            if (data.status === 'generating_titles' || data.status === 'generating_content') {
+            if (data.status === 'enhancing_description' || data.status === 'generating_titles' || data.status === 'generating_content') {
                 setTimeout(() => checkGenerationStatus(projectId), 2000);
             }
         })
@@ -372,6 +379,10 @@ function updateGenerationUI(data) {
             case 'pending':
                 statusText = 'Ready to generate';
                 statusClass = 'status-pending';
+                break;
+            case 'enhancing_description':
+                statusText = 'Enhancing book description...';
+                statusClass = 'status-generating';
                 break;
             case 'generating_titles':
                 statusText = 'Generating chapter titles...';

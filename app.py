@@ -327,6 +327,7 @@ def create_project():
     
     project_name = request.form.get('project_name', '').strip()
     book_topic = request.form.get('book_topic', '').strip()
+    author_bio = request.form.get('author_bio', '').strip()
     language = request.form.get('language', 'English')
     num_chapters = int(request.form.get('num_chapters', 10))
     
@@ -351,6 +352,7 @@ def create_project():
         'id': project_id,
         'name': project_name,
         'topic': book_topic,
+        'author_bio': author_bio,
         'language': language,
         'num_chapters': num_chapters,
         'cover_image': cover_image,
@@ -375,6 +377,7 @@ def create_ai_book():
         return redirect(url_for('index'))
     
     topic = request.form.get('topic', '').strip()
+    author_bio = request.form.get('author_bio', '').strip()
     language = request.form.get('language', 'English')
     chapters = int(request.form.get('chapters', 8))
     style = request.form.get('style', 'professional')
@@ -393,6 +396,7 @@ def create_ai_book():
         'id': project_id,
         'name': project_name,
         'topic': topic,
+        'author_bio': author_bio,
         'language': language,
         'num_chapters': chapters,
         'writing_style': style,
@@ -454,7 +458,7 @@ def upload_project_cover(project_id):
             flash('No file selected', 'error')
             return redirect(url_for('project_view', project_id=project_id))
         
-        if file and allowed_file(file.filename):
+        if file and file.filename and allowed_file(file.filename):
             # Remove old cover image if exists
             if project.get('cover_image'):
                 old_cover_path = os.path.join(UPLOAD_FOLDER, project['cover_image'])
@@ -534,10 +538,12 @@ def update_project_content(project_id):
             project['name'] = request.form.get('name', project['name'])
             project['topic'] = request.form.get('topic', project['topic'])
         elif edit_type == 'chapter':
-            chapter_index = int(request.form.get('chapterIndex'))
-            if 0 <= chapter_index < len(project.get('chapters', [])):
-                project['chapters'][chapter_index]['title'] = request.form.get('title')
-                project['chapters'][chapter_index]['content'] = request.form.get('content')
+            chapter_index_str = request.form.get('chapterIndex')
+            if chapter_index_str is not None:
+                chapter_index = int(chapter_index_str)
+                if 0 <= chapter_index < len(project.get('chapters', [])):
+                    project['chapters'][chapter_index]['title'] = request.form.get('title')
+                    project['chapters'][chapter_index]['content'] = request.form.get('content')
         
         project['last_modified'] = datetime.now().isoformat()
         
@@ -593,8 +599,48 @@ def generate_chapters_background(project_id, project, config):
         with open(project_file, 'w') as f:
             json.dump(project, f, indent=2)
         
-        # Generate chapter titles
-        titles_prompt = f"""Generate {project['num_chapters']} compelling chapter titles for a book about "{project['topic']}" in {project['language']}. 
+        # Enhanced description step before generating titles
+        project['generation_status'] = 'enhancing_description'
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        # First enhance the topic description for better context
+        description_prompt = f"""Analyze and enhance this book topic: "{project['topic']}" in {project['language']}.
+        
+        Create a comprehensive book description that includes:
+        1. Main theme and purpose
+        2. Target audience 
+        3. Key concepts to be covered
+        4. Writing style and tone
+        5. Learning outcomes or takeaways
+        
+        Return a detailed, professional description that will guide chapter creation."""
+        
+        success, enhanced_description = generate_content(description_prompt, config)
+        
+        if success:
+            project['enhanced_description'] = enhanced_description.strip()
+        else:
+            project['enhanced_description'] = project['topic']  # Fallback to original topic
+        
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        # Update status for title generation
+        project['generation_status'] = 'generating_titles'
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        # Generate chapter titles using enhanced description
+        titles_prompt = f"""Based on this enhanced book description: "{project.get('enhanced_description', project['topic'])}"
+        
+        Generate {project['num_chapters']} compelling, specific chapter titles in {project['language']} that:
+        1. Follow a logical progression
+        2. Cover all key aspects mentioned in the description
+        3. Are engaging and professional
+        4. Build upon each other naturally
+        5. Appeal to the target audience
+        
         Return only the titles, one per line, numbered from 1 to {project['num_chapters']}."""
         
         success, titles_result = generate_content(titles_prompt, config)
@@ -642,7 +688,9 @@ def generate_chapters_background(project_id, project, config):
                 json.dump(project, f, indent=2)
             
             content_prompt = f"""Write comprehensive, professional content for Chapter {chapter['number']}: "{chapter['title']}" 
-            for a book about "{project['topic']}" in {project['language']}. 
+            
+            Book Context: {project.get('enhanced_description', project['topic'])}
+            Language: {project['language']} 
 
             IMPORTANT FORMATTING REQUIREMENTS:
             - Write in clean, professional prose suitable for Amazon KDP publishing

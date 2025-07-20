@@ -28,20 +28,27 @@
         
         .cover-page {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 0;
+            margin: 0;
             {% if project.cover_image %}
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}') center/cover;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}') center/cover no-repeat;
             {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             {% endif %}
+            background-size: cover;
+            background-position: center;
             color: white;
-            border-radius: 10px;
-            margin-bottom: 3rem;
             page-break-after: always;
-            min-height: 70vh;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-left: -2rem;
+            margin-right: -2rem;
+            margin-top: -2rem;
         }
         
         .cover-title {
@@ -292,11 +299,28 @@
         </div>
         {% endfor %}
         
+        <!-- Author Bio Section -->
+        {% if project.author_bio and project.author_bio.strip() %}
+        <div class="author-bio-page" style="page-break-before: always; padding: 3rem 2rem; text-align: center;">
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #2d3748; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem;">About the Author</h2>
+            <div style="font-size: 1.1rem; line-height: 1.8; text-align: justify; color: #4a5568; margin-bottom: 2rem;">
+                {% for paragraph in project.author_bio.split('\n\n') %}
+                    {% if paragraph.strip() %}
+                        <p style="margin-bottom: 1.5rem;">{{ paragraph.strip() }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Footer -->
         <div class="footer">
             <p>This book was generated using BookGenPro - AI-Powered Book Generation</p>
             <p>Developed by ECPMind | www.ecertifpro.com</p>
             <p>Generated on {{ project.last_modified[:10] if project.last_modified else 'Unknown Date' }}</p>
+            {% if project.author_bio and project.author_bio.strip() %}
+            <p style="margin-top: 1rem; font-style: italic; color: #666;">Author bio included</p>
+            {% endif %}
         </div>
     </div>
 </body>
