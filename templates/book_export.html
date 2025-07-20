@@ -32,7 +32,7 @@
             height: 9in;
             background: white;
             margin: 0 auto;
-            padding: 0.75in;
+            padding: 0.5in;
             position: relative;
             font-family: 'Crimson Text', serif;
             font-size: 11pt;
@@ -45,12 +45,12 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 0;
-            margin: -0.75in -0.625in;
-            width: 7.25in;
-            height: 10.5in;
+            padding: 1.5rem;
+            margin: 0;
+            width: 6in;
+            height: 9in;
             {% if project.cover_image %}
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}');
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}');
             {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             {% endif %}
@@ -72,24 +72,33 @@
         
         .cover-title {
             font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            margin: 0 3rem 1.5rem 3rem;
+            margin: 0 0 0.8rem 0;
             color: white;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
         
         .cover-topic {
-            font-size: 1.1rem;
-            margin: 0 3rem 2rem 3rem;
-            opacity: 0.9;
+            font-size: 1rem;
+            margin: 0 0 1.5rem 0;
+            opacity: 0.95;
             color: white;
+            line-height: 1.4;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
         }
         
         .cover-footer {
-            margin: 2rem 3rem 0 3rem;
-            font-size: 0.9rem;
-            opacity: 0.8;
+            margin: 1.5rem 0 0 0;
+            font-size: 0.85rem;
+            opacity: 0.9;
             color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        
+        .cover-footer p {
+            margin: 0.2rem 0;
         }
         
         .toc-title {
@@ -161,11 +170,11 @@
         /* Amazon KDP Print Settings */
         @page {
             size: 6in 9in;
-            margin: 0.75in 0.625in 0.75in 0.625in;
+            margin: 0.5in 0.5in 0.5in 0.5in;
             @bottom-center {
                 content: counter(page);
                 font-family: 'Crimson Text', serif;
-                font-size: 10pt;
+                font-size: 9pt;
                 color: #666;
             }
         }
@@ -183,7 +192,7 @@
                 margin: 0;
                 width: 100%;
                 height: 100%;
-                padding: 0.75in;
+                padding: 0.5in;
                 position: relative;
             }
             
