@@ -40,8 +40,17 @@ REQUIRED_PRODUCT = "bookgenpro"
 def get_machine_id():
     """Generate a unique machine ID"""
     import platform
-    machine_info = f"{platform.node()}-{platform.system()}-{platform.processor()}"
-    return hashlib.md5(machine_info.encode()).hexdigest()
+    import uuid
+    try:
+        # Try to get a more stable machine identifier
+        machine_info = f"{platform.node()}-{platform.system()}-{platform.machine()}"
+        # Add UUID for uniqueness if system info is generic
+        if not platform.node() or platform.node() == 'localhost':
+            machine_info += f"-{uuid.getnode()}"
+        return hashlib.md5(machine_info.encode()).hexdigest()
+    except:
+        # Fallback to a generated UUID based on system info
+        return hashlib.md5(f"{platform.system()}-{uuid.getnode()}".encode()).hexdigest()
 
 def load_config():
     """Load configuration from config.json"""
@@ -209,7 +218,7 @@ def create_project():
     cover_image = None
     if 'cover_image' in request.files:
         file = request.files['cover_image']
-        if file and file.filename != '' and allowed_file(file.filename):
+        if file and file.filename and file.filename != '' and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             filename = f"{uuid.uuid4()}_{filename}"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -284,9 +293,8 @@ def generate_chapters(project_id):
 
 def generate_chapters_background(project_id, project, api_key, model):
     """Background task to generate chapters"""
+    project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
     try:
-        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
-        
         # Update status
         project['generation_status'] = 'generating_titles'
         with open(project_file, 'w') as f:

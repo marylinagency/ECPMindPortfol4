@@ -31,11 +31,12 @@
                                        placeholder="Enter your email address">
                             </div>
                             
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Machine ID</label>
-                                <input type="text" value="{{ config.machine_id }}" readonly
-                                       class="w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                                       data-tooltip="This is automatically generated for your device">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i data-feather="shield" class="w-4 h-4 mr-2"></i>
+                                    <span>Machine ID: <span class="font-mono text-xs">{{ config.machine_id }}</span></span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Automatically generated for this device</p>
                             </div>
                             
                             <button type="submit" 
