@@ -344,7 +344,10 @@
 <script>
 function togglePasswordVisibility(inputId) {
     const input = document.getElementById(inputId);
-    const icon = input.nextElementSibling.querySelector('i');
+    const iconContainer = input.nextElementSibling;
+    const icon = iconContainer ? iconContainer.querySelector('i') : null;
+    
+    if (!input || !icon) return;
     
     if (input.type === 'password') {
         input.type = 'text';
@@ -358,9 +361,13 @@ function togglePasswordVisibility(inputId) {
 }
 
 function toggleProviderSettings() {
-    const provider = document.getElementById('ai_provider').value;
+    const providerSelect = document.getElementById('ai_provider');
     const openrouterSettings = document.getElementById('openrouter-settings');
     const geminiSettings = document.getElementById('gemini-settings');
+    
+    if (!providerSelect || !openrouterSettings || !geminiSettings) return;
+    
+    const provider = providerSelect.value;
     
     if (provider === 'gemini') {
         openrouterSettings.style.display = 'none';
@@ -370,5 +377,10 @@ function toggleProviderSettings() {
         geminiSettings.style.display = 'none';
     }
 }
+
+// Initialize provider settings on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleProviderSettings();
+});
 </script>
 {% endblock %}

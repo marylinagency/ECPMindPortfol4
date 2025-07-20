@@ -8,5 +8,5 @@
   "chapters": [],
   "created_at": "2025-07-20T16:16:23.296368",
   "last_modified": "2025-07-20T16:16:23.296373",
-  "generation_status": "error: API Error: 429 - {\"error\":{\"message\":\"Rate limit exceeded: limit_rpm/meta-llama/llama-3.2-3b-instruct/e8440b11-29fb-4887-a222-eff9ba33dfbf. High demand for meta-llama/llama-3.2-3b-instruct:free on OpenRouter - limited to 1 requests per minute. Please retry shortly.\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"1\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1753028220000\"},\"provider_name\":null}},\"user_id\":\"user_2wCj130qWeP5TaknKWIp34AuKpw\"}"
+  "generation_status": "pending"
 }
