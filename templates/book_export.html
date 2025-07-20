@@ -50,7 +50,7 @@
             width: 7.25in;
             height: 10.5in;
             {% if project.cover_image %}
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for("static", filename="uploads/" + project.cover_image) }}');
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('file://{{ cover_image_path }}');
             {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             {% endif %}
