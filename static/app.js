@@ -305,8 +305,10 @@ function initializeDynamicFeatures() {
 
 // Real-time updates system
 function initializeRealTimeUpdates() {
-    // Auto-refresh project status
-    if (document.querySelector('[data-project-id]')) {
+    // Auto-refresh project status only if not completed
+    const statusElement = document.getElementById('generation-status');
+    if (document.querySelector('[data-project-id]') && 
+        (!statusElement || !statusElement.textContent.includes('completed'))) {
         setInterval(updateProjectStatus, 3000);
     }
     
@@ -327,10 +329,21 @@ function initializeChapterGeneration() {
     if (!projectId) return;
     
     const id = projectId.getAttribute('data-project-id');
+    
+    // Check if project is already completed - don't start polling
+    const statusElement = document.getElementById('generation-status');
+    if (statusElement && statusElement.textContent.includes('completed')) {
+        window.generationCompleted = true;
+        return;
+    }
+    
     checkGenerationStatus(id);
 }
 
 function checkGenerationStatus(projectId) {
+    // Don't check if already completed
+    if (window.generationCompleted) return;
+    
     fetch(`/check_generation_status/${projectId}`)
         .then(response => response.json())
         .then(data => {
@@ -388,8 +401,9 @@ function updateGenerationUI(data) {
         progressElement.style.width = progress + '%';
     }
     
-    // Refresh page if generation is completed
-    if (data.status === 'completed') {
+    // Only refresh page if generation just completed (not if it was already completed)
+    if (data.status === 'completed' && !window.generationCompleted) {
+        window.generationCompleted = true;
         setTimeout(() => {
             window.location.reload();
         }, 1000);
