@@ -432,6 +432,73 @@ def project_view(project_id):
         flash('Project not found', 'error')
         return redirect(url_for('index'))
 
+@app.route('/project/<project_id>/upload_cover', methods=['POST'])
+def upload_project_cover(project_id):
+    """Upload or update cover image for existing project"""
+    config = load_config()
+    if not config.get('license_activated', False):
+        flash('Please activate your license first', 'error')
+        return redirect(url_for('index'))
+    
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        if 'cover_image' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(url_for('project_view', project_id=project_id))
+        
+        file = request.files['cover_image']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(url_for('project_view', project_id=project_id))
+        
+        if file and allowed_file(file.filename):
+            # Remove old cover image if exists
+            if project.get('cover_image'):
+                old_cover_path = os.path.join(UPLOAD_FOLDER, project['cover_image'])
+                if os.path.exists(old_cover_path):
+                    os.remove(old_cover_path)
+            
+            # Save new cover image
+            filename = secure_filename(file.filename)
+            filename = f"{project_id}_{filename}"
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(file_path)
+            
+            # Resize image if needed
+            try:
+                with Image.open(file_path) as img:
+                    # Convert to RGB if necessary
+                    if img.mode in ('RGBA', 'LA', 'P'):
+                        img = img.convert('RGB')
+                    
+                    # Resize to reasonable dimensions while maintaining aspect ratio
+                    img.thumbnail((800, 1200), Image.Resampling.LANCZOS)
+                    img.save(file_path, 'JPEG', quality=85)
+                    
+            except Exception as e:
+                flash(f'Error processing image: {str(e)}', 'error')
+                return redirect(url_for('project_view', project_id=project_id))
+            
+            # Update project data
+            project['cover_image'] = filename
+            project['last_modified'] = datetime.now().isoformat()
+            
+            with open(project_file, 'w') as f:
+                json.dump(project, f, indent=2)
+            
+            flash('Cover image updated successfully!', 'success')
+        else:
+            flash('Invalid file type. Please upload an image file.', 'error')
+        
+        return redirect(url_for('project_view', project_id=project_id))
+        
+    except Exception as e:
+        flash(f'Error updating cover image: {str(e)}', 'error')
+        return redirect(url_for('project_view', project_id=project_id))
+
 @app.route('/generate_chapters/<project_id>')
 def generate_chapters(project_id):
     config = load_config()
@@ -524,15 +591,36 @@ def generate_chapters_background(project_id, project, config):
             with open(project_file, 'w') as f:
                 json.dump(project, f, indent=2)
             
-            content_prompt = f"""Write comprehensive content for Chapter {chapter['number']}: "{chapter['title']}" 
+            content_prompt = f"""Write comprehensive, professional content for Chapter {chapter['number']}: "{chapter['title']}" 
             for a book about "{project['topic']}" in {project['language']}. 
-            The content should be detailed, engaging, and approximately 1000-1500 words. 
-            Use proper formatting with paragraphs and sections where appropriate."""
+
+            IMPORTANT FORMATTING REQUIREMENTS:
+            - Write in clean, professional prose suitable for Amazon KDP publishing
+            - Do NOT use any Markdown formatting (no ##, ###, **, *, _, etc.)
+            - Use proper paragraph breaks for readability
+            - Write section headings as regular text with proper capitalization
+            - The content should be detailed, engaging, and approximately 1000-1500 words
+            - Use professional book formatting with clear paragraph structure
+            - No bullet points with asterisks - use proper paragraph flow instead
+            
+            Create content that flows naturally like a professionally published book."""
             
             success, content_result = generate_content(content_prompt, config)
             
             if success:
-                chapter['content'] = content_result.strip()
+                # Clean markdown formatting from generated content
+                import re
+                clean_content = content_result.strip()
+                # Remove markdown headers
+                clean_content = re.sub(r'^#{1,6}\s+', '', clean_content, flags=re.MULTILINE)
+                # Remove bold/italic markers
+                clean_content = re.sub(r'\*{1,2}([^*]+)\*{1,2}', r'\1', clean_content)
+                clean_content = re.sub(r'_{1,2}([^_]+)_{1,2}', r'\1', clean_content)
+                # Remove bullet point markers
+                clean_content = re.sub(r'^\*\s+', '', clean_content, flags=re.MULTILINE)
+                clean_content = re.sub(r'^\-\s+', '', clean_content, flags=re.MULTILINE)
+                
+                chapter['content'] = clean_content
                 chapter['status'] = 'completed'
             else:
                 chapter['content'] = f"Error generating content: {content_result}"

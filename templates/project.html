@@ -43,14 +43,32 @@
                 </div>
             </div>
             
-            {% if project.cover_image %}
             <div class="mt-6 lg:mt-0 lg:ml-8">
-                <div class="w-32 h-44 rounded-lg overflow-hidden shadow-lg book-cover">
+                <div class="w-32 h-44 rounded-lg overflow-hidden shadow-lg book-cover relative group">
+                    {% if project.cover_image %}
                     <img src="{{ url_for('static', filename='uploads/' + project.cover_image) }}" 
                          alt="Book Cover" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <i data-feather="image" class="w-8 h-8 text-white"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Cover Upload Overlay -->
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <button onclick="document.getElementById('coverUpload').click()" 
+                                class="bg-white text-gray-800 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors">
+                            <i data-feather="upload" class="w-4 h-4 inline mr-1"></i>
+                            Change Cover
+                        </button>
+                    </div>
                 </div>
+                
+                <!-- Hidden file input -->
+                <form method="POST" action="{{ url_for('upload_project_cover', project_id=project.id) }}" enctype="multipart/form-data" id="coverForm" class="hidden">
+                    <input type="file" id="coverUpload" name="cover_image" accept="image/*" onchange="document.getElementById('coverForm').submit()">
+                </form>
             </div>
-            {% endif %}
         </div>
         
         <!-- Progress Bar -->
@@ -77,6 +95,13 @@
             Generate Chapters with AI
         </a>
         {% endif %}
+        
+        <!-- Cover Image Upload Button -->
+        <button onclick="document.getElementById('coverUpload').click()" 
+                class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">
+            <i data-feather="image" class="w-5 h-5 inline mr-2"></i>
+            {% if project.cover_image %}Update Cover Image{% else %}Add Cover Image{% endif %}
+        </button>
         
         {% if project.chapters and project.generation_status == 'completed' %}
         <button onclick="previewBook()" 

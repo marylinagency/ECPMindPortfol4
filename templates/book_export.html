@@ -29,11 +29,19 @@
         .cover-page {
             text-align: center;
             padding: 4rem 2rem;
+            {% if project.cover_image %}
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/static/uploads/{{ project.cover_image }}') center/cover;
+            {% else %}
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            {% endif %}
             color: white;
             border-radius: 10px;
             margin-bottom: 3rem;
             page-break-after: always;
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .cover-title {
@@ -56,6 +64,7 @@
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             margin: 2rem auto;
+            display: none; /* Hide since we're using background image */
         }
         
         .cover-footer {
@@ -162,17 +171,38 @@
             font-size: 0.9rem;
         }
         
+        /* Amazon KDP Print Settings */
+        @page {
+            size: 6in 9in; /* Amazon standard paperback size */
+            margin: 0.75in 0.625in 0.75in 0.625in;
+            @bottom-center {
+                content: counter(page);
+                font-family: 'Crimson Text', serif;
+                font-size: 10pt;
+                color: #666;
+            }
+        }
+        
+        @page:first {
+            @bottom-center {
+                content: none;
+            }
+        }
+        
         @media print {
             body {
-                font-size: 12pt;
+                font-size: 11pt;
+                line-height: 1.4;
             }
             
             .book-container {
-                padding: 1rem;
+                padding: 0;
+                max-width: none;
             }
             
             .cover-page {
                 padding: 2rem 1rem;
+                margin-bottom: 0;
             }
             
             .cover-title {
@@ -180,7 +210,12 @@
             }
             
             .chapter-title {
-                font-size: 1.5rem;
+                font-size: 1.3rem;
+            }
+            
+            .chapter-content {
+                font-size: 11pt;
+                line-height: 1.4;
             }
         }
     </style>
@@ -226,8 +261,9 @@
             </div>
             
             <div class="chapter-content">
-                {% for paragraph in chapter.content.split('\n\n') %}
-                    {% if paragraph.strip() %}
+                {% set clean_content = chapter.content.replace('##', '').replace('###', '').replace('**', '').replace('*', '').replace('_', '') %}
+                {% for paragraph in clean_content.split('\n\n') %}
+                    {% if paragraph.strip() and not paragraph.strip().startswith('#') %}
                         <p>{{ paragraph.strip() }}</p>
                     {% endif %}
                 {% endfor %}
