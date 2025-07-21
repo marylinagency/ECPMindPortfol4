@@ -342,7 +342,17 @@
                 <p class="cover-subtitle">{{ project.topic }}</p>
                 {% endif %}
                 <div class="cover-author">
-                    <p>{{ project.author_name if project.author_name else 'BookGenPro Author' }}</p>
+                    {% if project.author_bio and project.author_bio.strip() %}
+                        {% set author_lines = project.author_bio.split('\n') %}
+                        {% set author_name = author_lines[0].strip() if author_lines else '' %}
+                        {% if author_name %}
+                            <p>BookGenPro by {{ author_name }}</p>
+                        {% else %}
+                            <p>BookGenPro</p>
+                        {% endif %}
+                    {% else %}
+                        <p>BookGenPro</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

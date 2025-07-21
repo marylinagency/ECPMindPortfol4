@@ -3010,6 +3010,12 @@ function loadWritingProgress() {
         });
 }
 
+// Legacy project library count function for compatibility
+function updateProjectLibraryCount() {
+    // This is now handled by loadWritingProgress()
+    console.log('Project library count will be updated by loadWritingProgress()');
+}
+
 // Load stats when page loads
 document.addEventListener('DOMContentLoaded', function() {
     updateProjectLibraryCount();

@@ -18,6 +18,12 @@ Preferred communication style: Simple, everyday language.
   - Built recent activity feed showing latest project updates with clickable links
   - Added live data refresh every 30 seconds when page is active
   - Enhanced homepage with real-time chapter count, word count, and project statistics
+  - Fixed JavaScript compatibility issues with missing functions for stable operation
+- **Enhanced PDF Export Cover Pages**: Updated professional book export formatting
+  - Removed chapter count and language information from cover pages for cleaner design
+  - Replaced "Generated with BookGenPro" with "BookGenPro by [Author Name]" on covers
+  - Updated both standard PDF export and KDP Print-Ready export templates
+  - Maintained cover image background functionality while improving branding consistency
 - **Beautiful Custom Error Pages**: Complete error handling system with engaging visual effects
   - Created stunning error pages for 404, 500, 400, 401, 403, 503 with unique animations and encouraging messages
   - Added interactive effects: floating sparkles on 404, rotating fun facts on 500, glitch effects, and particle animations

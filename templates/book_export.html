@@ -301,9 +301,17 @@
                     <h1 class="cover-title">{{ project.name }}</h1>
                     <p class="cover-topic">{{ project.topic }}</p>
                     <div class="cover-footer">
-                        <p>Generated with BookGenPro</p>
-                        <p>Language: {{ project.language }}</p>
-                        <p>{{ project.chapters|length if project.chapters else 0 }} Chapters</p>
+                        {% if project.author_bio and project.author_bio.strip() %}
+                            {% set author_lines = project.author_bio.split('\n') %}
+                            {% set author_name = author_lines[0].strip() if author_lines else '' %}
+                            {% if author_name %}
+                                <p>BookGenPro by {{ author_name }}</p>
+                            {% else %}
+                                <p>BookGenPro</p>
+                            {% endif %}
+                        {% else %}
+                            <p>BookGenPro</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
