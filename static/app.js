@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeHomepageFeatures();
     initializeCharts();
     loadProjectStatistics();
+    loadBookLibrary();
     loadRecentActivity();
     checkAIStatusOnLoad();
 });
@@ -1322,11 +1323,7 @@ function loadProjectStatistics() {
             updateProjectStats(data.projects);
             updateProjectCounter(data.projects.length);
             
-            // Load completed projects if grid exists
-            const projectsGrid = document.getElementById('completed-projects-grid');
-            if (projectsGrid) {
-                loadCompletedProjects(data.projects);
-            }
+            // Projects will be loaded in the book library section
         })
         .catch(error => {
             console.log('Failed to load project statistics:', error);
@@ -1403,66 +1400,7 @@ function loadRecentActivity() {
         });
 }
 
-// Completed Projects Loading
-function loadCompletedProjects(projects) {
-    const projectsGrid = document.getElementById('completed-projects-grid');
-    const emptyState = document.getElementById('empty-projects-state');
-    
-    if (!projectsGrid) return;
-    
-    const completedProjects = projects.filter(p => p.status === 'completed');
-    
-    if (completedProjects.length === 0) {
-        if (emptyState) emptyState.style.display = 'block';
-        projectsGrid.style.display = 'none';
-        return;
-    }
-    
-    if (emptyState) emptyState.style.display = 'none';
-    projectsGrid.style.display = 'grid';
-    
-    const projectsHTML = completedProjects.map(project => {
-        const coverImage = project.cover_image ? 
-            `/static/uploads/${project.cover_image}` : 
-            'data:image/svg+xml,' + encodeURIComponent(generateBookCoverSVG(project.title || 'Untitled'));
-            
-        const chapterCount = project.chapters || 0;
-        const createdDate = project.created_date ? 
-            new Date(project.created_date).toLocaleDateString() : 
-            'Unknown date';
-        
-        return `
-            <div class="group bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden hover:bg-white/15 hover:scale-105 transition-all duration-300">
-                <div class="aspect-[3/4] relative overflow-hidden">
-                    <img src="${coverImage}" alt="${project.title}" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div class="flex space-x-2">
-                            <a href="/project/${project.filename.replace('.json', '')}" class="flex-1 bg-blue-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-blue-700/80 transition-colors">
-                                View
-                            </a>
-                            <a href="/book_preview/${project.filename.replace('.json', '')}" class="flex-1 bg-green-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-green-700/80 transition-colors">
-                                Preview
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-semibold text-white mb-2 line-clamp-2">${project.title || 'Untitled Book'}</h3>
-                    <div class="flex justify-between text-sm text-gray-400 mb-2">
-                        <span>${chapterCount} chapters</span>
-                        <span>${createdDate}</span>
-                    </div>
-                    <div class="text-xs text-gray-500">
-                        ${project.language || 'English'} • ${project.style || 'Professional'} style
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    projectsGrid.innerHTML = projectsHTML;
-}
+// Note: Completed projects are now handled by the comprehensive book library system
 
 // Utility function to create modals
 function createModal(title, content, className = '') {
@@ -2763,4 +2701,212 @@ function updateChartsWithData(projectStats) {
             chaptersChart.update("none");
         }
     }
+}
+
+// Book Library Functions
+let currentFilter = "all";
+
+function loadBookLibrary() {
+    const libraryGrid = document.getElementById("book-library-grid");
+    const emptyState = document.getElementById("library-empty-state");
+    const bookCount = document.getElementById("library-book-count");
+    
+    if (!libraryGrid) return;
+    
+    // Show loading state
+    libraryGrid.innerHTML = "<div class=\"col-span-full text-center text-gray-400\">Loading your book library...</div>";
+    
+    fetch("/api/projects")
+        .then(response => response.json())
+        .then(data => {
+            const books = data.projects || [];
+            
+            if (bookCount) bookCount.textContent = books.length;
+            
+            if (books.length === 0) {
+                libraryGrid.innerHTML = "";
+                if (emptyState) emptyState.classList.remove("hidden");
+                return;
+            }
+            
+            if (emptyState) emptyState.classList.add("hidden");
+            displayBooks(books);
+        })
+        .catch(error => {
+            console.error("Error loading book library:", error);
+            libraryGrid.innerHTML = "<div class=\"col-span-full text-center text-red-400\">Failed to load books</div>";
+        });
+}
+
+function displayBooks(books) {
+    const libraryGrid = document.getElementById("book-library-grid");
+    if (!libraryGrid) return;
+    
+    // Filter books based on current filter
+    let filteredBooks = books;
+    if (currentFilter === "completed") {
+        filteredBooks = books.filter(book => book.generation_status === "completed");
+    } else if (currentFilter === "draft") {
+        filteredBooks = books.filter(book => book.generation_status !== "completed");
+    }
+    
+    if (filteredBooks.length === 0) {
+        libraryGrid.innerHTML = `<div class="col-span-full text-center text-gray-400 py-8">No ${currentFilter === "all" ? "" : currentFilter + " "}books found</div>`;
+        return;
+    }
+    
+    const booksHTML = filteredBooks.map(book => {
+        const coverImage = book.cover_image ? 
+            `/static/uploads/${book.cover_image}` : 
+            generateBookCoverDataURL(book.title || "Untitled");
+            
+        const chapterCount = Array.isArray(book.chapters) ? book.chapters.length : (book.chapters || 0);
+        const createdDate = book.created_date ? 
+            new Date(book.created_date).toLocaleDateString() : 
+            "Unknown date";
+            
+        const statusColor = book.generation_status === "completed" ? "text-green-400" : 
+                           book.generation_status === "generating" ? "text-yellow-400" : "text-gray-400";
+        const statusIcon = book.generation_status === "completed" ? "✓" : 
+                          book.generation_status === "generating" ? "⟳" : "○";
+        const statusText = book.generation_status === "completed" ? "Complete" : 
+                          book.generation_status === "generating" ? "Generating" : "Draft";
+        
+        return `
+            <div class="group bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden hover:bg-white/15 hover:scale-105 transition-all duration-300 cursor-pointer" 
+                 onclick="openBook(\"${book.filename.replace(".json", "")}\")">
+                <div class="aspect-[3/4] relative overflow-hidden">
+                    <img src="${coverImage}" alt="${book.title || "Untitled"}" 
+                         class="w-full h-full object-cover" 
+                         onerror="this.src=\"${generateBookCoverDataURL(book.title || "Untitled")}\">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    <!-- Status Badge -->
+                    <div class="absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${statusColor} bg-black/30">
+                        ${statusIcon} ${statusText}
+                    </div>
+                    
+                    <!-- Hover Actions -->
+                    <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div class="flex space-x-2">
+                            <button onclick="event.stopPropagation(); openBook(\"${book.filename.replace(".json", "")}\")\" 
+                                    class="flex-1 bg-blue-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-blue-700/80 transition-colors">
+                                <i data-feather="eye" class="w-4 h-4 inline mr-1"></i>View
+                            </button>
+                            <button onclick="event.stopPropagation(); previewBook(\"${book.filename.replace(".json", "")}\")\" 
+                                    class="flex-1 bg-green-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-green-700/80 transition-colors">
+                                <i data-feather="book-open" class="w-4 h-4 inline mr-1"></i>Preview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-300 transition-colors">
+                        ${book.title || "Untitled Book"}
+                    </h3>
+                    
+                    <p class="text-gray-400 text-sm mb-3 line-clamp-2">
+                        ${book.topic || book.description || "No description available"}
+                    </p>
+                    
+                    <div class="flex justify-between items-center text-xs text-gray-500 mb-2">
+                        <span class="flex items-center">
+                            <i data-feather="file-text" class="w-3 h-3 mr-1"></i>
+                            ${chapterCount} chapters
+                        </span>
+                        <span class="flex items-center">
+                            <i data-feather="globe" class="w-3 h-3 mr-1"></i>
+                            ${book.language || "English"}
+                        </span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500">${createdDate}</span>
+                        <span class="text-gray-400">${book.style || "Professional"} style</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
+    
+    libraryGrid.innerHTML = booksHTML;
+    
+    // Re-initialize feather icons
+    if (typeof feather !== "undefined") {
+        feather.replace();
+    }
+}
+
+function filterBooks(filter) {
+    currentFilter = filter;
+    
+    // Update filter button styles
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+        btn.classList.remove("active", "bg-blue-600", "text-white", "bg-green-600", "bg-yellow-600");
+        btn.classList.add("bg-white/20", "text-gray-300");
+    });
+    
+    const activeBtn = document.querySelector(`button[onclick="filterBooks(\"${filter}\")"]`);
+    if (activeBtn) {
+        activeBtn.classList.remove("bg-white/20", "text-gray-300");
+        if (filter === "completed") {
+            activeBtn.classList.add("bg-green-600", "text-white");
+        } else if (filter === "draft") {
+            activeBtn.classList.add("bg-yellow-600", "text-white");
+        } else {
+            activeBtn.classList.add("active", "bg-blue-600", "text-white");
+        }
+    }
+    
+    // Reload with filter
+    loadBookLibrary();
+}
+
+function openBook(projectId) {
+    window.location.href = `/project/${projectId}`;
+}
+
+function previewBook(projectId) {
+    window.location.href = `/book_preview/${projectId}`;
+}
+
+function generateBookCoverDataURL(title) {
+    const colors = [
+        ["#667eea", "#764ba2"],
+        ["#f093fb", "#f5576c"],
+        ["#4facfe", "#00f2fe"],
+        ["#43e97b", "#38f9d7"],
+        ["#fa709a", "#fee140"]
+    ];
+    
+    const colorPair = colors[Math.floor(Math.random() * colors.length)];
+    const displayTitle = title.length > 25 ? title.substring(0, 25) + "..." : title;
+    
+    const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400">
+            <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:${colorPair[0]};stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:${colorPair[1]};stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grad)"/>
+            <foreignObject x="20" y="150" width="260" height="100">
+                <div xmlns="http://www.w3.org/1999/xhtml" style="
+                    color: white; 
+                    font-family: Arial, sans-serif; 
+                    font-size: 18px; 
+                    font-weight: bold; 
+                    text-align: center;
+                    word-wrap: break-word;
+                    line-height: 1.3;
+                ">
+                    ${displayTitle}
+                </div>
+            </foreignObject>
+        </svg>
+    `;
+    
+    return "data:image/svg+xml," + encodeURIComponent(svg);
 }
