@@ -2,11 +2,24 @@
 
 ## Overview
 
-BookGenPro is a Flask-based web application that enables users to generate complete books using AI through the OpenRouter API. The application features a modern web interface with Tailwind CSS styling, project management capabilities, and PDF/HTML export functionality with a licensing system for product activation.
+BookGenPro is a comprehensive AI-powered book creation platform that empowers authors to transform ideas into professionally structured, publication-ready books. Supporting both OpenRouter and Google Gemini AI integration, the platform offers complete book generation workflows, advanced editing capabilities, and professional export options for DOCX and PDF formats with full-page cover designs optimized for print-on-demand publishing.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Recent Changes
+
+### July 21, 2025
+- **About Section Update**: Completely refreshed the "About BookGenPro" section on homepage with:
+  - Enhanced description highlighting dual AI support (OpenRouter & Gemini)
+  - Updated feature highlights to emphasize complete workflow and print-ready exports  
+  - Added detailed feature breakdown with Key Features and Export Options sections
+  - Modernized messaging to appeal to both new and experienced authors
+- **JavaScript Fixes**: Resolved syntax errors in book library functionality
+  - Fixed quote escaping issues in template literals for onclick handlers
+  - Corrected missing brackets in DOM element construction
+  - All Edit, Delete, View, and Preview buttons now working properly
 
 ## System Architecture
 
@@ -33,11 +46,12 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Core Features
-1. **AI Book Generation**: Multi-language book creation using OpenRouter API
-2. **Project Management**: Create, save, load, and manage book projects
-3. **Chapter Editing**: Manual and AI-assisted chapter content editing
-4. **Cover Image Support**: Upload and manage book cover images
-5. **Export System**: PDF and HTML export with professional styling
+1. **Dual AI Integration**: Support for both OpenRouter and Google Gemini AI models
+2. **Complete Book Management**: Project library with creation, editing, deletion, and progress tracking
+3. **Real-time Generation**: Live progress updates during AI content generation
+4. **Multi-language Support**: Book generation in 9 different languages
+5. **Professional Export**: DOCX and PDF export with KDP-optimized formatting and full-page covers
+6. **Chapter-by-Chapter Editing**: Comprehensive editing interface for fine-tuning content
 
 ### File Structure
 - `app.py`: Main Flask application with all routes and business logic
