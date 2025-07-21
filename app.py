@@ -443,9 +443,10 @@ def save_settings():
 def save_author_bio():
     config = load_config()
     config['default_author_bio'] = request.form.get('default_author_bio', '')
+    config['default_author_name'] = request.form.get('default_author_name', '')
     config['use_default_bio'] = request.form.get('use_default_bio') == 'true'
     save_config(config)
-    flash('Default author bio saved successfully!', 'success')
+    flash('Default author information saved successfully!', 'success')
     return redirect(url_for('settings'))
 
 @app.route('/check_ai_provider_status')
@@ -631,6 +632,13 @@ def create_manual_book():
             flash('Please provide both book title and topic', 'error')
             return redirect(url_for('index'))
         
+        # Get author info from settings if not provided
+        if not author_bio and config.get('use_default_bio', False):
+            author_bio = config.get('default_author_bio', '')
+        
+        # Get author name from config
+        author_name = config.get('default_author_name', '')
+        
         # Create project
         project_id = str(uuid.uuid4())[:8]
         project = {
@@ -639,6 +647,8 @@ def create_manual_book():
             'name': book_title,
             'topic': topic,
             'author_bio': author_bio,
+            'author_name': author_name,
+            'default_author_name': config.get('default_author_name', ''),
             'language': language,
             'style': style,
             'num_chapters': num_chapters,
@@ -1065,6 +1075,13 @@ def create_ai_book():
     # Use enhanced title as project name
     project_name = enhanced_title[:80]
     
+    # Get author info from settings if not provided
+    if not author_bio and config.get('use_default_bio', False):
+        author_bio = config.get('default_author_bio', '')
+    
+    # Get author name from config
+    author_name = config.get('default_author_name', '')
+    
     # Create new project
     project_id = str(uuid.uuid4())
     project = {
@@ -1075,6 +1092,8 @@ def create_ai_book():
         'description': book_description,
         'topic': topic,
         'author_bio': author_bio,
+        'author_name': author_name,
+        'default_author_name': config.get('default_author_name', ''),
         'language': language,
         'num_chapters': chapters,
         'writing_style': style,

@@ -21,9 +21,15 @@ Preferred communication style: Simple, everyday language.
   - Fixed JavaScript compatibility issues with missing functions for stable operation
 - **Enhanced PDF Export Cover Pages**: Updated professional book export formatting
   - Removed chapter count and language information from cover pages for cleaner design
-  - Replaced "Generated with BookGenPro" with "BookGenPro by [Author Name]" on covers
+  - Replaced "Generated with BookGenPro" with author name from settings on covers
   - Updated both standard PDF export and KDP Print-Ready export templates
   - Maintained cover image background functionality while improving branding consistency
+- **Author Management System**: Complete author information integration
+  - Added author name field to settings page for consistent cover page branding
+  - Updated project creation to automatically include author name and bio from settings
+  - Enhanced settings page with dedicated author name and bio management
+  - Ensured author bio appears at the end of all exported books as "About the Author" section
+  - Integrated settings-based author information into both manual and AI book creation workflows
 - **Beautiful Custom Error Pages**: Complete error handling system with engaging visual effects
   - Created stunning error pages for 404, 500, 400, 401, 403, 503 with unique animations and encouraging messages
   - Added interactive effects: floating sparkles on 404, rotating fun facts on 500, glitch effects, and particle animations
