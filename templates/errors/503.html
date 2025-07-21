@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Unavailable - BookGenPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .maintenance-pulse {
+            animation: maintenance-pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes maintenance-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, #8B5CF6, #3B82F6, #06B6D4);
+            background-size: 300% 300%;
+            animation: gradient-shift 4s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50">
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="text-center max-w-2xl mx-auto">
+            <!-- Animated Maintenance Icon -->
+            <div class="maintenance-pulse mb-8">
+                <div class="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full shadow-2xl">
+                    <i data-feather="server" class="w-16 h-16 text-white"></i>
+                </div>
+            </div>
+            
+            <!-- Error Code -->
+            <h1 class="text-8xl font-bold gradient-text mb-4">503</h1>
+            
+            <!-- Error Title -->
+            <h2 class="text-4xl font-bold text-gray-800 mb-6">
+                Service Temporarily Unavailable
+            </h2>
+            
+            <!-- Maintenance Message -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-8 border border-white/50">
+                <div class="inline-block mb-4">
+                    <i data-feather="cpu" class="w-12 h-12 text-purple-600"></i>
+                </div>
+                <p class="text-xl text-gray-600 mb-4">
+                    We're giving our servers a little creative break!
+                </p>
+                <p class="text-lg text-gray-500 mb-4">
+                    Just like authors need time to refine their craft, our servers occasionally need maintenance to serve you better.
+                </p>
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <p class="text-purple-800 font-medium">
+                        <i data-feather="clock" class="w-4 h-4 inline mr-2"></i>
+                        We'll be back shortly - this is the perfect time to brainstorm your next bestseller!
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="location.reload()" 
+                        class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transform transition-all duration-300">
+                    <i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i>
+                    Try Again
+                </button>
+                
+                <a href="{{ url_for('index') }}" 
+                   class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transform transition-all duration-300">
+                    <i data-feather="home" class="w-5 h-5 mr-2"></i>
+                    Home Page
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>

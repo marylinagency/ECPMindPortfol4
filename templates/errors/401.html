@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Forbidden - BookGenPro</title>
+    <title>Access Denied - BookGenPro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        .forbidden-shake {
-            animation: forbidden-shake 3s ease-in-out infinite;
+        .lock-shake {
+            animation: lock-shake 2s ease-in-out infinite;
         }
         
-        @keyframes forbidden-shake {
+        @keyframes lock-shake {
             0%, 20%, 50%, 80%, 100% { transform: translateX(0); }
-            10% { transform: translateX(-8px); }
-            30% { transform: translateX(8px); }
-            60% { transform: translateX(-4px); }
-            90% { transform: translateX(4px); }
+            10% { transform: translateX(-5px); }
+            30% { transform: translateX(5px); }
+            60% { transform: translateX(-3px); }
+            90% { transform: translateX(3px); }
         }
         
         .gradient-text {
-            background: linear-gradient(45deg, #DC2626, #B91C1C, #7F1D1D);
+            background: linear-gradient(45deg, #DC2626, #7C2D12, #991B1B);
             background-size: 300% 300%;
             animation: gradient-shift 3s ease infinite;
             -webkit-background-clip: text;
@@ -35,39 +35,39 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-red-50 via-rose-50 to-pink-50">
+<body class="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-purple-50">
     <div class="min-h-screen flex items-center justify-center px-4">
         <div class="text-center max-w-2xl mx-auto">
-            <!-- Animated Forbidden Icon -->
-            <div class="forbidden-shake mb-8">
-                <div class="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-r from-red-500 to-rose-600 rounded-full shadow-2xl">
-                    <i data-feather="shield-off" class="w-16 h-16 text-white"></i>
+            <!-- Animated Lock Icon -->
+            <div class="lock-shake mb-8">
+                <div class="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-r from-red-500 to-pink-600 rounded-full shadow-2xl">
+                    <i data-feather="lock" class="w-16 h-16 text-white"></i>
                 </div>
             </div>
             
             <!-- Error Code -->
-            <h1 class="text-8xl font-bold gradient-text mb-4">403</h1>
+            <h1 class="text-8xl font-bold gradient-text mb-4">401</h1>
             
             <!-- Error Title -->
             <h2 class="text-4xl font-bold text-gray-800 mb-6">
-                Access Forbidden
+                Access Denied
             </h2>
             
-            <!-- Forbidden Message -->
+            <!-- Authorization Message -->
             <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-8 border border-white/50">
                 <div class="inline-block mb-4">
-                    <i data-feather="x-circle" class="w-12 h-12 text-red-600"></i>
+                    <i data-feather="key" class="w-12 h-12 text-red-600"></i>
                 </div>
                 <p class="text-xl text-gray-600 mb-4">
-                    This section is off-limits for now!
+                    This chapter requires special access!
                 </p>
                 <p class="text-lg text-gray-500 mb-4">
-                    Like a restricted section in a grand library, this area requires special privileges to access.
+                    Every great story has its exclusive content. You'll need the right credentials to unlock this part of your journey.
                 </p>
                 <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                     <p class="text-red-800 font-medium">
-                        <i data-feather="info" class="w-4 h-4 inline mr-2"></i>
-                        Contact your administrator or check your permissions to gain access to this content.
+                        <i data-feather="shield" class="w-4 h-4 inline mr-2"></i>
+                        Please sign in or check your permissions to continue your writing adventure!
                     </p>
                 </div>
             </div>
@@ -75,13 +75,13 @@
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="/settings" 
-                   class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transform transition-all duration-300">
-                    <i data-feather="settings" class="w-5 h-5 mr-2"></i>
-                    Check Settings
+                   class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transform transition-all duration-300">
+                    <i data-feather="log-in" class="w-5 h-5 mr-2"></i>
+                    Sign In / Activate
                 </a>
                 
                 <a href="{{ url_for('index') }}" 
-                   class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transform transition-all duration-300">
+                   class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transform transition-all duration-300">
                     <i data-feather="home" class="w-5 h-5 mr-2"></i>
                     Back to Home
                 </a>

@@ -3361,5 +3361,50 @@ Generate the complete chapter content:"""
         with open(project_file, 'w') as f:
             json.dump(project, f, indent=2)
 
+# ===== ERROR HANDLERS =====
+
+@app.errorhandler(404)
+def page_not_found(error):
+    """Handle 404 errors with beautiful error page"""
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    """Handle 500 errors with beautiful error page"""
+    return render_template('errors/500.html'), 500
+
+@app.errorhandler(400)
+def bad_request(error):
+    """Handle 400 errors with beautiful error page"""
+    return render_template('errors/400.html'), 400
+
+@app.errorhandler(401)
+def unauthorized(error):
+    """Handle 401 errors with beautiful error page"""
+    return render_template('errors/401.html'), 401
+
+@app.errorhandler(403)
+def forbidden(error):
+    """Handle 403 errors with beautiful error page"""
+    return render_template('errors/403.html'), 403
+
+@app.errorhandler(503)
+def service_unavailable(error):
+    """Handle 503 errors with beautiful error page"""
+    return render_template('errors/503.html'), 503
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    """Handle any other errors with generic beautiful error page"""
+    # Get error code if available
+    error_code = getattr(error, 'code', 500)
+    error_title = getattr(error, 'name', 'Server Error')
+    error_message = str(error) if str(error) else "An unexpected error occurred"
+    
+    return render_template('errors/generic.html', 
+                         error_code=error_code,
+                         error_title=error_title,
+                         error_message=error_message), error_code
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
