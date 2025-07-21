@@ -1,7 +1,7 @@
 // BookGenPro JavaScript functionality
 
 // Global chart variables
-let booksChart, chaptersChart;
+// Chart variables removed - no longer using charts on homepage
 
 // Dynamic animated background nodes with real-time interaction
 function createAnimatedBackground() {
@@ -68,11 +68,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize new enhanced homepage features
     initializeHomepageFeatures();
-    initializeCharts();
-    loadProjectStatistics();
     loadBookLibrary();
     loadRecentActivity();
     checkAIStatusOnLoad();
+    loadHomepageStats();
 });
 
 // Load saved author bio from settings enhancement
@@ -1315,50 +1314,61 @@ window.checkAIStatus = function() {
         });
 };
 
-// Project Statistics Loading
-function loadProjectStatistics() {
+// Homepage Statistics Loading  
+function loadHomepageStats() {
     fetch('/api/projects')
         .then(response => response.json())
         .then(data => {
-            updateProjectStats(data.projects);
-            updateProjectCounter(data.projects.length);
-            
-            // Projects will be loaded in the book library section
+            updateLibraryCounter(data.projects.length);
         })
         .catch(error => {
-            console.log('Failed to load project statistics:', error);
+            console.log('Failed to load homepage statistics:', error);
+        });
+
+    // Update AI provider status
+    updateHomepageAIStatus();
+}
+
+function updateLibraryCounter(count) {
+    const counterElement = document.getElementById('stats-library-count');
+    if (counterElement) {
+        counterElement.textContent = `${count} book${count !== 1 ? 's' : ''}`;
+    }
+}
+
+function updateHomepageAIStatus() {
+    fetch('/api/check_ai_status')
+        .then(response => response.json())
+        .then(data => {
+            const providerElement = document.getElementById('stats-ai-provider');
+            const statusElement = document.getElementById('stats-ai-status');
+            
+            if (providerElement) {
+                // Extract provider name from detailed status
+                if (data.detailed_status.includes('OpenRouter')) {
+                    providerElement.textContent = 'OpenRouter';
+                } else if (data.detailed_status.includes('Gemini')) {
+                    providerElement.textContent = 'Gemini AI';
+                } else {
+                    providerElement.textContent = 'Not Configured';
+                }
+            }
+            
+            if (statusElement) {
+                statusElement.textContent = data.is_ready ? 'Ready for generation' : 'Setup required';
+            }
+        })
+        .catch(error => {
+            console.log('AI status check failed:', error);
+            const providerElement = document.getElementById('stats-ai-provider');
+            const statusElement = document.getElementById('stats-ai-status');
+            
+            if (providerElement) providerElement.textContent = 'Connection Error';
+            if (statusElement) statusElement.textContent = 'Unable to verify status';
         });
 }
 
-function updateProjectStats(projects) {
-    const totalBooksElement = document.getElementById('stats-total-books');
-    const totalChaptersElement = document.getElementById('stats-total-chapters');
-    const completionPercentage = document.getElementById('completion-percentage');
-    const completionBar = document.getElementById('completion-bar');
-    
-    const completedProjects = projects.filter(p => p.status === 'completed');
-    const totalChapters = projects.reduce((sum, p) => sum + (p.chapters || 0), 0);
-    const completionPercent = projects.length > 0 ? Math.round((completedProjects.length / projects.length) * 100) : 0;
-    
-    if (totalBooksElement) totalBooksElement.textContent = projects.length;
-    if (totalChaptersElement) totalChaptersElement.textContent = totalChapters;
-    if (completionPercentage) completionPercentage.textContent = completionPercent + '%';
-    if (completionBar) completionBar.style.width = completionPercent + '%';
-    
-    // Update charts with real data
-    const stats = {
-        total_books: projects.length,
-        total_chapters: totalChapters
-    };
-    updateChartsWithData(stats);
-}
 
-function updateProjectCounter(count) {
-    const counters = document.querySelectorAll('#project-count, #total-projects');
-    counters.forEach(counter => {
-        if (counter) counter.textContent = count;
-    });
-}
 
 // Recent Activity Loading
 function loadRecentActivity() {
@@ -2592,116 +2602,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Initialize statistics charts
-function initializeCharts() {
-    // Books chart
-    const booksCtx = document.getElementById("books-chart");
-    if (booksCtx) {
-        booksChart = new Chart(booksCtx, {
-            type: "line",
-            data: {
-                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-                datasets: [{
-                    label: "Books Created",
-                    data: [0, 1, 1, 2, 3, 4],
-                    borderColor: "rgb(16, 185, 129)",
-                    backgroundColor: "rgba(16, 185, 129, 0.1)",
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: "rgb(16, 185, 129)",
-                    pointBorderColor: "rgb(16, 185, 129)",
-                    pointRadius: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        display: false,
-                        beginAtZero: true,
-                        max: 5
-                    },
-                    x: {
-                        display: false
-                    }
-                }
-            }
-        });
-    }
 
-    // Chapters chart
-    const chaptersCtx = document.getElementById("chapters-chart");
-    if (chaptersCtx) {
-        chaptersChart = new Chart(chaptersCtx, {
-            type: "bar",
-            data: {
-                labels: ["W1", "W2", "W3", "W4"],
-                datasets: [{
-                    label: "Chapters Written",
-                    data: [5, 8, 12, 15],
-                    backgroundColor: "rgba(14, 165, 233, 0.8)",
-                    borderColor: "rgb(14, 165, 233)",
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        display: false,
-                        beginAtZero: true,
-                        max: 20
-                    },
-                    x: {
-                        display: false
-                    }
-                }
-            }
-        });
-    }
-}
-
-// Update charts with real project data
-function updateChartsWithData(projectStats) {
-    // Update chart data with actual statistics
-    if (projectStats.total_books !== undefined) {
-        if (booksChart) {
-            // Create a simple upward trend based on total books
-            const trend = Array.from({length: 6}, (_, i) => Math.max(0, Math.ceil(projectStats.total_books * (i + 1) / 6)));
-            booksChart.data.datasets[0].data = trend;
-            booksChart.update("none");
-        }
-    }
-    
-    if (projectStats.total_chapters !== undefined) {
-        if (chaptersChart) {
-            // Create weekly chapter distribution
-            const avgPerWeek = Math.ceil(projectStats.total_chapters / 4);
-            const weeklyData = [
-                Math.max(0, avgPerWeek - 2),
-                Math.max(0, avgPerWeek - 1), 
-                Math.max(0, avgPerWeek),
-                Math.max(0, avgPerWeek + 1)
-            ];
-            chaptersChart.data.datasets[0].data = weeklyData;
-            chaptersChart.update("none");
-        }
-    }
-}
 
 // Book Library Functions
 let currentFilter = "all";

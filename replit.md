@@ -249,7 +249,17 @@ Preferred communication style: Simple, everyday language.
 ### 2025-07-21: Enhanced AI Integration & Mood Tracker  
 - Updated Gemini AI integration to use new google-genai library instead of deprecated google-generativeai
 - Fixed all Gemini API calls to use centralized generate_with_gemini function with proper error handling
-- Enhanced AI provider system with better fallback mechanisms and comprehensive logging
+- Enhanced AI provider system with better fallback mechanisms and comprehensive status checking
+
+### 2025-07-21: Homepage Redesign - Removed Statistics Charts
+- Removed total books and total chapters statistics charts from homepage as requested
+- Replaced center statistics dashboard with clean welcome message and AI status overview
+- Added new AI provider status card showing current configured provider (OpenRouter/Gemini)
+- Added library counter showing total number of books in user's collection
+- Removed Chart.js chart initialization and data loading functions from JavaScript
+- Updated homepage layout to focus on essential features and quick actions
+- Simplified homepage statistics to show only relevant information: AI status and library count
+- Enhanced homepage with cleaner, more focused design prioritizing book creation actionsehensive logging
 - Fixed mood tracker redirect from /mood_tracker to /mood-tracker for consistent URL structure
 - Added license countdown timer with real-time updates showing days:hours:minutes:seconds until expiration
 - Implemented visual warning system (red under 7 days, yellow under 30 days) for license expiration

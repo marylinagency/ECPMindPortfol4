@@ -136,7 +136,7 @@
                     <div class="flex items-center justify-between mb-8">
                         <h2 class="text-3xl font-bold text-white">Quick Actions</h2>
                         <div class="text-gray-400 text-sm">
-                            <span id="total-projects">0</span> books created • <span id="ai-status">AI Ready</span>
+                            <span id="ai-status">AI Ready</span>
                         </div>
                     </div>
                     
@@ -195,36 +195,52 @@
                             </div>
                         </div>
 
-                        <!-- Center - Statistics Dashboard -->
+                        <!-- Center - Overview Dashboard -->
                         <div class="col-span-5 space-y-6">
-                            <!-- Statistics Charts -->
+                            <!-- Welcome Message -->
+                            <div class="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-xl rounded-xl border border-blue-500/30 p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mr-4">
+                                        <i data-feather="user" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white">Welcome to BookGenPro</h3>
+                                        <p class="text-sm text-blue-200">Your AI-powered writing companion</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-300 text-sm leading-relaxed">
+                                    Transform your ideas into complete books using advanced AI technology. Whether you're writing business guides, self-help books, or technical manuals, BookGenPro provides the tools and intelligence to bring your vision to life.
+                                </p>
+                            </div>
+
+                            <!-- AI Status & Features -->
                             <div class="grid grid-cols-2 gap-4">
-                                <!-- Total Books Chart -->
+                                <!-- AI Status Card -->
                                 <div class="bg-gradient-to-br from-emerald-500/20 to-green-500/20 backdrop-blur-xl rounded-xl border border-emerald-500/30 p-4">
                                     <div class="flex items-center justify-between mb-3">
                                         <div>
-                                            <p class="text-emerald-200 text-sm font-medium">Total Books</p>
-                                            <p class="text-2xl font-bold text-white" id="stats-total-books">0</p>
+                                            <p class="text-emerald-200 text-sm font-medium">AI Provider</p>
+                                            <p class="text-lg font-bold text-white" id="stats-ai-provider">Checking...</p>
                                         </div>
                                         <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                                            <i data-feather="book" class="w-4 h-4 text-white"></i>
+                                            <i data-feather="cpu" class="w-4 h-4 text-white"></i>
                                         </div>
                                     </div>
-                                    <canvas id="books-chart" width="200" height="80" class="w-full h-16"></canvas>
+                                    <p class="text-xs text-emerald-300" id="stats-ai-status">Validating configuration...</p>
                                 </div>
 
-                                <!-- Total Chapters Chart -->
+                                <!-- Project Count Card -->
                                 <div class="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 backdrop-blur-xl rounded-xl border border-cyan-500/30 p-4">
                                     <div class="flex items-center justify-between mb-3">
                                         <div>
-                                            <p class="text-cyan-200 text-sm font-medium">Total Chapters</p>
-                                            <p class="text-2xl font-bold text-white" id="stats-total-chapters">0</p>
+                                            <p class="text-cyan-200 text-sm font-medium">Your Library</p>
+                                            <p class="text-lg font-bold text-white" id="stats-library-count">0 books</p>
                                         </div>
                                         <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
-                                            <i data-feather="file-text" class="w-4 h-4 text-white"></i>
+                                            <i data-feather="library" class="w-4 h-4 text-white"></i>
                                         </div>
                                     </div>
-                                    <canvas id="chapters-chart" width="200" height="80" class="w-full h-16"></canvas>
+                                    <p class="text-xs text-cyan-300">Manage your book collection</p>
                                 </div>
                             </div>
 
