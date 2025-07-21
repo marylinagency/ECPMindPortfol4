@@ -38,10 +38,10 @@
         /* AMAZON KDP PAGE SETTINGS - 6x9 inch trim size */
         @page {
             size: 6in 9in; /* Standard KDP paperback size - CUSTOMIZABLE */
-            margin-top: 0.75in; /* Top margin - CUSTOMIZABLE */
-            margin-bottom: 0.75in; /* Bottom margin - CUSTOMIZABLE */
-            margin-inside: 0.75in; /* Inside margin (binding side) - CUSTOMIZABLE */
-            margin-outside: 0.5in; /* Outside margin - CUSTOMIZABLE */
+            margin-top: 0.5in; /* Top margin - تقليل الهامش العلوي */
+            margin-bottom: 0.5in; /* Bottom margin - تقليل الهامش السفلي */
+            margin-inside: 0.6in; /* Inside margin (binding side) - تقليل الهامش الداخلي */
+            margin-outside: 0.35in; /* Outside margin - تقليل الهامش الخارجي */
             
             @bottom-center {
                 content: counter(page);
@@ -63,14 +63,14 @@
         
         /* RIGHT PAGES (Odd pages) - Standard margins */
         @page:right {
-            margin-left: 0.75in; /* Inside margin */
-            margin-right: 0.5in; /* Outside margin */
+            margin-left: 0.6in; /* Inside margin - تقليل الهامش */
+            margin-right: 0.35in; /* Outside margin - تقليل الهامش */
         }
         
         /* LEFT PAGES (Even pages) - Mirrored margins */
         @page:left {
-            margin-left: 0.5in; /* Outside margin */
-            margin-right: 0.75in; /* Inside margin */
+            margin-left: 0.35in; /* Outside margin - تقليل الهامش */
+            margin-right: 0.6in; /* Inside margin - تقليل الهامش */
         }
         
         /* COVER PAGE STYLING */
@@ -212,9 +212,9 @@
             font-size: 1.8rem; /* Chapter title size - CUSTOMIZABLE */
             font-weight: 600;
             text-align: center;
-            margin: 0 0 2.5rem 0;
+            margin: 0 0 1.8rem 0; /* تقليل المسافة تحت عنوان الفصل */
             color: #2c3e50;
-            padding-bottom: 0.8rem;
+            padding-bottom: 0.6rem;
             border-bottom: 1px solid #ecf0f1;
             line-height: 1.2;
         }
@@ -227,14 +227,14 @@
         }
         
         .chapter-content p {
-            margin-bottom: 1.2rem; /* Paragraph spacing - CUSTOMIZABLE */
-            text-indent: 1.5em; /* First line indent - CUSTOMIZABLE */
-            line-height: 1.6; /* Line height - CUSTOMIZABLE */
+            margin-bottom: 0.8rem; /* تقليل المسافة بين الفقرات */
+            text-indent: 1.2em; /* تقليل مسافة بداية الفقرة */
+            line-height: 1.45; /* تقليل المسافة بين الأسطر */
             text-align: justify;
             hyphens: auto;
             orphans: 3; /* Prevent single lines at bottom of page */
             widows: 3; /* Prevent single lines at top of page */
-            word-spacing: 0.1em;
+            word-spacing: 0.05em; /* تقليل المسافة بين الكلمات */
         }
         
         /* First paragraph in chapter has no indent */
@@ -272,11 +272,11 @@
         }
         
         .author-bio-content p {
-            margin-bottom: 1.2rem;
-            line-height: 1.6;
+            margin-bottom: 0.8rem; /* تقليل المسافة بين فقرات السيرة الذاتية */
+            line-height: 1.45; /* تحسين كثافة النص */
             text-align: justify;
             hyphens: auto;
-            text-indent: 1.5em;
+            text-indent: 1.2em; /* تقليل مسافة بداية الفقرة */
         }
         
         .author-bio-content p:first-child {
@@ -291,9 +291,10 @@
             }
             
             .chapter-content p {
-                margin-bottom: 1.2rem;
+                margin-bottom: 0.8rem; /* تحسين المسافات في الطباعة */
                 text-align: justify;
                 hyphens: auto;
+                line-height: 1.4; /* تحسين كثافة النص للطباعة */
             }
             
             /* Ensure proper page breaks */
