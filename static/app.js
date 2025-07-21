@@ -2780,9 +2780,21 @@ function displayBooks(books) {
                         </span>
                     </div>
                     
-                    <div class="flex justify-between items-center text-xs">
+                    <div class="flex justify-between items-center text-xs mb-4">
                         <span class="text-gray-500">${createdDate}</span>
                         <span class="text-gray-400">${book.style || "Professional"} style</span>
+                    </div>
+                    
+                    <!-- Bottom Action Buttons -->
+                    <div class="flex space-x-2 mt-auto">
+                        <button onclick="event.stopPropagation(); editBook(\"${book.filename.replace(".json", "")}\")\" 
+                                class="flex-1 bg-orange-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-orange-700/80 transition-colors">
+                            <i data-feather="edit" class="w-3 h-3 inline mr-1"></i>Edit
+                        </button>
+                        <button onclick="event.stopPropagation(); deleteBook(\"${book.filename.replace(".json", "")}\", \"${book.title || "Untitled Book"}\")\" 
+                                class="flex-1 bg-red-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-red-700/80 transition-colors">
+                            <i data-feather="trash-2" class="w-3 h-3 inline mr-1"></i>Delete
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2836,6 +2848,47 @@ function openBook(projectId) {
 
 function previewBook(projectId) {
     window.location.href = `/book_preview/${projectId}`;
+}
+
+function editBook(projectId) {
+    window.location.href = `/project/${projectId}`;
+}
+
+function deleteBook(projectId, bookTitle) {
+    if (confirm(`Are you sure you want to delete "${bookTitle}"? This action cannot be undone.`)) {
+        fetch(`/delete_project/${projectId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // Show success message
+                if (typeof showNotification === 'function') {
+                    showNotification('Book deleted successfully', 'success');
+                } else {
+                    alert('Book deleted successfully');
+                }
+                // Reload the library to reflect changes
+                loadBookLibrary();
+            } else {
+                if (typeof showNotification === 'function') {
+                    showNotification('Failed to delete book', 'error');
+                } else {
+                    alert('Failed to delete book');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting book:', error);
+            if (typeof showNotification === 'function') {
+                showNotification('Error deleting book', 'error');
+            } else {
+                alert('Error deleting book');
+            }
+        });
+    }
 }
 
 function generateBookCoverDataURL(title) {
