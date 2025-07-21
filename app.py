@@ -2598,5 +2598,474 @@ Title:"""
     except Exception as e:
         return "Generated Book"
 
+# ===== AI ENHANCEMENT API ROUTES =====
+
+@app.route('/api/enhance_title/<project_id>', methods=['POST'])
+def enhance_title(project_id):
+    """Enhance project title using AI"""
+    try:
+        config = load_config()
+        if not config.get('license_activated', False):
+            return jsonify({'success': False, 'message': 'License not activated'})
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        current_title = project.get('name', '')
+        topic = project.get('topic', '')
+        language = project.get('language', 'English')
+        
+        ai_provider = config.get('ai_provider', 'openrouter')
+        
+        # Create enhancement prompt
+        prompt = f"""Enhance this book title to make it more compelling and professional:
+
+Current Title: "{current_title}"
+Book Topic: "{topic}"
+Language: {language}
+
+Requirements:
+1. Keep the core meaning intact
+2. Make it more engaging and marketable
+3. Ensure it accurately reflects the book's content
+4. Make it memorable and professional
+5. Optimal length for a book title (not too long)
+
+Return only the enhanced title, nothing else."""
+
+        # Generate enhanced title
+        if ai_provider == 'gemini':
+            success, enhanced_title = generate_with_gemini(prompt, config.get('gemini_api_key', ''), config.get('gemini_model', 'gemini-2.5-flash'))
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        else:
+            success, enhanced_title = generate_content(prompt, config)
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        
+        # Update project
+        project['name'] = enhanced_title.strip()
+        project['last_modified'] = datetime.now().isoformat()
+        
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        return jsonify({'success': True, 'enhanced_title': enhanced_title.strip()})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/enhance_description/<project_id>', methods=['POST'])
+def enhance_description(project_id):
+    """Enhance project description using AI"""
+    try:
+        config = load_config()
+        if not config.get('license_activated', False):
+            return jsonify({'success': False, 'message': 'License not activated'})
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        current_description = project.get('topic', '')
+        title = project.get('name', '')
+        language = project.get('language', 'English')
+        
+        ai_provider = config.get('ai_provider', 'openrouter')
+        
+        # Create enhancement prompt
+        prompt = f"""Enhance this book description to be more detailed and compelling:
+
+Book Title: "{title}"
+Current Description: "{current_description}"
+Language: {language}
+
+Requirements:
+1. Expand on the core concept while maintaining focus
+2. Add context and depth to make it more comprehensive
+3. Make it engaging for potential readers
+4. Include key topics that should be covered
+5. Maintain professional tone
+6. Keep it clear and well-structured
+
+Return the enhanced description, nothing else."""
+
+        # Generate enhanced description
+        if ai_provider == 'gemini':
+            success, enhanced_description = generate_with_gemini(prompt, config.get('gemini_api_key', ''), config.get('gemini_model', 'gemini-2.5-flash'))
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        else:
+            success, enhanced_description = generate_content(prompt, config)
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        
+        # Update project
+        project['topic'] = enhanced_description.strip()
+        project['last_modified'] = datetime.now().isoformat()
+        
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        return jsonify({'success': True, 'enhanced_description': enhanced_description.strip()})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/update_chapter_title', methods=['POST'])
+def update_chapter_title():
+    """Update a specific chapter title"""
+    try:
+        config = load_config()
+        if not config.get('license_activated', False):
+            return jsonify({'success': False, 'message': 'License not activated'})
+        
+        data = request.get_json()
+        project_id = data.get('project_id')
+        chapter_id = data.get('chapter_id')
+        new_title = data.get('title')
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        # Find and update the chapter
+        for chapter in project.get('chapters', []):
+            if chapter.get('id') == chapter_id:
+                chapter['title'] = new_title
+                break
+        
+        project['last_modified'] = datetime.now().isoformat()
+        
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        return jsonify({'success': True, 'message': 'Chapter title updated successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/enhance_chapter_title/<project_id>/<chapter_id>', methods=['POST'])
+def enhance_chapter_title(project_id, chapter_id):
+    """Enhance a specific chapter title using AI"""
+    try:
+        config = load_config()
+        if not config.get('license_activated', False):
+            return jsonify({'success': False, 'message': 'License not activated'})
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        # Find the chapter
+        target_chapter = None
+        for chapter in project.get('chapters', []):
+            if chapter.get('id') == chapter_id:
+                target_chapter = chapter
+                break
+        
+        if not target_chapter:
+            return jsonify({'success': False, 'message': 'Chapter not found'})
+        
+        current_title = target_chapter.get('title', '')
+        book_title = project.get('name', '')
+        book_topic = project.get('topic', '')
+        chapter_content = target_chapter.get('content', '')[:500]  # First 500 chars
+        language = project.get('language', 'English')
+        
+        ai_provider = config.get('ai_provider', 'openrouter')
+        
+        # Create enhancement prompt
+        prompt = f"""Enhance this chapter title to be more compelling and descriptive:
+
+Book Title: "{book_title}"
+Book Topic: "{book_topic}"
+Current Chapter Title: "{current_title}"
+Chapter Content Preview: "{chapter_content}..."
+Language: {language}
+
+Requirements:
+1. Make the title more engaging and specific
+2. Ensure it accurately reflects the chapter content
+3. Keep it professional and appropriate for the book
+4. Make it clear what readers will learn from this chapter
+5. Maintain appropriate length for a chapter title
+6. Ensure it fits well with the overall book structure
+
+Return only the enhanced chapter title, nothing else."""
+
+        # Generate enhanced title
+        if ai_provider == 'gemini':
+            success, enhanced_title = generate_with_gemini(prompt, config.get('gemini_api_key', ''), config.get('gemini_model', 'gemini-2.5-flash'))
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        else:
+            success, enhanced_title = generate_content(prompt, config)
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        
+        # Update chapter title
+        target_chapter['title'] = enhanced_title.strip()
+        project['last_modified'] = datetime.now().isoformat()
+        
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        return jsonify({'success': True, 'enhanced_title': enhanced_title.strip()})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/enhance_chapter_content/<project_id>/<chapter_id>', methods=['POST'])
+def enhance_chapter_content(project_id, chapter_id):
+    """Enhance a specific chapter content using AI"""
+    try:
+        config = load_config()
+        if not config.get('license_activated', False):
+            return jsonify({'success': False, 'message': 'License not activated'})
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        # Find the chapter
+        target_chapter = None
+        for chapter in project.get('chapters', []):
+            if chapter.get('id') == chapter_id:
+                target_chapter = chapter
+                break
+        
+        if not target_chapter:
+            return jsonify({'success': False, 'message': 'Chapter not found'})
+        
+        current_content = target_chapter.get('content', '')
+        chapter_title = target_chapter.get('title', '')
+        book_title = project.get('name', '')
+        book_topic = project.get('topic', '')
+        language = project.get('language', 'English')
+        
+        ai_provider = config.get('ai_provider', 'openrouter')
+        
+        # Create enhancement prompt
+        prompt = f"""Enhance and improve this chapter content while maintaining its core structure and meaning:
+
+Book Title: "{book_title}"
+Book Topic: "{book_topic}"
+Chapter Title: "{chapter_title}"
+Language: {language}
+
+Current Content:
+{current_content}
+
+Requirements:
+1. Improve clarity and flow of the writing
+2. Enhance explanations and add helpful details where appropriate
+3. Maintain the original structure and key points
+4. Improve transitions between paragraphs
+5. Ensure professional, engaging tone
+6. Add depth without changing the fundamental content
+7. Keep the same approximate length
+8. Maintain consistency with the book's overall theme
+
+Return the enhanced content only, preserving paragraph structure."""
+
+        # Generate enhanced content
+        if ai_provider == 'gemini':
+            success, enhanced_content = generate_with_gemini(prompt, config.get('gemini_api_key', ''), config.get('gemini_model', 'gemini-2.5-flash'))
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        else:
+            success, enhanced_content = generate_content(prompt, config)
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        
+        # Update chapter content
+        target_chapter['content'] = enhanced_content.strip()
+        target_chapter['status'] = 'completed'
+        project['last_modified'] = datetime.now().isoformat()
+        
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        return jsonify({'success': True, 'message': 'Chapter content enhanced successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/enhance_all_chapter_titles/<project_id>', methods=['POST'])
+def enhance_all_chapter_titles(project_id):
+    """Enhance all chapter titles using AI"""
+    try:
+        config = load_config()
+        if not config.get('license_activated', False):
+            return jsonify({'success': False, 'message': 'License not activated'})
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        chapters = project.get('chapters', [])
+        if not chapters:
+            return jsonify({'success': False, 'message': 'No chapters found'})
+        
+        book_title = project.get('name', '')
+        book_topic = project.get('topic', '')
+        language = project.get('language', 'English')
+        
+        ai_provider = config.get('ai_provider', 'openrouter')
+        
+        # Collect all current titles
+        current_titles = [f"Chapter {ch.get('number', i+1)}: {ch.get('title', '')}" for i, ch in enumerate(chapters)]
+        
+        # Create enhancement prompt for all titles
+        prompt = f"""Enhance ALL these chapter titles to be more compelling and descriptive:
+
+Book Title: "{book_title}"
+Book Topic: "{book_topic}"
+Language: {language}
+
+Current Chapter Titles:
+{chr(10).join(current_titles)}
+
+Requirements:
+1. Enhance each title to be more engaging and specific
+2. Ensure titles work well together as a cohesive sequence
+3. Make each title clearly indicate what the chapter covers
+4. Keep professional tone appropriate for the book
+5. Maintain logical progression between chapters
+6. Ensure titles are descriptive but not too long
+
+Return the enhanced titles in the same order, one per line, in format "Chapter X: [Enhanced Title]"."""
+
+        # Generate enhanced titles
+        if ai_provider == 'gemini':
+            success, enhanced_titles_text = generate_with_gemini(prompt, config.get('gemini_api_key', ''), config.get('gemini_model', 'gemini-2.5-flash'))
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        else:
+            success, enhanced_titles_text = generate_content(prompt, config)
+            if not success:
+                return jsonify({'success': False, 'message': 'AI generation failed'})
+        
+        # Parse enhanced titles
+        enhanced_lines = enhanced_titles_text.strip().split('\n')
+        enhanced_titles = []
+        for line in enhanced_lines:
+            if ':' in line:
+                # Extract title after "Chapter X: "
+                title_part = line.split(':', 1)[1].strip()
+                enhanced_titles.append(title_part)
+        
+        # Update all chapter titles
+        for i, chapter in enumerate(chapters):
+            if i < len(enhanced_titles):
+                chapter['title'] = enhanced_titles[i]
+        
+        project['last_modified'] = datetime.now().isoformat()
+        
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        return jsonify({'success': True, 'message': f'Enhanced {len(enhanced_titles)} chapter titles successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/regenerate_all_chapter_content/<project_id>', methods=['POST'])
+def regenerate_all_chapter_content(project_id):
+    """Regenerate all chapter content using AI"""
+    try:
+        config = load_config()
+        if not config.get('license_activated', False):
+            return jsonify({'success': False, 'message': 'License not activated'})
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        chapters = project.get('chapters', [])
+        if not chapters:
+            return jsonify({'success': False, 'message': 'No chapters found'})
+        
+        # Start background regeneration
+        thread = threading.Thread(target=regenerate_all_content_background, 
+                                args=(project_id, project, config))
+        thread.daemon = True
+        thread.start()
+        
+        return jsonify({'success': True, 'message': 'Started regenerating all chapter content in background'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+def regenerate_all_content_background(project_id, project, config):
+    """Background task to regenerate all chapter content"""
+    project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+    
+    try:
+        book_title = project.get('name', '')
+        book_topic = project.get('topic', '')
+        language = project.get('language', 'English')
+        ai_provider = config.get('ai_provider', 'openrouter')
+        
+        # Update status
+        project['generation_status'] = 'regenerating_all_content'
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        # Regenerate each chapter
+        for i, chapter in enumerate(project.get('chapters', [])):
+            chapter['status'] = 'generating'
+            with open(project_file, 'w') as f:
+                json.dump(project, f, indent=2)
+            
+            chapter_title = chapter.get('title', '')
+            
+            # Create content generation prompt
+            prompt = f"""Generate comprehensive content for this chapter:
+
+Book Title: "{book_title}"
+Book Topic: "{book_topic}"
+Chapter Title: "{chapter_title}"
+Language: {language}
+
+Requirements:
+1. Write detailed, informative content appropriate for this chapter
+2. Ensure content aligns with the book's overall theme
+3. Use professional, engaging writing style
+4. Include practical examples or insights where relevant
+5. Structure content with clear paragraphs
+6. Aim for substantial content (500-1000 words)
+7. Make it valuable and educational for readers
+
+Generate the complete chapter content:"""
+
+            # Generate content
+            if ai_provider == 'gemini':
+                success, content = generate_with_gemini(prompt, config.get('gemini_api_key', ''), config.get('gemini_model', 'gemini-2.5-flash'))
+            else:
+                success, content = generate_content(prompt, config)
+            
+            if success:
+                chapter['content'] = content.strip()
+                chapter['status'] = 'completed'
+            else:
+                chapter['status'] = 'error'
+            
+            with open(project_file, 'w') as f:
+                json.dump(project, f, indent=2)
+        
+        # Mark as completed
+        project['generation_status'] = 'completed'
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+    
+    except Exception as e:
+        logging.error(f"Error in regenerate_all_content_background: {e}")
+        project['generation_status'] = f'error: {str(e)}'
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

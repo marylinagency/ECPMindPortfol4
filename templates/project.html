@@ -13,12 +13,20 @@
                     <a href="{{ url_for('index') }}" class="text-gray-500 hover:text-gray-700">
                         <i data-feather="arrow-left" class="w-5 h-5"></i>
                     </a>
-                    <h1 class="text-3xl font-bold text-gray-900 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors" 
-                        onclick="editProjectTitle('{{ project.get('id', '') }}', '{{ project.get('name', 'Untitled') }}')" 
-                        title="Click to edit title">
-                        {{ project.get('name', 'Untitled Project') }}
-                        <i data-feather="edit-2" class="w-4 h-4 inline ml-2 text-gray-400"></i>
-                    </h1>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-3xl font-bold text-gray-900 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors" 
+                            onclick="editProjectTitle('{{ project.get('id', '') }}', '{{ project.get('name', 'Untitled') }}')" 
+                            title="Click to edit title">
+                            {{ project.get('name', 'Untitled Project') }}
+                            <i data-feather="edit-2" class="w-4 h-4 inline ml-2 text-gray-400"></i>
+                        </h1>
+                        <button onclick="enhanceProjectTitle('{{ project.get('id', '') }}')" 
+                                class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-lg text-sm hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                title="Enhance title with AI">
+                            <i data-feather="zap" class="w-4 h-4 inline mr-1"></i>
+                            AI Enhance
+                        </button>
+                    </div>
                     <span id="generation-status" class="status-badge status-{{ (project.get('generation_status', 'pending')).replace('_', '-') }}">
                         {% set status = project.get('generation_status', 'pending') %}
                         {% if status == 'pending' %}Ready to generate
@@ -31,12 +39,20 @@
                     </span>
                 </div>
                 
-                <p class="text-gray-600 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors" 
-                   onclick="editProjectDescription('{{ project.get('id', '') }}', '{{ project.get('topic', '') }}')" 
-                   title="Click to edit description">
-                    {{ project.get('topic', 'No description available') }}
-                    <i data-feather="edit-2" class="w-4 h-4 inline ml-2 text-gray-400"></i>
-                </p>
+                <div class="flex items-start gap-3 mb-4">
+                    <p class="text-gray-600 flex-1 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors" 
+                       onclick="editProjectDescription('{{ project.get('id', '') }}', '{{ project.get('topic', '') }}')" 
+                       title="Click to edit description">
+                        {{ project.get('topic', 'No description available') }}
+                        <i data-feather="edit-2" class="w-4 h-4 inline ml-2 text-gray-400"></i>
+                    </p>
+                    <button onclick="enhanceProjectDescription('{{ project.get('id', '') }}')" 
+                            class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-3 py-1 rounded-lg text-sm hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                            title="Enhance description with AI">
+                        <i data-feather="zap" class="w-4 h-4 inline mr-1"></i>
+                        AI Enhance
+                    </button>
+                </div>
                 
                 <div class="flex flex-wrap gap-4 text-sm text-gray-500">
                     <span class="flex items-center">
@@ -232,16 +248,43 @@
     <!-- Chapters Section -->
     {% if project.get('chapters') %}
     <div class="bg-white rounded-xl shadow-lg p-8 slide-in" id="chapters-container">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Chapters</h2>
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Chapters</h2>
+            <div class="flex gap-2">
+                <button onclick="enhanceAllChapterTitles('{{ project.get('id', '') }}')" 
+                        class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg text-sm hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        title="Enhance all chapter titles with AI">
+                    <i data-feather="zap" class="w-4 h-4 inline mr-1"></i>
+                    AI Enhance All Titles
+                </button>
+                <button onclick="regenerateAllChapterContent('{{ project.get('id', '') }}')" 
+                        class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-lg text-sm hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        title="Regenerate all chapter content with AI">
+                    <i data-feather="refresh-cw" class="w-4 h-4 inline mr-1"></i>
+                    Regenerate All Content
+                </button>
+            </div>
+        </div>
         
         <div class="space-y-6">
             {% for chapter in project.get('chapters', []) %}
             <div class="chapter-card bg-gray-50 rounded-lg p-6 {{ chapter.get('status', 'pending') }}" data-chapter-id="{{ chapter.get('id', '') }}">
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-gray-900 chapter-title">
-                            Chapter {{ chapter.get('number', '?') }}: {{ chapter.get('title', 'Untitled') }}
-                        </h3>
+                        <div class="flex items-center gap-2 mb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 chapter-title cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors"
+                                onclick="editChapterTitle('{{ project.get('id', '') }}', '{{ chapter.get('id', '') }}', '{{ chapter.get('title', '') }}')"
+                                title="Click to edit chapter title">
+                                Chapter {{ chapter.get('number', '?') }}: {{ chapter.get('title', 'Untitled') }}
+                                <i data-feather="edit-2" class="w-3 h-3 inline ml-1 text-gray-400"></i>
+                            </h3>
+                            <button onclick="enhanceChapterTitle('{{ project.get('id', '') }}', '{{ chapter.get('id', '') }}')" 
+                                    class="bg-gradient-to-r from-purple-400 to-pink-400 text-white px-2 py-1 rounded text-xs hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                    title="Enhance chapter title with AI">
+                                <i data-feather="zap" class="w-3 h-3 inline mr-1"></i>
+                                AI
+                            </button>
+                        </div>
                         <div class="flex items-center mt-2">
                             <span class="status-badge status-{{ chapter.get('status', 'pending') }}">
                                 {% set ch_status = chapter.get('status', 'pending') %}
@@ -275,6 +318,11 @@
                             class="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors"
                             data-tooltip="Regenerate Chapter">
                         <i data-feather="refresh-cw" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="enhanceChapterContent('{{ project.get('id', '') }}', '{{ chapter.get('id', '') }}')" 
+                            class="text-amber-600 hover:text-amber-800 p-2 rounded-lg hover:bg-amber-50 transition-colors"
+                            data-tooltip="Enhance Chapter Content with AI">
+                        <i data-feather="zap" class="w-5 h-5"></i>
                     </button>
                     {% endif %}
                 </div>
@@ -951,5 +999,247 @@ document.addEventListener('DOMContentLoaded', function() {
         checkGenerationStatus();
     }
 });
+
+// ===== AI ENHANCEMENT FUNCTIONS =====
+
+function enhanceProjectTitle(projectId) {
+    if (!confirm('Enhance the project title using AI? This will replace the current title.')) {
+        return;
+    }
+    
+    showLoadingModal('Enhancing Project Title', 'AI is creating a better title for your book...');
+    
+    fetch(`/api/enhance_title/${projectId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingModal();
+        if (data.success) {
+            showNotification('Title enhanced successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification('Failed to enhance title: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoadingModal();
+        showNotification('Error enhancing title: ' + error.message, 'error');
+    });
+}
+
+function enhanceProjectDescription(projectId) {
+    if (!confirm('Enhance the project description using AI? This will replace the current description.')) {
+        return;
+    }
+    
+    showLoadingModal('Enhancing Project Description', 'AI is creating a better description for your book...');
+    
+    fetch(`/api/enhance_description/${projectId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingModal();
+        if (data.success) {
+            showNotification('Description enhanced successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification('Failed to enhance description: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoadingModal();
+        showNotification('Error enhancing description: ' + error.message, 'error');
+    });
+}
+
+function editChapterTitle(projectId, chapterId, currentTitle) {
+    const newTitle = prompt('Edit Chapter Title:', currentTitle);
+    if (newTitle && newTitle !== currentTitle) {
+        fetch(`/api/update_chapter_title`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                project_id: projectId,
+                chapter_id: chapterId,
+                title: newTitle
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Chapter title updated successfully!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showNotification('Failed to update chapter title: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('Error updating chapter title: ' + error.message, 'error');
+        });
+    }
+}
+
+function enhanceChapterTitle(projectId, chapterId) {
+    if (!confirm('Enhance this chapter title using AI? This will replace the current title.')) {
+        return;
+    }
+    
+    showLoadingModal('Enhancing Chapter Title', 'AI is creating a better title for this chapter...');
+    
+    fetch(`/api/enhance_chapter_title/${projectId}/${chapterId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingModal();
+        if (data.success) {
+            showNotification('Chapter title enhanced successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification('Failed to enhance chapter title: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoadingModal();
+        showNotification('Error enhancing chapter title: ' + error.message, 'error');
+    });
+}
+
+function enhanceChapterContent(projectId, chapterId) {
+    if (!confirm('Enhance this chapter content using AI? This will improve the current content.')) {
+        return;
+    }
+    
+    showLoadingModal('Enhancing Chapter Content', 'AI is improving the content for this chapter...');
+    
+    fetch(`/api/enhance_chapter_content/${projectId}/${chapterId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingModal();
+        if (data.success) {
+            showNotification('Chapter content enhanced successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification('Failed to enhance chapter content: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoadingModal();
+        showNotification('Error enhancing chapter content: ' + error.message, 'error');
+    });
+}
+
+function enhanceAllChapterTitles(projectId) {
+    if (!confirm('Enhance ALL chapter titles using AI? This will replace all current chapter titles.')) {
+        return;
+    }
+    
+    showLoadingModal('Enhancing All Chapter Titles', 'AI is creating better titles for all chapters...');
+    
+    fetch(`/api/enhance_all_chapter_titles/${projectId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingModal();
+        if (data.success) {
+            showNotification('All chapter titles enhanced successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification('Failed to enhance chapter titles: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoadingModal();
+        showNotification('Error enhancing chapter titles: ' + error.message, 'error');
+    });
+}
+
+function regenerateAllChapterContent(projectId) {
+    if (!confirm('Regenerate ALL chapter content using AI? This will replace all current chapter content.')) {
+        return;
+    }
+    
+    showLoadingModal('Regenerating All Chapter Content', 'AI is creating new content for all chapters...');
+    
+    fetch(`/api/regenerate_all_chapter_content/${projectId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingModal();
+        if (data.success) {
+            showNotification('All chapter content regenerated successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification('Failed to regenerate chapter content: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoadingModal();
+        showNotification('Error regenerating chapter content: ' + error.message, 'error');
+    });
+}
+
+function showLoadingModal(title, message) {
+    const modal = document.createElement('div');
+    modal.id = 'ai-loading-modal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="zap" class="w-8 h-8 text-white animate-pulse"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">${title}</h3>
+                <p class="text-gray-600 mb-6">${message}</p>
+                
+                <!-- Progress animation -->
+                <div class="mb-4">
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-2 rounded-full animate-pulse" style="width: 70%"></div>
+                    </div>
+                </div>
+                
+                <!-- Status text -->
+                <p class="text-sm text-amber-600 font-medium">Working with AI...</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    feather.replace();
+}
+
+function hideLoadingModal() {
+    const modal = document.getElementById('ai-loading-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
 </script>
 {% endblock %}
