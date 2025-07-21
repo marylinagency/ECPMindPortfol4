@@ -2930,3 +2930,96 @@ function generateBookCoverDataURL(title) {
     
     return "data:image/svg+xml," + encodeURIComponent(svg);
 }
+
+// Load real writing progress statistics
+function loadWritingProgress() {
+    fetch('/api/writing_progress')
+        .then(response => response.json())
+        .then(data => {
+            // Update completion percentage and progress bar
+            const completionPercentage = data.completion_percentage || 0;
+            const completionBar = document.getElementById('completion-bar');
+            const completionText = document.getElementById('completion-percentage');
+            
+            if (completionBar && completionText) {
+                completionText.textContent = completionPercentage + '%';
+                completionBar.style.width = completionPercentage + '%';
+            }
+            
+            // Update recent activity
+            const recentActivityContainer = document.getElementById('recent-activity');
+            if (recentActivityContainer) {
+                if (data.recent_activity && data.recent_activity.length > 0) {
+                    recentActivityContainer.innerHTML = '';
+                    data.recent_activity.forEach(activity => {
+                        const activityItem = document.createElement('div');
+                        activityItem.className = 'flex items-center justify-between p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all cursor-pointer';
+                        activityItem.innerHTML = `
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                                <div>
+                                    <p class="text-sm text-white font-medium">${activity.project_name}</p>
+                                    <p class="text-xs text-gray-400">${activity.action} • ${activity.time_ago}</p>
+                                </div>
+                            </div>
+                            <i data-feather="external-link" class="w-4 h-4 text-gray-400"></i>
+                        `;
+                        
+                        // Add click handler to open project
+                        activityItem.addEventListener('click', function() {
+                            window.location.href = `/project/${activity.project_id}`;
+                        });
+                        
+                        recentActivityContainer.appendChild(activityItem);
+                    });
+                    feather.replace(); // Replace feather icons
+                } else {
+                    recentActivityContainer.innerHTML = `
+                        <div class="text-center p-4 bg-white/5 rounded-lg">
+                            <i data-feather="book-open" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                            <p class="text-sm text-gray-400">No recent activity</p>
+                            <p class="text-xs text-gray-500">Start creating books to see your progress!</p>
+                        </div>
+                    `;
+                    feather.replace();
+                }
+            }
+            
+            // Update project count in library section
+            const libraryCount = document.getElementById('stats-library-count');
+            if (libraryCount) {
+                const totalProjects = data.total_projects || 0;
+                libraryCount.textContent = `${totalProjects} book${totalProjects !== 1 ? 's' : ''}`;
+            }
+            
+        })
+        .catch(error => {
+            console.error('Error loading writing progress:', error);
+            // Show default empty state
+            const recentActivityContainer = document.getElementById('recent-activity');
+            if (recentActivityContainer) {
+                recentActivityContainer.innerHTML = `
+                    <div class="text-center p-4 bg-white/5 rounded-lg">
+                        <i data-feather="alert-circle" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                        <p class="text-sm text-gray-400">Unable to load progress</p>
+                        <p class="text-xs text-gray-500">Check your connection and try again</p>
+                    </div>
+                `;
+                feather.replace();
+            }
+        });
+}
+
+// Load stats when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    updateProjectLibraryCount();
+    checkAIStatus();
+    loadWritingProgress();
+    
+    // Refresh progress every 30 seconds if user is active
+    setInterval(function() {
+        if (document.visibilityState === 'visible') {
+            loadWritingProgress();
+        }
+    }, 30000);
+});

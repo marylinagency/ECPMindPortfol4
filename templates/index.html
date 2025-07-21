@@ -252,10 +252,22 @@
                                     <div>
                                         <div class="flex justify-between text-sm text-gray-300 mb-2">
                                             <span>Books Completed</span>
-                                            <span id="completion-percentage">0%</span>
+                                            <span id="completion-percentage">Loading...</span>
                                         </div>
                                         <div class="w-full bg-white/10 rounded-full h-2">
                                             <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500" id="completion-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Writing Stats Grid -->
+                                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
+                                        <div class="text-center">
+                                            <p class="text-2xl font-bold text-white" id="stats-total-chapters">-</p>
+                                            <p class="text-xs text-gray-400">Total Chapters</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-2xl font-bold text-white" id="stats-total-words">-</p>
+                                            <p class="text-xs text-gray-400">Words Written</p>
                                         </div>
                                     </div>
 
@@ -263,7 +275,10 @@
                                     <div class="pt-4 border-t border-white/10">
                                         <h5 class="text-sm font-medium text-white mb-3">Recent Activity</h5>
                                         <div id="recent-activity" class="space-y-2">
-                                            <!-- Dynamic activity items will be loaded here -->
+                                            <div class="text-center p-4 bg-white/5 rounded-lg">
+                                                <div class="animate-spin w-6 h-6 border-2 border-gray-400 border-t-white rounded-full mx-auto mb-2"></div>
+                                                <p class="text-sm text-gray-400">Loading activity...</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

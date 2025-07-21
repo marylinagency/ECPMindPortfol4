@@ -473,6 +473,138 @@ def check_ai_provider_status():
         'status': 'ready' if configured else 'not_configured'
     })
 
+@app.route('/api/writing_progress')
+def get_writing_progress():
+    """Get real writing progress statistics"""
+    try:
+        config = load_config()
+        if not config.get('license_activated', False):
+            return jsonify({
+                'total_projects': 0,
+                'completed_projects': 0,
+                'total_chapters': 0,
+                'total_words': 0,
+                'completion_percentage': 0,
+                'recent_activity': []
+            })
+        
+        total_projects = 0
+        completed_projects = 0
+        total_chapters = 0
+        total_words = 0
+        recent_activity = []
+        
+        # Get all project files
+        project_files = []
+        if os.path.exists(PROJECTS_FOLDER):
+            for filename in os.listdir(PROJECTS_FOLDER):
+                if filename.endswith('.json') and filename != '.gitkeep':
+                    project_files.append(filename)
+        
+        projects_data = []
+        
+        for filename in project_files:
+            try:
+                project_file = os.path.join(PROJECTS_FOLDER, filename)
+                with open(project_file, 'r') as f:
+                    project = json.load(f)
+                
+                total_projects += 1
+                projects_data.append(project)
+                
+                # Count chapters and calculate completion
+                chapters = project.get('chapters', [])
+                project_chapter_count = len(chapters)
+                total_chapters += project_chapter_count
+                
+                # Check if project is completed
+                project_status = project.get('status', 'in_progress')
+                if project_status == 'completed':
+                    completed_projects += 1
+                
+                # Count words in chapters
+                project_words = 0
+                for chapter in chapters:
+                    content = chapter.get('content', '')
+                    if content and content.strip():
+                        # Simple word count
+                        project_words += len(content.split())
+                
+                total_words += project_words
+                
+                # Add to recent activity
+                project_name = project.get('name', 'Untitled Project')
+                last_modified = project.get('last_modified', project.get('created_at', ''))
+                
+                if last_modified:
+                    try:
+                        from datetime import datetime
+                        if isinstance(last_modified, str):
+                            # Parse the datetime string
+                            if 'T' in last_modified:
+                                modified_dt = datetime.fromisoformat(last_modified.replace('Z', '+00:00'))
+                            else:
+                                modified_dt = datetime.fromisoformat(last_modified)
+                        else:
+                            modified_dt = last_modified
+                        
+                        # Calculate days ago
+                        days_ago = (datetime.now() - modified_dt.replace(tzinfo=None)).days
+                        
+                        if days_ago == 0:
+                            time_ago = "Today"
+                        elif days_ago == 1:
+                            time_ago = "Yesterday"
+                        elif days_ago < 7:
+                            time_ago = f"{days_ago} days ago"
+                        elif days_ago < 30:
+                            weeks_ago = days_ago // 7
+                            time_ago = f"{weeks_ago} week{'s' if weeks_ago > 1 else ''} ago"
+                        else:
+                            time_ago = f"{days_ago // 30} month{'s' if days_ago // 30 > 1 else ''} ago"
+                        
+                        activity_item = {
+                            'project_name': project_name,
+                            'time_ago': time_ago,
+                            'action': 'Updated',
+                            'project_id': project.get('id', filename.replace('.json', ''))
+                        }
+                        recent_activity.append(activity_item)
+                    except Exception as e:
+                        logging.error(f"Error parsing date for project {project_name}: {e}")
+                        
+            except Exception as e:
+                logging.error(f"Error reading project file {filename}: {e}")
+        
+        # Sort recent activity by project name for now (since we don't have exact timestamps)
+        recent_activity.sort(key=lambda x: x['project_name'])
+        recent_activity = recent_activity[:5]  # Limit to 5 most recent
+        
+        # Calculate completion percentage
+        completion_percentage = 0
+        if total_projects > 0:
+            completion_percentage = round((completed_projects / total_projects) * 100)
+        
+        return jsonify({
+            'total_projects': total_projects,
+            'completed_projects': completed_projects,
+            'total_chapters': total_chapters,
+            'total_words': total_words,
+            'completion_percentage': completion_percentage,
+            'recent_activity': recent_activity
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting writing progress: {e}")
+        return jsonify({
+            'total_projects': 0,
+            'completed_projects': 0,
+            'total_chapters': 0,
+            'total_words': 0,
+            'completion_percentage': 0,
+            'recent_activity': []
+        })
+
 @app.route('/create_manual_book', methods=['POST'])
 def create_manual_book():
     """Create a manual book project with enhanced options"""
