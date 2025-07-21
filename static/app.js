@@ -2679,7 +2679,7 @@ function displayBooks(books) {
                 <div class="aspect-[3/4] relative overflow-hidden">
                     <img src="${coverImage}" alt="${book.title || "Untitled"}" 
                          class="w-full h-full object-cover" 
-                         onerror="this.src=\"${generateBookCoverDataURL(book.title || "Untitled")}\">
+                         onerror="this.src='${generateBookCoverDataURL(book.title || "Untitled")}'">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     
                     <!-- Status Badge -->
@@ -2748,7 +2748,7 @@ function filterBooks(filter) {
         btn.classList.add("bg-white/20", "text-gray-300");
     });
     
-    const activeBtn = document.querySelector(`button[onclick="filterBooks(\"${filter}\")"]`);
+    const activeBtn = document.querySelector(`button[data-filter="${filter}"]`);
     if (activeBtn) {
         activeBtn.classList.remove("bg-white/20", "text-gray-300");
         if (filter === "completed") {
@@ -2760,8 +2760,16 @@ function filterBooks(filter) {
         }
     }
     
-    // Reload with filter
-    loadBookLibrary();
+    // Re-fetch and display books with current filter
+    fetch("/api/projects")
+        .then(response => response.json())
+        .then(data => {
+            const books = data.projects || [];
+            displayBooks(books);
+        })
+        .catch(error => {
+            console.error("Error filtering books:", error);
+        });
 }
 
 function openBook(projectId) {

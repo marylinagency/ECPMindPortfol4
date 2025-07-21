@@ -237,7 +237,7 @@
                                             <p class="text-lg font-bold text-white" id="stats-library-count">0 books</p>
                                         </div>
                                         <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
-                                            <i data-feather="library" class="w-4 h-4 text-white"></i>
+                                            <i data-feather="book" class="w-4 h-4 text-white"></i>
                                         </div>
                                     </div>
                                     <p class="text-xs text-cyan-300">Manage your book collection</p>
@@ -740,9 +740,9 @@
                             <span id="library-book-count">0</span> books total
                         </div>
                         <div class="flex items-center space-x-2">
-                            <button onclick="filterBooks('all')" class="filter-btn active px-3 py-1 rounded-full text-xs bg-blue-600 text-white">All</button>
-                            <button onclick="filterBooks('completed')" class="filter-btn px-3 py-1 rounded-full text-xs bg-white/20 text-gray-300 hover:bg-green-600 hover:text-white">Completed</button>
-                            <button onclick="filterBooks('draft')" class="filter-btn px-3 py-1 rounded-full text-xs bg-white/20 text-gray-300 hover:bg-yellow-600 hover:text-white">Draft</button>
+                            <button onclick="filterBooks('all')" class="filter-btn active px-3 py-1 rounded-full text-xs bg-blue-600 text-white" data-filter="all">All</button>
+                            <button onclick="filterBooks('completed')" class="filter-btn px-3 py-1 rounded-full text-xs bg-white/20 text-gray-300 hover:bg-green-600 hover:text-white" data-filter="completed">Completed</button>
+                            <button onclick="filterBooks('draft')" class="filter-btn px-3 py-1 rounded-full text-xs bg-white/20 text-gray-300 hover:bg-yellow-600 hover:text-white" data-filter="draft">Draft</button>
                         </div>
                     </div>
                 </div>
