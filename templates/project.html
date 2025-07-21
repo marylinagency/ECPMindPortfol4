@@ -218,6 +218,11 @@
         </button>
         
         {% if project.get('chapters') and project.get('generation_status') == 'completed' %}
+        <a href="{{ url_for('pdf_editor', project_id=project.get('id', '')) }}" 
+           class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium mr-4">
+            <i data-feather="edit" class="w-5 h-5 inline mr-2"></i>
+            Edit as PDF
+        </a>
         <a href="{{ url_for('book_preview', project_id=project.get('id', '')) }}" 
            class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium mr-4">
             <i data-feather="eye" class="w-5 h-5 inline mr-2"></i>

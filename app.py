@@ -1134,6 +1134,135 @@ def project_view(project_id):
         flash('Project not found', 'error')
         return redirect(url_for('index'))
 
+@app.route('/pdf_editor/<project_id>')
+def pdf_editor(project_id):
+    """PDF Editor interface"""
+    config = load_config()
+    if not config.get('license_activated', False):
+        flash('Please activate your license first', 'error')
+        return redirect(url_for('index'))
+    
+    project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+    if not os.path.exists(project_file):
+        flash('Project not found', 'error')
+        return redirect(url_for('index'))
+    
+    with open(project_file, 'r') as f:
+        project = json.load(f)
+    
+    return render_template('pdf_editor.html', project=project, config=config)
+
+@app.route('/pdf_preview/<project_id>')
+def pdf_preview(project_id):
+    """Generate PDF preview for editor"""
+    project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+    if not os.path.exists(project_file):
+        return "Project not found", 404
+    
+    with open(project_file, 'r') as f:
+        project = json.load(f)
+    
+    # Clean chapter content for better formatting
+    if project.get('chapters'):
+        for chapter in project['chapters']:
+            chapter['cleaned_paragraphs'] = clean_chapter_content(chapter.get('content', ''))
+    
+    # Generate HTML for PDF
+    html_content = render_template('book_export.html', project=project)
+    
+    # Generate PDF
+    pdf = weasyprint.HTML(string=html_content).write_pdf()
+    
+    from flask import Response
+    return Response(pdf, mimetype='application/pdf')
+
+@app.route('/api/pdf_edit/<project_id>', methods=['POST'])
+def api_pdf_edit(project_id):
+    """Handle PDF editing operations"""
+    try:
+        data = request.get_json()
+        edit_type = data.get('type')
+        
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        if not os.path.exists(project_file):
+            return jsonify({'success': False, 'message': 'Project not found'})
+        
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        # Handle different edit types
+        if edit_type == 'title':
+            project['name'] = data.get('title', '')
+            project['title'] = data.get('title', '')
+        elif edit_type == 'description':
+            project['topic'] = data.get('description', '')
+            if 'description' not in project:
+                project['description'] = data.get('description', '')
+        elif edit_type == 'author_bio':
+            project['author_bio'] = data.get('author_bio', '')
+        elif edit_type == 'chapter':
+            chapter_id = data.get('chapter_id')
+            new_title = data.get('title', '')
+            new_content = data.get('content', '')
+            
+            # Find and update chapter
+            for chapter in project.get('chapters', []):
+                if chapter.get('id') == chapter_id:
+                    chapter['title'] = new_title
+                    chapter['content'] = new_content
+                    # Update word count
+                    chapter['word_count'] = len(new_content.split())
+                    break
+        
+        # Update last modified timestamp
+        project['last_modified'] = datetime.now().isoformat()
+        
+        # Save project
+        with open(project_file, 'w') as f:
+            json.dump(project, f, indent=2)
+        
+        return jsonify({'success': True, 'message': 'Changes saved successfully'})
+        
+    except Exception as e:
+        logging.error(f"Error in PDF edit: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/get_chapter/<chapter_id>')
+def api_get_chapter(chapter_id):
+    """Get chapter details for editing"""
+    try:
+        # Find project containing this chapter
+        for filename in os.listdir(PROJECTS_FOLDER):
+            if filename.endswith('.json'):
+                with open(os.path.join(PROJECTS_FOLDER, filename), 'r') as f:
+                    project = json.load(f)
+                    for chapter in project.get('chapters', []):
+                        if chapter.get('id') == chapter_id:
+                            return jsonify(chapter)
+        
+        return jsonify({'error': 'Chapter not found'}), 404
+        
+    except Exception as e:
+        logging.error(f"Error getting chapter: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chapters/<project_id>')
+def api_get_chapters(project_id):
+    """Get all chapters for a project"""
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        if not os.path.exists(project_file):
+            return jsonify({'error': 'Project not found'}), 404
+        
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        return jsonify(project.get('chapters', []))
+        
+    except Exception as e:
+        logging.error(f"Error getting chapters: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/project/<project_id>/upload_cover', methods=['POST'])
 def upload_project_cover(project_id):
     """Upload or update cover image for existing project"""

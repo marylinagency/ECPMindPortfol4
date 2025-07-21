@@ -14,5 +14,8 @@
   },
   "ai_provider": "gemini",
   "gemini_api_key": "AIzaSyB3v1iQ-w5XgbwyDn1mdSj5colqX9ZcX1E",
-  "gemini_model": "gemini-1.5-flash"
+  "gemini_model": "gemini-1.5-flash",
+  "default_author_bio": "",
+  "default_author_name": "RADHWEN DALY HAMDOUNI",
+  "use_default_bio": true
 }
