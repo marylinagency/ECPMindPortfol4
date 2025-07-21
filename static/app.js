@@ -257,7 +257,7 @@ function showManualForm() {
                 </button>
             </div>
             
-            <form method="POST" action="/create_project" enctype="multipart/form-data" class="space-y-6">
+            <form method="POST" action="/create_manual_book" enctype="multipart/form-data" class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Book Title</label>
                     <input type="text" name="book_title" required
@@ -266,15 +266,8 @@ function showManualForm() {
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
-                    <input type="text" name="project_name" required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                           placeholder="Enter project name">
-                </div>
-                
-                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Book Topic/Theme</label>
-                    <textarea name="book_topic" rows="4" required
+                    <textarea name="topic" rows="4" required
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                               placeholder="Describe your book topic, genre, and main themes..."></textarea>
                 </div>
@@ -312,15 +305,80 @@ function showManualForm() {
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Number of Chapters</label>
-                        <input type="number" name="num_chapters" value="10" min="3" max="50"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <input type="number" name="chapters" value="8" min="3" max="25"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Cover Image (Optional)</label>
-                    <input type="file" name="cover_image" accept="image/*"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Writing Style</label>
+                    <select name="style" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="academic">Academic</option>
+                        <option value="creative">Creative</option>
+                        <option value="technical">Technical</option>
+                    </select>
+                </div>
+                
+                <!-- Generation Options -->
+                <div class="bg-gray-50 rounded-lg p-4 space-y-4">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Generation Options</h4>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chapter Titles</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="chapter_titles_method" value="ai" class="mr-2" checked>
+                                <span class="text-gray-700 text-sm">AI Generated</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="chapter_titles_method" value="manual" class="mr-2">
+                                <span class="text-gray-700 text-sm">Manual Entry</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chapter Content</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="content_method" value="ai" class="mr-2">
+                                <span class="text-gray-700 text-sm">AI Generated</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="content_method" value="manual" class="mr-2" checked>
+                                <span class="text-gray-700 text-sm">Manual Entry</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mood Tracker -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">How are you feeling about writing today?</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <label class="flex flex-col items-center p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                            <input type="radio" name="generation_mood" value="excited" class="sr-only">
+                            <span class="text-2xl mb-1">😊</span>
+                            <span class="text-xs text-gray-600">Excited</span>
+                        </label>
+                        <label class="flex flex-col items-center p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                            <input type="radio" name="generation_mood" value="focused" class="sr-only">
+                            <span class="text-2xl mb-1">🎯</span>
+                            <span class="text-xs text-gray-600">Focused</span>
+                        </label>
+                        <label class="flex flex-col items-center p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                            <input type="radio" name="generation_mood" value="creative" class="sr-only">
+                            <span class="text-2xl mb-1">🎨</span>
+                            <span class="text-xs text-gray-600">Creative</span>
+                        </label>
+                        <label class="flex flex-col items-center p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                            <input type="radio" name="generation_mood" value="motivated" class="sr-only">
+                            <span class="text-2xl mb-1">🚀</span>
+                            <span class="text-xs text-gray-600">Motivated</span>
+                        </label>
+                    </div>
                 </div>
                 
                 <div class="flex space-x-4">

@@ -83,6 +83,129 @@ def load_config():
         save_config(default_config)
         return default_config
 
+def generate_chapter_titles_ai(book_title, topic, language, num_chapters, style, config):
+    """Generate chapter titles using AI"""
+    try:
+        prompt = f"""Generate {num_chapters} compelling chapter titles for a book with the following details:
+
+Title: {book_title}
+Topic: {topic}
+Language: {language}
+Style: {style}
+
+Please provide exactly {num_chapters} chapter titles that:
+- Are engaging and descriptive
+- Follow a logical progression
+- Match the {style} style
+- Are appropriate for the topic
+- Are in {language}
+
+Return only the chapter titles, one per line, without numbers or additional text."""
+
+        # Try to generate with configured AI provider
+        if config.get('ai_provider') == 'gemini' and config.get('gemini_api_key'):
+            response = generate_with_gemini(prompt, config)
+        elif config.get('openrouter_api_key'):
+            response = generate_with_openrouter(prompt, config)
+        else:
+            return None
+        
+        if response:
+            titles = [line.strip() for line in response.strip().split('\n') if line.strip()]
+            # Ensure we have the right number of titles
+            if len(titles) >= num_chapters:
+                return titles[:num_chapters]
+            else:
+                # Pad with generic titles if needed
+                while len(titles) < num_chapters:
+                    titles.append(f"Chapter {len(titles) + 1}")
+                return titles
+        
+        return None
+    except Exception as e:
+        logging.error(f"Error generating chapter titles: {e}")
+        return None
+
+def start_ai_content_generation(project_id, config):
+    """Start AI content generation for a project in background"""
+    import threading
+    
+    def generate_content():
+        try:
+            project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+            if not os.path.exists(project_file):
+                return
+            
+            with open(project_file, 'r') as f:
+                project = json.load(f)
+            
+            project['generation_status'] = 'generating'
+            
+            # Save status update
+            with open(project_file, 'w') as f:
+                json.dump(project, f, indent=2)
+            
+            # Generate content for each chapter
+            for i, chapter in enumerate(project['chapters']):
+                if chapter['status'] == 'pending':
+                    chapter_prompt = f"""Write compelling content for this chapter:
+
+Book Title: {project.get('title', project.get('name', 'Untitled'))}
+Book Topic: {project['topic']}
+Chapter Title: {chapter['title']}
+Writing Style: {project['style']}
+Language: {project['language']}
+
+Please write detailed, engaging content for this chapter that:
+- Fits the overall book theme
+- Matches the {project['style']} writing style
+- Is written in {project['language']}
+- Is substantial (800-1200 words)
+- Flows naturally from the chapter title
+- Provides value to readers
+
+Write the complete chapter content:"""
+
+                    try:
+                        # Generate content with AI
+                        if config.get('ai_provider') == 'gemini' and config.get('gemini_api_key'):
+                            content = generate_with_gemini(chapter_prompt, config)
+                        elif config.get('openrouter_api_key'):
+                            content = generate_with_openrouter(chapter_prompt, config)
+                        else:
+                            content = f"AI content generation unavailable. Please edit this chapter manually.\n\nChapter: {chapter['title']}\n\nAdd your content here..."
+                        
+                        if content:
+                            chapter['content'] = content
+                            chapter['status'] = 'completed'
+                            chapter['word_count'] = len(content.split())
+                        else:
+                            chapter['content'] = f"Content generation failed for {chapter['title']}. Please edit manually."
+                            chapter['status'] = 'failed'
+                    except Exception as e:
+                        logging.error(f"Error generating content for chapter {i+1}: {e}")
+                        chapter['content'] = f"Content generation failed for {chapter['title']}. Please edit manually."
+                        chapter['status'] = 'failed'
+                
+                # Save progress after each chapter
+                with open(project_file, 'w') as f:
+                    json.dump(project, f, indent=2)
+            
+            # Mark project as completed
+            project['generation_status'] = 'completed'
+            project['last_modified'] = datetime.now().isoformat()
+            
+            with open(project_file, 'w') as f:
+                json.dump(project, f, indent=2)
+                
+        except Exception as e:
+            logging.error(f"Background content generation failed: {e}")
+    
+    # Start generation in background thread
+    thread = threading.Thread(target=generate_content)
+    thread.daemon = True
+    thread.start()
+
 def save_config(config):
     """Save configuration to config.json"""
     with open('config.json', 'w') as f:
@@ -342,7 +465,7 @@ def check_ai_provider_status():
 
 @app.route('/create_manual_book', methods=['POST'])
 def create_manual_book():
-    """Create a manual book project"""
+    """Create a manual book project with enhanced options"""
     config = load_config()
     if not config.get('license_activated', False):
         flash('Please activate your license first', 'error')
@@ -350,6 +473,7 @@ def create_manual_book():
     
     try:
         # Get form data
+        book_title = request.form.get('book_title', '').strip()
         topic = request.form.get('topic', '').strip()
         author_bio = request.form.get('author_bio', '').strip()
         language = request.form.get('language', 'English')
@@ -357,22 +481,29 @@ def create_manual_book():
         style = request.form.get('style', 'professional')
         generation_mood = request.form.get('generation_mood', '')
         
-        if not topic:
-            flash('Please provide a book topic', 'error')
+        # Get generation options
+        chapter_titles_method = request.form.get('chapter_titles_method', 'manual')
+        content_method = request.form.get('content_method', 'manual')
+        
+        if not book_title or not topic:
+            flash('Please provide both book title and topic', 'error')
             return redirect(url_for('index'))
         
         # Create project
         project_id = str(uuid.uuid4())[:8]
         project = {
             'id': project_id,
-            'name': topic[:50] + ('...' if len(topic) > 50 else ''),
+            'title': book_title,
+            'name': book_title,
             'topic': topic,
             'author_bio': author_bio,
             'language': language,
             'style': style,
             'num_chapters': num_chapters,
             'creation_method': 'manual',
-            'generation_status': 'manual',
+            'chapter_titles_method': chapter_titles_method,
+            'content_method': content_method,
+            'generation_status': 'draft',
             'created_at': datetime.now().isoformat(),
             'last_modified': datetime.now().isoformat(),
             'chapters': [],
@@ -380,28 +511,90 @@ def create_manual_book():
             'cover_image': None
         }
         
-        # Create empty chapters for manual editing
-        for i in range(1, num_chapters + 1):
-            chapter = {
-                'id': str(uuid.uuid4())[:8],
-                'number': i,
-                'title': f'Chapter {i}',
-                'content': f'Content for Chapter {i} - Click to edit and add your own content here.',
-                'status': 'manual',
-                'word_count': 0
-            }
-            project['chapters'].append(chapter)
+        # Handle chapter titles based on method
+        if chapter_titles_method == 'ai':
+            # Generate AI chapter titles
+            try:
+                chapter_titles = generate_chapter_titles_ai(book_title, topic, language, num_chapters, style, config)
+                if chapter_titles:
+                    for i, title in enumerate(chapter_titles, 1):
+                        chapter = {
+                            'id': str(uuid.uuid4())[:8],
+                            'number': i,
+                            'title': title,
+                            'content': f'Content for {title} - Click to edit and add your own content here.' if content_method == 'manual' else '',
+                            'status': 'draft' if content_method == 'manual' else 'pending',
+                            'word_count': 0
+                        }
+                        project['chapters'].append(chapter)
+                else:
+                    # Fallback to manual if AI fails
+                    for i in range(1, num_chapters + 1):
+                        chapter = {
+                            'id': str(uuid.uuid4())[:8],
+                            'number': i,
+                            'title': f'Chapter {i}',
+                            'content': f'Content for Chapter {i} - Click to edit and add your own content here.',
+                            'status': 'draft',
+                            'word_count': 0
+                        }
+                        project['chapters'].append(chapter)
+                    flash('AI chapter title generation failed, created manual chapters', 'warning')
+            except Exception as e:
+                logging.error(f"AI chapter title generation failed: {e}")
+                # Create manual chapters as fallback
+                for i in range(1, num_chapters + 1):
+                    chapter = {
+                        'id': str(uuid.uuid4())[:8],
+                        'number': i,
+                        'title': f'Chapter {i}',
+                        'content': f'Content for Chapter {i} - Click to edit and add your own content here.',
+                        'status': 'draft',
+                        'word_count': 0
+                    }
+                    project['chapters'].append(chapter)
+                flash('AI unavailable, created manual chapters', 'warning')
+        else:
+            # Create manual chapters
+            for i in range(1, num_chapters + 1):
+                chapter = {
+                    'id': str(uuid.uuid4())[:8],
+                    'number': i,
+                    'title': f'Chapter {i}',
+                    'content': f'Content for Chapter {i} - Click to edit and add your own content here.',
+                    'status': 'draft',
+                    'word_count': 0
+                }
+                project['chapters'].append(chapter)
+        
+        # If AI content generation is requested, mark for background processing
+        if content_method == 'ai' and project['chapters']:
+            project['generation_status'] = 'pending'
+            for chapter in project['chapters']:
+                chapter['status'] = 'pending'
         
         # Save project
         project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
         with open(project_file, 'w') as f:
             json.dump(project, f, indent=2)
         
-        flash(f'Manual book project "{project["name"]}" created successfully! Start editing chapters.', 'success')
+        # Start AI content generation in background if requested
+        if content_method == 'ai':
+            flash(f'Book project "{book_title}" created! AI content generation starting...', 'success')
+            # Start background generation
+            try:
+                start_ai_content_generation(project_id, config)
+            except Exception as e:
+                logging.error(f"Failed to start AI content generation: {e}")
+                flash('Project created but AI content generation failed to start', 'warning')
+        else:
+            flash(f'Book project "{book_title}" created successfully! Start editing chapters.', 'success')
+        
         return redirect(url_for('project_view', project_id=project_id))
         
     except Exception as e:
-        flash(f'Error creating manual project: {str(e)}', 'error')
+        logging.error(f"Error creating manual project: {e}")
+        flash(f'Error creating project: {str(e)}', 'error')
         return redirect(url_for('index'))
 
 @app.route('/save_mood', methods=['POST'])
