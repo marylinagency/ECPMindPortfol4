@@ -2765,7 +2765,7 @@ function displayBooks(books) {
                         ${book.title || "Untitled Book"}
                     </h3>
                     
-                    <p class="text-gray-400 text-sm mb-3 line-clamp-2">
+                    <p class="text-black text-sm mb-3 line-clamp-2">
                         ${book.topic || book.description || "No description available"}
                     </p>
                     
