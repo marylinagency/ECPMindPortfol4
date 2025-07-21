@@ -59,16 +59,26 @@ def load_config():
             return json.load(f)
     except FileNotFoundError:
         # Create default config
+        from datetime import datetime, timedelta
+        # Set expiration to 90 days from now for demonstration
+        expiry_date = datetime.now() + timedelta(days=90)
+        
         default_config = {
             "openrouter_api_key": "",
             "gemini_api_key": "",
             "ai_provider": "openrouter",  # "openrouter" or "gemini"
             "selected_model": "meta-llama/llama-3.2-3b-instruct:free",
             "gemini_model": "gemini-1.5-flash",
-            "license_activated": False,
-            "license_key": "",
-            "email": "",
-            "machine_id": get_machine_id()
+            "license_activated": True,
+            "license_key": "demo-key-123",
+            "email": "demo@bookgenpro.com",
+            "machine_id": get_machine_id(),
+            "license_info": {
+                "license_type": "Professional",
+                "expires_at": expiry_date.strftime('%Y-%m-%dT%H:%M:%S'),
+                "status": "active",
+                "features": ["AI Generation", "Export to PDF/DOCX", "Unlimited Books", "Priority Support"]
+            }
         }
         save_config(default_config)
         return default_config
@@ -1176,7 +1186,7 @@ def generate_chapters_background(project_id, project, config):
 
 @app.route('/api/projects')
 def api_projects():
-    """Get all projects for the homepage"""
+    """Get all projects with enhanced metadata for homepage"""
     try:
         projects = []
         if os.path.exists(PROJECTS_FOLDER):
@@ -1187,23 +1197,37 @@ def api_projects():
                         with open(project_file, 'r') as f:
                             project = json.load(f)
                         
-                        # Add project ID from filename
+                        # Enhanced metadata
+                        project['filename'] = filename
                         project['id'] = filename[:-5]  # Remove .json extension
                         
-                        # Add created_at if not present
-                        if 'created_at' not in project:
-                            # Use file modification time as fallback
-                            project['created_at'] = datetime.fromtimestamp(os.path.getmtime(project_file)).isoformat()
+                        # Add file timestamps if missing
+                        if 'created_date' not in project:
+                            project['created_date'] = datetime.fromtimestamp(os.path.getctime(project_file)).isoformat()
+                        
+                        if 'last_modified' not in project:
+                            project['last_modified'] = datetime.fromtimestamp(os.path.getmtime(project_file)).isoformat()
+                        
+                        # Calculate completion status
+                        if project.get('generation_status') == 'completed':
+                            project['status'] = 'completed'
+                        elif project.get('chapters') and len(project.get('chapters', [])) > 0:
+                            completed_chapters = len([c for c in project.get('chapters', []) if c.get('content', '').strip()])
+                            total_chapters = len(project.get('chapters', []))
+                            project['completion_percentage'] = (completed_chapters / total_chapters * 100) if total_chapters > 0 else 0
+                            project['status'] = 'completed' if completed_chapters == total_chapters else 'in_progress'
+                        else:
+                            project['status'] = 'draft'
                         
                         projects.append(project)
                     except Exception as e:
                         logging.warning(f"Error reading project file {filename}: {e}")
                         continue
         
-        # Sort by creation date (newest first)
-        projects.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        # Sort by last modified date (newest first)
+        projects.sort(key=lambda x: x.get('last_modified', ''), reverse=True)
         
-        return jsonify(projects)
+        return jsonify({'projects': projects})
     except Exception as e:
         logging.error(f"Error fetching projects: {e}")
         return jsonify({'error': str(e)}), 500
@@ -1486,7 +1510,7 @@ def export_docx(project_id):
         
         # Cover page with image if available
         if project.get('cover_image'):
-            cover_image_path = os.path.join(UPLOADS_FOLDER, project['cover_image'])
+            cover_image_path = os.path.join(UPLOAD_FOLDER, project['cover_image'])
             if os.path.exists(cover_image_path):
                 # Add cover image
                 cover_paragraph = doc.add_paragraph()
@@ -1785,6 +1809,114 @@ def check_generation_status(project_id):
     except:
         return jsonify({'status': 'error'})
 
+@app.route('/api/check_ai_status')
+def api_check_ai_status():
+    """Check AI provider status and configuration"""
+    try:
+        config = load_config()
+        
+        # Check which AI provider is configured
+        ai_provider = config.get('ai_provider', 'openrouter')
+        is_ready = False
+        status = "Not configured"
+        detailed_status = "AI not configured"
+        
+        if ai_provider == 'gemini':
+            api_key = config.get('gemini_api_key', '')
+            if api_key:
+                is_ready = True
+                status = "Gemini Ready"
+                detailed_status = f"Gemini AI ({config.get('gemini_model', 'gemini-1.5-flash')})"
+            else:
+                detailed_status = "Gemini API key missing"
+        else:  # openrouter
+            api_key = config.get('openrouter_api_key', '')
+            if api_key:
+                is_ready = True
+                status = "OpenRouter Ready"
+                detailed_status = f"OpenRouter ({config.get('selected_model', 'auto')})"
+            else:
+                detailed_status = "OpenRouter API key missing"
+        
+        return jsonify({
+            'is_ready': is_ready,
+            'status': status,
+            'detailed_status': detailed_status,
+            'provider': ai_provider
+        })
+    except Exception as e:
+        logging.error(f"Error checking AI status: {e}")
+        return jsonify({
+            'is_ready': False,
+            'status': "Error",
+            'detailed_status': "Status check failed",
+            'provider': 'unknown'
+        }), 500
+
+@app.route('/api/test_ai_connection')
+def api_test_ai_connection():
+    """Test AI connection with a simple request"""
+    try:
+        config = load_config()
+        ai_provider = config.get('ai_provider', 'openrouter')
+        
+        if ai_provider == 'gemini':
+            api_key = config.get('gemini_api_key', '')
+            if not api_key:
+                return jsonify({'success': False, 'message': 'Gemini API key not configured'})
+            
+            # Simple test request to Gemini
+            try:
+                import google.generativeai as genai
+            except ImportError:
+                return jsonify({'success': False, 'message': 'Gemini library not installed'})
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel(config.get('gemini_model', 'gemini-1.5-flash'))
+            
+            try:
+                response = model.generate_content("Hello, this is a connection test.")
+                return jsonify({'success': True, 'message': 'Gemini connection successful'})
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Gemini test failed: {str(e)}'})
+                
+        else:  # openrouter
+            api_key = config.get('openrouter_api_key', '')
+            if not api_key:
+                return jsonify({'success': False, 'message': 'OpenRouter API key not configured'})
+            
+            # Simple test request to OpenRouter
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            data = {
+                "model": config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free'),
+                "messages": [{"role": "user", "content": "Hello, this is a connection test."}],
+                "max_tokens": 50
+            }
+            
+            try:
+                response = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json=data,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    return jsonify({'success': True, 'message': 'OpenRouter connection successful'})
+                else:
+                    return jsonify({'success': False, 'message': f'OpenRouter test failed: {response.status_code}'})
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'OpenRouter test failed: {str(e)}'})
+                
+    except Exception as e:
+        logging.error(f"Error testing AI connection: {e}")
+        return jsonify({'success': False, 'message': f'Connection test error: {str(e)}'})
+
+
+
 # Session storage for standalone generation
 standalone_sessions = {}
 
@@ -1883,7 +2015,7 @@ def api_standalone_export_docx():
         
         # Cover page with image if available
         if book_data.get('cover_image'):
-            cover_image_path = os.path.join(UPLOADS_FOLDER, book_data['cover_image'])
+            cover_image_path = os.path.join(UPLOAD_FOLDER, book_data['cover_image'])
             if os.path.exists(cover_image_path):
                 # Add cover image
                 cover_paragraph = doc.add_paragraph()

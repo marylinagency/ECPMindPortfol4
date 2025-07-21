@@ -5,6 +5,12 @@
       "mood": "tired",
       "note": "i am tired beacause dont sleep",
       "timestamp": "2025-07-20T18:26:28.651572"
+    },
+    {
+      "date": "2025-07-21",
+      "mood": "inspired",
+      "note": "",
+      "timestamp": "2025-07-21T06:22:22.618430"
     }
   ]
 }

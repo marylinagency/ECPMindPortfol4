@@ -78,90 +78,312 @@
                 </div>
             </div>
 
-            <!-- Main Content Grid -->
-            <div class="container-desktop">
-                <div class="grid grid-cols-12 gap-8">
-                    <!-- Left Sidebar - Generation Tools -->
-                    <div class="col-span-4 space-y-6">
-                        <!-- Quick Generation Card -->
-                        <div class="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
-                                    <i data-feather="zap" class="w-6 h-6 text-white"></i>
+            <!-- Essential Features Overview -->
+            <div class="container-desktop mb-12">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-white mb-4">Essential Features</h2>
+                    <p class="text-xl text-gray-300 max-w-3xl mx-auto">Everything you need to create, edit, and publish professional books</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <!-- AI-Powered Generation -->
+                    <div class="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 text-center hover:bg-white/15 transition-all duration-300">
+                        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i data-feather="cpu" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-4">AI Generation</h3>
+                        <p class="text-gray-300 mb-6">Create complete books in minutes using advanced AI. Support for 9 languages and multiple writing styles.</p>
+                        <div class="space-y-2 text-sm text-gray-400">
+                            <div>✓ Chapter outline generation</div>
+                            <div>✓ Full content creation</div>
+                            <div>✓ Professional formatting</div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Export -->
+                    <div class="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 text-center hover:bg-white/15 transition-all duration-300">
+                        <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i data-feather="file-text" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-4">Export Options</h3>
+                        <p class="text-gray-300 mb-6">Export your books in multiple formats ready for publishing or sharing with professional layouts.</p>
+                        <div class="space-y-2 text-sm text-gray-400">
+                            <div>✓ PDF with cover images</div>
+                            <div>✓ DOCX for editing</div>
+                            <div>✓ KDP-ready formatting</div>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Editing -->
+                    <div class="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 text-center hover:bg-white/15 transition-all duration-300">
+                        <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i data-feather="edit-3" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-4">Live Editing</h3>
+                        <p class="text-gray-300 mb-6">Edit any part of your book with click-to-edit functionality and real-time preview capabilities.</p>
+                        <div class="space-y-2 text-sm text-gray-400">
+                            <div>✓ Click-to-edit interface</div>
+                            <div>✓ Chapter management</div>
+                            <div>✓ Cover image uploads</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Dashboard -->
+            <div class="container-desktop mb-12">
+                <div class="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-3xl font-bold text-white">Quick Actions</h2>
+                        <div class="text-gray-400 text-sm">
+                            <span id="total-projects">0</span> books created • <span id="ai-status">AI Ready</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-12 gap-6">
+                        <!-- Left Sidebar - Creation Tools -->
+                        <div class="col-span-4 space-y-6">
+                            <!-- AI Generation Card -->
+                            <div class="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-2xl border border-orange-500/30 p-6 hover:border-orange-500/50 transition-all duration-300">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
+                                        <i data-feather="zap" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white">AI Generation</h3>
+                                        <p class="text-sm text-orange-200">Fast & intelligent</p>
+                                    </div>
                                 </div>
-                                <h3 class="text-xl font-bold text-white">AI Generation</h3>
+                                <p class="text-gray-300 mb-6 text-sm">Create complete books instantly with AI-powered content generation</p>
+                                <a href="/standalone_generation" class="block w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 text-center">
+                                    Start Generating
+                                </a>
                             </div>
-                            <p class="text-gray-300 mb-6">Create complete books instantly with AI</p>
-                            <a href="/standalone_generation" class="block w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 text-center">
-                                Start Generating
+
+                            <!-- Manual Creation Card -->
+                            <div class="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-xl rounded-2xl border border-blue-500/30 p-6 hover:border-blue-500/50 transition-all duration-300">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mr-4">
+                                        <i data-feather="edit-3" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white">Manual Creation</h3>
+                                        <p class="text-sm text-blue-200">Full control</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-300 mb-6 text-sm">Create books from scratch with complete control over content and structure</p>
+                                <button onclick="showManualCreationModal()" class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300">
+                                    Create Manually
+                                </button>
+                            </div>
+
+                            <!-- Writing Mood Tracker -->
+                            <div class="bg-gradient-to-br from-pink-500/20 to-purple-500/20 backdrop-blur-xl rounded-2xl border border-pink-500/30 p-6 hover:border-pink-500/50 transition-all duration-300">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl flex items-center justify-center mr-4">
+                                        <i data-feather="heart" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white">Mood Tracker</h3>
+                                        <p class="text-sm text-pink-200">Track creativity</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-300 mb-6 text-sm">Monitor your writing moods and track creative patterns</p>
+                                <a href="/mood_tracker" class="block w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 text-center">
+                                    Track Mood
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Center - Statistics Dashboard -->
+                        <div class="col-span-5 space-y-6">
+                            <!-- Statistics Cards -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- Total Books -->
+                                <div class="bg-gradient-to-br from-emerald-500/20 to-green-500/20 backdrop-blur-xl rounded-xl border border-emerald-500/30 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-emerald-200 text-sm font-medium">Total Books</p>
+                                            <p class="text-2xl font-bold text-white" id="stats-total-books">0</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
+                                            <i data-feather="book" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Chapters Written -->
+                                <div class="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 backdrop-blur-xl rounded-xl border border-cyan-500/30 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-cyan-200 text-sm font-medium">Total Chapters</p>
+                                            <p class="text-2xl font-bold text-white" id="stats-total-chapters">0</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center">
+                                            <i data-feather="file-text" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Stats Overview -->
+                            <div class="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-6">
+                                <h4 class="text-lg font-semibold text-white mb-4">Your Writing Progress</h4>
+                                <div class="space-y-4">
+                                    <!-- Progress Bar -->
+                                    <div>
+                                        <div class="flex justify-between text-sm text-gray-300 mb-2">
+                                            <span>Books Completed</span>
+                                            <span id="completion-percentage">0%</span>
+                                        </div>
+                                        <div class="w-full bg-white/10 rounded-full h-2">
+                                            <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500" id="completion-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Recent Activity -->
+                                    <div class="pt-4 border-t border-white/10">
+                                        <h5 class="text-sm font-medium text-white mb-3">Recent Activity</h5>
+                                        <div id="recent-activity" class="space-y-2">
+                                            <!-- Dynamic activity items will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Sidebar - Quick Actions & Templates -->
+                        <div class="col-span-3 space-y-6">
+                            <!-- Settings & Configuration -->
+                            <div class="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-gray-500 to-slate-500 rounded-xl flex items-center justify-center mr-4">
+                                        <i data-feather="settings" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-white">Configuration</h3>
+                                        <p class="text-sm text-gray-300" id="config-status">AI Ready</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <a href="{{ url_for('settings') }}" class="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white py-2 px-4 rounded-lg text-sm transition-all duration-300 block text-center">
+                                        <i data-feather="sliders" class="w-4 h-4 inline mr-2"></i>
+                                        Settings
+                                    </a>
+                                    <button onclick="checkAIStatus()" class="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white py-2 px-4 rounded-lg text-sm transition-all duration-300">
+                                        <i data-feather="activity" class="w-4 h-4 inline mr-2"></i>
+                                        Test AI Connection
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Quick Templates -->
+                            <div class="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-violet-500 to-purple-500 rounded-xl flex items-center justify-center mr-4">
+                                        <i data-feather="layers" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white">Quick Templates</h3>
+                                </div>
+                                <div class="space-y-2">
+                                    <button onclick="useTemplate('business')" class="w-full text-left bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg p-3 text-gray-300 hover:text-white transition-all duration-200 text-sm">
+                                        <div class="font-medium">📊 Business Guide</div>
+                                        <div class="text-xs opacity-75">Professional business book</div>
+                                    </button>
+                                    <button onclick="useTemplate('selfhelp')" class="w-full text-left bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg p-3 text-gray-300 hover:text-white transition-all duration-200 text-sm">
+                                        <div class="font-medium">🌟 Self-Help Book</div>
+                                        <div class="text-xs opacity-75">Personal development</div>
+                                    </button>
+                                    <button onclick="useTemplate('technical')" class="w-full text-left bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg p-3 text-gray-300 hover:text-white transition-all duration-200 text-sm">
+                                        <div class="font-medium">🔧 Technical Manual</div>
+                                        <div class="text-xs opacity-75">Step-by-step guide</div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Getting Started Guide -->
+            <div class="container-desktop mb-12">
+                <div class="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 backdrop-blur-xl rounded-3xl border border-indigo-500/30 p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i data-feather="compass" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-white mb-2">Getting Started</h2>
+                        <p class="text-lg text-gray-300">New to BookGenPro? Follow these simple steps to create your first book</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <!-- Step 1 -->
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white">1</div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Configure AI</h3>
+                            <p class="text-sm text-gray-300 mb-4">Set up your OpenRouter or Gemini API key in settings</p>
+                            <a href="{{ url_for('settings') }}" class="text-indigo-300 hover:text-indigo-200 text-sm font-medium">
+                                Configure Now →
                             </a>
                         </div>
 
-                        <!-- Manual Creation Card -->
-                        <div class="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mr-4">
-                                    <i data-feather="edit-3" class="w-6 h-6 text-white"></i>
-                                </div>
-                                <h3 class="text-xl font-bold text-white">Manual Creation</h3>
-                            </div>
-                            <p class="text-gray-300 mb-6">Full control over your book content</p>
-                            <button onclick="showManualCreationModal()" class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
-                                Create Manually
+                        <!-- Step 2 -->
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white">2</div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Choose Method</h3>
+                            <p class="text-sm text-gray-300 mb-4">Use AI generation for speed or manual creation for control</p>
+                            <button onclick="showMethodSelection()" class="text-indigo-300 hover:text-indigo-200 text-sm font-medium">
+                                Learn More →
                             </button>
                         </div>
 
-                        <!-- Quick Templates -->
-                        <div class="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mr-4">
-                                    <i data-feather="layers" class="w-6 h-6 text-white"></i>
-                                </div>
-                                <h3 class="text-xl font-bold text-white">Quick Templates</h3>
-                            </div>
-                            <div class="space-y-3">
-                                <button class="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-3 text-gray-300 hover:text-white transition-all duration-200">
-                                    <div class="font-medium">Business Guide</div>
-                                    <div class="text-sm opacity-75">Professional business book template</div>
-                                </button>
-                                <button class="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-3 text-gray-300 hover:text-white transition-all duration-200">
-                                    <div class="font-medium">Self-Help Book</div>
-                                    <div class="text-sm opacity-75">Personal development guide</div>
-                                </button>
-                                <button class="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-3 text-gray-300 hover:text-white transition-all duration-200">
-                                    <div class="font-medium">Technical Manual</div>
-                                    <div class="text-sm opacity-75">Step-by-step instructions</div>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Center and Right - Completed Projects Gallery -->
-                    <div class="col-span-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-3xl font-bold text-white">Your Completed Books</h2>
-                            <div class="text-gray-400">
-                                <span id="project-count">0</span> books created
-                            </div>
+                        <!-- Step 3 -->
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white">3</div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Create Content</h3>
+                            <p class="text-sm text-gray-300 mb-4">Generate or write your book content, edit as needed</p>
+                            <a href="/standalone_generation" class="text-indigo-300 hover:text-indigo-200 text-sm font-medium">
+                                Start Creating →
+                            </a>
                         </div>
 
-                        <!-- Projects Grid -->
-                        <div id="completed-projects-grid" class="grid grid-cols-3 gap-6">
-                            <!-- Projects will be dynamically loaded here -->
-                        </div>
-
-                        <!-- Empty State -->
-                        <div id="empty-projects-state" class="text-center py-20">
-                            <div class="w-24 h-24 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <i data-feather="book" class="w-12 h-12 text-gray-400"></i>
-                            </div>
-                            <h3 class="text-2xl font-bold text-gray-400 mb-2">No Books Yet</h3>
-                            <p class="text-gray-500 mb-6">Start creating your first book using AI generation or manual creation</p>
-                            <button onclick="showAIGenerationModal()" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
-                                Create Your First Book
+                        <!-- Step 4 -->
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white">4</div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Export & Share</h3>
+                            <p class="text-sm text-gray-300 mb-4">Download as PDF or DOCX, ready for publishing</p>
+                            <button onclick="showExportGuide()" class="text-indigo-300 hover:text-indigo-200 text-sm font-medium">
+                                Export Guide →
                             </button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Your Completed Books Section -->
+            <div class="container-desktop mb-12">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-4xl font-bold text-white">Your Book Library</h2>
+                    <div class="text-gray-400">
+                        <span id="project-count">0</span> books created
+                    </div>
+                </div>
+
+                <!-- Projects Grid -->
+                <div id="completed-projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Projects will be dynamically loaded here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-projects-state" class="text-center py-20">
+                    <div class="w-24 h-24 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-feather="book" class="w-12 h-12 text-gray-300"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-300 mb-2">No Books Yet</h3>
+                    <p class="text-gray-400 mb-6">Start creating your first book using AI generation or manual creation</p>
+                    <a href="/standalone_generation" class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300">
+                        Create Your First Book
+                    </a>
                 </div>
             </div>
             

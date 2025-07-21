@@ -62,6 +62,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeRealTimeUpdates();
     initializeInteractiveElements();
     loadSavedAuthorBio();
+    
+    // Initialize new enhanced homepage features
+    initializeHomepageFeatures();
+    loadProjectStatistics();
+    loadRecentActivity();
+    checkAIStatusOnLoad();
 });
 
 // Load saved author bio from settings enhancement
@@ -1023,6 +1029,482 @@ function saveFormData(form) {
     
     localStorage.setItem(`autosave_${form.id}`, JSON.stringify(saveData));
     showSaveIndicator('saved');
+}
+
+function showSaveIndicator(status) {
+    const indicator = document.getElementById('save-indicator') || createSaveIndicator();
+    
+    if (status === 'saving') {
+        indicator.textContent = 'Saving...';
+        indicator.className = 'save-indicator text-yellow-600';
+    } else {
+        indicator.textContent = 'Saved';
+        indicator.className = 'save-indicator text-green-600';
+        
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+        }, 2000);
+    }
+}
+
+function createSaveIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'save-indicator';
+    indicator.className = 'fixed top-4 left-4 z-50 px-3 py-1 bg-white rounded shadow-lg text-sm';
+    document.body.appendChild(indicator);
+    return indicator;
+}
+
+// Enhanced Homepage Features
+function initializeHomepageFeatures() {
+    // Initialize quick template functionality
+    initializeQuickTemplates();
+    
+    // Initialize method selection guide
+    initializeMethodGuide();
+    
+    // Initialize export guide
+    initializeExportGuide();
+    
+    // Initialize AI status checking
+    setupAIStatusMonitoring();
+}
+
+// Quick Templates Functionality
+function initializeQuickTemplates() {
+    // Template data
+    const templates = {
+        business: {
+            title: "The Complete Business Guide to [Your Industry]",
+            description: "A comprehensive business guide covering market analysis, strategic planning, financial management, and growth strategies for entrepreneurs and business leaders in [specific industry]. This book will provide practical tools, real-world case studies, and actionable insights for building successful businesses.",
+            chapters: 12,
+            style: "professional"
+        },
+        selfhelp: {
+            title: "Transform Your Life: A Journey to Personal Excellence",
+            description: "A personal development book focused on self-improvement, mindset transformation, goal achievement, and building lasting positive habits. This guide will help readers overcome obstacles, develop confidence, and create meaningful change in their personal and professional lives.",
+            chapters: 10,
+            style: "conversational"
+        },
+        technical: {
+            title: "Mastering [Technology/Skill]: A Step-by-Step Technical Guide",
+            description: "A comprehensive technical manual providing detailed instructions, best practices, troubleshooting guides, and advanced techniques for mastering [specific technology or skill]. Perfect for beginners to advanced practitioners looking to enhance their expertise.",
+            chapters: 15,
+            style: "technical"
+        }
+    };
+
+    // Add event listeners for template buttons (if they don't exist, create them)
+    window.useTemplate = function(templateKey) {
+        const template = templates[templateKey];
+        if (!template) return;
+
+        // Fill the AI generation form if it exists
+        const titleInput = document.getElementById('gen_book_title');
+        const topicInput = document.getElementById('gen_topic');
+        const chaptersInput = document.getElementById('gen_chapters');
+        const styleSelect = document.getElementById('gen_style');
+
+        if (titleInput) titleInput.value = template.title;
+        if (topicInput) topicInput.value = template.description;
+        if (chaptersInput) chaptersInput.value = template.chapters;
+        if (styleSelect) styleSelect.value = template.style;
+
+        // Show notification
+        showNotification(`${templateKey.charAt(0).toUpperCase() + templateKey.slice(1)} template loaded! Scroll down to customize and generate.`, 'success');
+        
+        // Smooth scroll to the AI generation form
+        const generationForm = document.getElementById('generate-book-form');
+        if (generationForm) {
+            generationForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Add highlight effect
+            generationForm.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.5)';
+            setTimeout(() => {
+                generationForm.style.boxShadow = '';
+            }, 3000);
+        }
+    };
+}
+
+// Method Selection Guide
+function initializeMethodGuide() {
+    window.showMethodSelection = function() {
+        const modal = createModal('Choose Your Creation Method', `
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="selectMethod('ai')">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center mr-3">
+                                <i data-feather="zap" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <h3 class="font-semibold">AI Generation</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Best for: Quick book creation, content ideas, getting started</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>✓ Complete books in minutes</li>
+                            <li>✓ AI-generated outlines and content</li>
+                            <li>✓ Multiple language support</li>
+                            <li>✓ Professional formatting</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="selectMethod('manual')">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mr-3">
+                                <i data-feather="edit-3" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <h3 class="font-semibold">Manual Creation</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Best for: Custom content, specific requirements, personal touch</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>✓ Complete creative control</li>
+                            <li>✓ Custom chapter structure</li>
+                            <li>✓ Personal writing style</li>
+                            <li>✓ Edit as you go</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="text-center pt-4 border-t border-gray-200">
+                    <p class="text-sm text-gray-600 mb-4">💡 Pro Tip: You can combine both methods! Start with AI generation and then manually edit the content.</p>
+                </div>
+            </div>
+        `);
+        
+        document.body.appendChild(modal);
+    };
+
+    window.selectMethod = function(method) {
+        // Close modal
+        const modal = document.querySelector('.method-selection-modal');
+        if (modal) modal.remove();
+
+        if (method === 'ai') {
+            window.location.href = '/standalone_generation';
+        } else {
+            showManualCreationModal();
+        }
+    };
+}
+
+// Export Guide
+function initializeExportGuide() {
+    window.showExportGuide = function() {
+        const modal = createModal('Export Your Books', `
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mr-3">
+                                <i data-feather="file-text" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <h3 class="font-semibold">PDF Export</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Perfect for: Reading, sharing, publishing</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>✓ Professional formatting</li>
+                            <li>✓ Cover image included</li>
+                            <li>✓ KDP-ready layout</li>
+                            <li>✓ Print-friendly</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+                                <i data-feather="edit-2" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <h3 class="font-semibold">DOCX Export</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Perfect for: Editing, collaboration, submission</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>✓ Editable in Word</li>
+                            <li>✓ Track changes support</li>
+                            <li>✓ Comments and reviews</li>
+                            <li>✓ Publisher ready</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-blue-800 mb-2">📚 Publishing Tips</h4>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• PDF exports are ideal for Amazon KDP and other print-on-demand services</li>
+                        <li>• DOCX exports work great for traditional publishers and editors</li>
+                        <li>• Always review your book in preview mode before exporting</li>
+                        <li>• Upload a high-quality cover image for best results</li>
+                    </ul>
+                </div>
+                
+                <div class="text-center pt-4">
+                    <button onclick="document.querySelector('.export-guide-modal').remove()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        Got it!
+                    </button>
+                </div>
+            </div>
+        `);
+        
+        modal.classList.add('export-guide-modal');
+        document.body.appendChild(modal);
+    };
+}
+
+// AI Status Monitoring
+function setupAIStatusMonitoring() {
+    // Check AI status every 30 seconds if on homepage
+    if (window.location.pathname === '/') {
+        setInterval(updateAIStatus, 30000);
+    }
+}
+
+function checkAIStatusOnLoad() {
+    // Update initial status
+    updateAIStatus();
+}
+
+function updateAIStatus() {
+    fetch('/api/check_ai_status')
+        .then(response => response.json())
+        .then(data => {
+            const statusElement = document.getElementById('ai-status');
+            const configStatusElement = document.getElementById('config-status');
+            
+            if (statusElement) {
+                statusElement.textContent = data.status;
+            }
+            
+            if (configStatusElement) {
+                configStatusElement.textContent = data.detailed_status;
+                configStatusElement.className = data.is_ready ? 'text-sm text-green-300' : 'text-sm text-red-300';
+            }
+        })
+        .catch(error => {
+            console.log('AI status check failed:', error);
+        });
+}
+
+window.checkAIStatus = function() {
+    const button = event.target;
+    const originalText = button.textContent;
+    
+    button.textContent = 'Testing...';
+    button.disabled = true;
+    
+    fetch('/api/test_ai_connection')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('✅ AI connection successful!', 'success');
+                updateAIStatus(); // Refresh status
+            } else {
+                showNotification('❌ AI connection failed: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('❌ Connection test failed', 'error');
+        })
+        .finally(() => {
+            button.textContent = originalText;
+            button.disabled = false;
+        });
+};
+
+// Project Statistics Loading
+function loadProjectStatistics() {
+    fetch('/api/projects')
+        .then(response => response.json())
+        .then(data => {
+            updateProjectStats(data.projects);
+            updateProjectCounter(data.projects.length);
+            
+            // Load completed projects if grid exists
+            const projectsGrid = document.getElementById('completed-projects-grid');
+            if (projectsGrid) {
+                loadCompletedProjects(data.projects);
+            }
+        })
+        .catch(error => {
+            console.log('Failed to load project statistics:', error);
+        });
+}
+
+function updateProjectStats(projects) {
+    const totalBooksElement = document.getElementById('stats-total-books');
+    const totalChaptersElement = document.getElementById('stats-total-chapters');
+    const completionPercentage = document.getElementById('completion-percentage');
+    const completionBar = document.getElementById('completion-bar');
+    
+    const completedProjects = projects.filter(p => p.status === 'completed');
+    const totalChapters = projects.reduce((sum, p) => sum + (p.chapters || 0), 0);
+    const completionPercent = projects.length > 0 ? Math.round((completedProjects.length / projects.length) * 100) : 0;
+    
+    if (totalBooksElement) totalBooksElement.textContent = projects.length;
+    if (totalChaptersElement) totalChaptersElement.textContent = totalChapters;
+    if (completionPercentage) completionPercentage.textContent = completionPercent + '%';
+    if (completionBar) completionBar.style.width = completionPercent + '%';
+}
+
+function updateProjectCounter(count) {
+    const counters = document.querySelectorAll('#project-count, #total-projects');
+    counters.forEach(counter => {
+        if (counter) counter.textContent = count;
+    });
+}
+
+// Recent Activity Loading
+function loadRecentActivity() {
+    const activityContainer = document.getElementById('recent-activity');
+    if (!activityContainer) return;
+    
+    // Show loading state
+    activityContainer.innerHTML = '<div class="text-gray-500 text-sm">Loading recent activity...</div>';
+    
+    fetch('/api/projects')
+        .then(response => response.json())
+        .then(data => {
+            const projects = data.projects.sort((a, b) => 
+                new Date(b.last_modified || 0) - new Date(a.last_modified || 0)
+            ).slice(0, 3);
+            
+            if (projects.length === 0) {
+                activityContainer.innerHTML = '<div class="text-gray-500 text-sm">No recent activity</div>';
+                return;
+            }
+            
+            const activityHTML = projects.map(project => {
+                const date = project.last_modified ? 
+                    new Date(project.last_modified).toLocaleDateString() : 
+                    'Unknown date';
+                
+                return `
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-300">${project.title || 'Untitled Book'}</span>
+                        <span class="text-gray-500">${date}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            activityContainer.innerHTML = activityHTML;
+        })
+        .catch(error => {
+            activityContainer.innerHTML = '<div class="text-red-400 text-sm">Failed to load activity</div>';
+        });
+}
+
+// Completed Projects Loading
+function loadCompletedProjects(projects) {
+    const projectsGrid = document.getElementById('completed-projects-grid');
+    const emptyState = document.getElementById('empty-projects-state');
+    
+    if (!projectsGrid) return;
+    
+    const completedProjects = projects.filter(p => p.status === 'completed');
+    
+    if (completedProjects.length === 0) {
+        if (emptyState) emptyState.style.display = 'block';
+        projectsGrid.style.display = 'none';
+        return;
+    }
+    
+    if (emptyState) emptyState.style.display = 'none';
+    projectsGrid.style.display = 'grid';
+    
+    const projectsHTML = completedProjects.map(project => {
+        const coverImage = project.cover_image ? 
+            `/static/uploads/${project.cover_image}` : 
+            'data:image/svg+xml,' + encodeURIComponent(generateBookCoverSVG(project.title || 'Untitled'));
+            
+        const chapterCount = project.chapters || 0;
+        const createdDate = project.created_date ? 
+            new Date(project.created_date).toLocaleDateString() : 
+            'Unknown date';
+        
+        return `
+            <div class="group bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden hover:bg-white/15 hover:scale-105 transition-all duration-300">
+                <div class="aspect-[3/4] relative overflow-hidden">
+                    <img src="${coverImage}" alt="${project.title}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div class="flex space-x-2">
+                            <a href="/project/${project.filename.replace('.json', '')}" class="flex-1 bg-blue-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-blue-700/80 transition-colors">
+                                View
+                            </a>
+                            <a href="/book_preview/${project.filename.replace('.json', '')}" class="flex-1 bg-green-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-green-700/80 transition-colors">
+                                Preview
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold text-white mb-2 line-clamp-2">${project.title || 'Untitled Book'}</h3>
+                    <div class="flex justify-between text-sm text-gray-400 mb-2">
+                        <span>${chapterCount} chapters</span>
+                        <span>${createdDate}</span>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        ${project.language || 'English'} • ${project.style || 'Professional'} style
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    projectsGrid.innerHTML = projectsHTML;
+}
+
+// Utility function to create modals
+function createModal(title, content, className = '') {
+    const modal = document.createElement('div');
+    modal.className = `fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm ${className}`;
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-gray-900">${title}</h2>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                ${content}
+            </div>
+        </div>
+    `;
+    
+    // Re-initialize feather icons for the modal
+    setTimeout(() => feather.replace(), 100);
+    
+    return modal;
+}
+
+// Generate SVG cover for books without images
+function generateBookCoverSVG(title) {
+    const colors = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+    ];
+    
+    const gradient = colors[Math.floor(Math.random() * colors.length)];
+    
+    return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400">
+            <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grad)"/>
+            <text x="150" y="200" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">
+                ${title.length > 30 ? title.substring(0, 30) + '...' : title}
+            </text>
+        </svg>
+    `;
 }
 
 function showSaveIndicator(status) {
