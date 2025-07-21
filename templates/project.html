@@ -41,7 +41,7 @@
                 
                 <div class="flex items-start gap-3 mb-4">
                     <p class="text-gray-600 flex-1 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors" 
-                       onclick="editProjectDescription('{{ project.get('id', '') }}', '{{ project.get('topic', '') }}')" 
+                       onclick="editProjectDescription('{{ project.get('id', '') }}', `{{ project.get('topic', '').replace('`', '\\`').replace('\\', '\\\\') }}`)" 
                        title="Click to edit description">
                         {{ project.get('topic', 'No description available') }}
                         <i data-feather="edit-2" class="w-4 h-4 inline ml-2 text-gray-400"></i>
@@ -1240,6 +1240,91 @@ function hideLoadingModal() {
     if (modal) {
         modal.remove();
     }
+}
+
+function editProjectDescription(projectId, currentDescription) {
+    // Create modal for editing description
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Edit Project Description</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea id="editDescriptionText" 
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                         rows="6" 
+                         placeholder="Enter project description...">${currentDescription}</textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button onclick="this.closest('.fixed').remove()" 
+                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="saveProjectDescription('${projectId}', this)" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <i data-feather="save" class="w-4 h-4 inline mr-2"></i>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    feather.replace();
+    
+    // Focus on textarea
+    document.getElementById('editDescriptionText').focus();
+}
+
+function saveProjectDescription(projectId, button) {
+    const textarea = document.getElementById('editDescriptionText');
+    const newDescription = textarea.value.trim();
+    
+    if (!newDescription) {
+        showNotification('Description cannot be empty', 'error');
+        return;
+    }
+    
+    button.disabled = true;
+    button.innerHTML = '<i data-feather="loader" class="w-4 h-4 inline mr-2 animate-spin"></i>Saving...';
+    feather.replace();
+    
+    fetch(`/api/update_project/${projectId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            topic: newDescription
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Project description updated successfully!', 'success');
+            button.closest('.fixed').remove();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification('Failed to update description: ' + data.message, 'error');
+            button.disabled = false;
+            button.innerHTML = '<i data-feather="save" class="w-4 h-4 inline mr-2"></i>Save Changes';
+            feather.replace();
+        }
+    })
+    .catch(error => {
+        showNotification('Error updating description: ' + error.message, 'error');
+        button.disabled = false;
+        button.innerHTML = '<i data-feather="save" class="w-4 h-4 inline mr-2"></i>Save Changes';
+        feather.replace();
+    });
 }
 </script>
 {% endblock %}
