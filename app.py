@@ -438,6 +438,15 @@ def save_settings():
     flash('Settings saved successfully! AI provider updated.', 'success')
     return redirect(url_for('settings'))
 
+@app.route('/save_author_bio', methods=['POST'])
+def save_author_bio():
+    config = load_config()
+    config['default_author_bio'] = request.form.get('default_author_bio', '')
+    config['use_default_bio'] = request.form.get('use_default_bio') == 'true'
+    save_config(config)
+    flash('Default author bio saved successfully!', 'success')
+    return redirect(url_for('settings'))
+
 @app.route('/check_ai_provider_status')
 def check_ai_provider_status():
     """Check the current AI provider configuration status"""

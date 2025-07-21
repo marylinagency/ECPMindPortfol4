@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - BookGenPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .floating-element {
+            animation: float 7s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-10px) translateX(5px); }
+            50% { transform: translateY(-20px) translateX(0px); }
+            75% { transform: translateY(-10px) translateX(-5px); }
+        }
+        .bounce-in {
+            animation: bounceIn 1s ease-out;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pulse-lock {
+            animation: pulseLock 2s infinite;
+        }
+        @keyframes pulseLock {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.6); }
+            50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.9); }
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .key-glow {
+            animation: keyGlow 3s infinite;
+        }
+        @keyframes keyGlow {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)); }
+            50% { filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8)); }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg overflow-hidden relative">
+    <!-- Animated Background -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <!-- Floating Keys and Locks -->
+        <div class="floating-element absolute top-20 left-20 w-8 h-8 text-white/20 key-glow">
+            <i data-feather="key" class="w-full h-full"></i>
+        </div>
+        <div class="floating-element absolute bottom-32 right-16 w-6 h-6 text-white/15 key-glow" style="animation-delay: 1s;">
+            <i data-feather="unlock" class="w-full h-full"></i>
+        </div>
+        <div class="floating-element absolute top-1/3 right-1/4 w-10 h-10 text-white/25 key-glow" style="animation-delay: 2s;">
+            <i data-feather="lock" class="w-full h-full"></i>
+        </div>
+        
+        <!-- Floating Orbs -->
+        <div class="floating-element absolute top-1/4 left-32 w-20 h-20 bg-gradient-to-br from-blue-400/30 to-purple-400/30 rounded-full blur-xl"></div>
+        <div class="floating-element absolute bottom-1/4 right-24 w-28 h-28 bg-gradient-to-br from-indigo-400/20 to-cyan-400/20 rounded-full blur-2xl" style="animation-delay: 3s;"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 min-h-screen flex items-center justify-center px-4">
+        <div class="text-center max-w-2xl mx-auto">
+            <!-- Lock Icon with Animation -->
+            <div class="bounce-in mb-8">
+                <div class="relative inline-block">
+                    <div id="lockIcon" class="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm pulse-lock cursor-pointer" onclick="shakeLock()">
+                        <i data-feather="lock" class="w-16 h-16 text-white"></i>
+                    </div>
+                    <!-- Rotating Shield -->
+                    <div class="absolute inset-0 w-32 h-32 border-4 border-dashed border-white/30 rounded-full animate-spin" style="animation-duration: 12s;"></div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div class="mb-8">
+                <h1 class="text-8xl font-bold text-white mb-4 bounce-in" style="animation-delay: 0.2s;">403</h1>
+                <h2 class="text-3xl font-semibold text-white mb-4 bounce-in" style="animation-delay: 0.4s;">Access Denied</h2>
+                <p class="text-xl text-white/90 mb-6 bounce-in" style="animation-delay: 0.6s;">
+                    This chapter is locked! But don't worry, every great story has its mysteries.
+                    <br>Let's find the right key to unlock your creative potential!
+                </p>
+            </div>
+
+            <!-- Encouraging Message -->
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/20 bounce-in" style="animation-delay: 0.8s;">
+                <div class="flex items-center justify-center mb-4">
+                    <i data-feather="shield" class="w-8 h-8 text-blue-300 mr-3"></i>
+                    <h3 class="text-xl font-semibold text-white">Your Story Awaits!</h3>
+                </div>
+                <p class="text-white/80 leading-relaxed">
+                    Sometimes the best chapters are the ones we have to earn access to. 
+                    This just means your next great story is protected and waiting for you to unlock it!
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center bounce-in" style="animation-delay: 1s;">
+                <a href="/" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center">
+                    <i data-feather="home" class="w-5 h-5 mr-2"></i>
+                    Back to Home
+                </a>
+                <a href="/settings" class="bg-blue-600/80 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg backdrop-blur-sm flex items-center justify-center">
+                    <i data-feather="settings" class="w-5 h-5 mr-2"></i>
+                    Check Settings
+                </a>
+            </div>
+
+            <!-- Interactive Element -->
+            <div class="mt-12 bounce-in" style="animation-delay: 1.2s;">
+                <div class="bg-white/10 rounded-xl p-4 cursor-pointer hover:bg-white/20 transition-all duration-300" onclick="showHint()">
+                    <div class="flex items-center justify-center mb-2">
+                        <i data-feather="lightbulb" class="w-6 h-6 text-yellow-300 mr-2"></i>
+                        <span class="text-white font-medium">Need a hint?</span>
+                    </div>
+                    <p id="hintText" class="text-white/70 text-sm">
+                        Click here for a creative writing tip! 💡
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+        
+        function shakeLock() {
+            const lockIcon = document.getElementById('lockIcon');
+            lockIcon.classList.add('shake');
+            setTimeout(() => {
+                lockIcon.classList.remove('shake');
+            }, 500);
+        }
+        
+        const hints = [
+            "Every locked door is just an opportunity waiting to be discovered! 🚪",
+            "Great writers don't fear barriers - they write around them! ✍️",
+            "Sometimes the best stories come from unexpected detours! 🌟",
+            "Access denied? Think of it as 'story potential unlocked'! 📚",
+            "The best plots have twists - even error pages can inspire! 🎭"
+        ];
+        
+        let hintIndex = 0;
+        function showHint() {
+            const hintText = document.getElementById('hintText');
+            hintText.textContent = hints[hintIndex];
+            hintIndex = (hintIndex + 1) % hints.length;
+            
+            // Add a little animation
+            hintText.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                hintText.style.transform = 'scale(1)';
+            }, 150);
+        }
+    </script>
+</body>
+</html>

@@ -117,42 +117,101 @@
         <div id="setup-section" class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 mb-8">
             <h2 class="text-2xl font-bold text-white mb-6">Book Generation Setup</h2>
             
-            <form id="generation-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-white text-sm font-medium mb-2">Book Topic/Description</label>
-                    <textarea id="book-topic" rows="3" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent" placeholder="Describe your book topic in detail..."></textarea>
+            <form id="generation-form" class="space-y-6">
+                <!-- Book Title -->
+                <div class="md:col-span-2">
+                    <label class="block text-white text-sm font-medium mb-2">Book Title</label>
+                    <input type="text" id="book-title-input" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent" placeholder="Enter your book title...">
                 </div>
                 
-                <div>
-                    <label class="block text-white text-sm font-medium mb-2">Author Bio (Optional)</label>
-                    <textarea id="author-bio" rows="3" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent" placeholder="Brief author biography..."></textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-white text-sm font-medium mb-2">Book Topic/Description</label>
+                        <textarea id="book-topic" rows="3" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent" placeholder="Describe your book topic in detail..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-white text-sm font-medium mb-2">Author Bio (Optional)</label>
+                        <textarea id="author-bio" rows="3" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent" placeholder="Brief author biography..."></textarea>
+                    </div>
                 </div>
                 
-                <div>
-                    <label class="block text-white text-sm font-medium mb-2">Language</label>
-                    <select id="book-language" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:ring-2 focus:ring-blue-400">
-                        <option value="English">English</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="French">French</option>
-                        <option value="German">German</option>
-                        <option value="Italian">Italian</option>
-                    </select>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-white text-sm font-medium mb-2">Language</label>
+                        <select id="book-language" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:ring-2 focus:ring-blue-400">
+                            <option value="English">English</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="French">French</option>
+                            <option value="German">German</option>
+                            <option value="Italian">Italian</option>
+                            <option value="Portuguese">Portuguese</option>
+                            <option value="Arabic">Arabic</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Japanese">Japanese</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-white text-sm font-medium mb-2">Number of Chapters</label>
+                        <input type="number" id="chapter-count" min="3" max="25" value="8" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:ring-2 focus:ring-blue-400">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-white text-sm font-medium mb-2">Writing Style</label>
+                        <select id="writing-style" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:ring-2 focus:ring-blue-400">
+                            <option value="professional">Professional</option>
+                            <option value="casual">Casual</option>
+                            <option value="academic">Academic</option>
+                            <option value="creative">Creative</option>
+                            <option value="technical">Technical</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div>
-                    <label class="block text-white text-sm font-medium mb-2">Number of Chapters</label>
-                    <input type="number" id="chapter-count" min="3" max="20" value="8" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:ring-2 focus:ring-blue-400">
+                <!-- Generation Options -->
+                <div class="bg-white/10 rounded-lg p-6 border border-white/20">
+                    <h3 class="text-lg font-semibold text-white mb-4">Generation Options</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-white text-sm font-medium mb-3">Chapter Title Generation</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="title-method" value="ai" class="mr-3" checked>
+                                    <span class="text-white">AI Generated (Recommended)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="title-method" value="manual" class="mr-3">
+                                    <span class="text-white">Manual Entry</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-white text-sm font-medium mb-3">Content Generation</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="content-method" value="ai" class="mr-3" checked>
+                                    <span class="text-white">AI Generated (Full Book)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="content-method" value="titles-only" class="mr-3">
+                                    <span class="text-white">Titles Only (Manual Content)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
             
-            <div class="flex space-x-4 mt-6">
-                <button id="generate-titles-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
-                    <i data-feather="list" class="w-5 h-5 mr-2"></i>
-                    Generate Chapter Titles
+            <div class="flex flex-wrap gap-4 mt-6">
+                <button id="generate-btn" class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center font-semibold">
+                    <i data-feather="zap" class="w-5 h-5 mr-2"></i>
+                    Start Generation
                 </button>
-                <button id="generate-full-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center">
-                    <i data-feather="book" class="w-5 h-5 mr-2"></i>
-                    Generate Full Book
+                <button id="reset-form-btn" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center">
+                    <i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i>
+                    Reset Form
                 </button>
             </div>
         </div>

@@ -311,6 +311,75 @@
             </div>
         </div>
         
+        <!-- Default Author Bio Settings -->
+        <div class="border-t border-gray-200 pt-8 mt-8">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-6">Default Author Bio</h2>
+            
+            <form method="POST" action="{{ url_for('save_author_bio') }}" class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
+                <div class="flex items-start space-x-4 mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                        <i data-feather="bookmark" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Permanent Author Bio</h3>
+                        <p class="text-gray-600">Set a default author biography that will be automatically used in all your books</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="default_author_bio" class="block text-sm font-medium text-gray-700 mb-2">
+                            Default Author Bio
+                        </label>
+                        <textarea id="default_author_bio" name="default_author_bio" rows="4" 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                  placeholder="Enter your default author biography that will be used across all books...">{{ config.default_author_bio if config.default_author_bio else '' }}</textarea>
+                        <p class="mt-2 text-sm text-gray-600">
+                            This bio will automatically appear in all new book projects. You can still modify it for individual books.
+                        </p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="use_default_bio" value="true" 
+                                   {{ 'checked' if config.use_default_bio else '' }}
+                                   class="mr-2 rounded border-gray-300 text-green-600 focus:ring-green-500">
+                            <span class="text-sm text-gray-700">Automatically use this bio in all new books</span>
+                        </label>
+                    </div>
+                    
+                    <div class="bg-white border border-green-200 rounded-lg p-4">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-2">Quick Actions</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="loadEnhancedBioToDefault()" 
+                                    class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded hover:bg-purple-200 transition-colors">
+                                <i data-feather="copy" class="w-3 h-3 inline mr-1"></i>
+                                Use Enhanced Bio Above
+                            </button>
+                            <button type="button" onclick="clearDefaultBio()" 
+                                    class="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded hover:bg-gray-200 transition-colors">
+                                <i data-feather="x" class="w-3 h-3 inline mr-1"></i>
+                                Clear Bio
+                            </button>
+                            <button type="button" onclick="previewDefaultBio()" 
+                                    class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition-colors">
+                                <i data-feather="eye" class="w-3 h-3 inline mr-1"></i>
+                                Preview
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="submit" 
+                                class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-medium">
+                            <i data-feather="save" class="w-5 h-5 inline mr-2"></i>
+                            Save Default Bio
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
         <!-- License Information -->
         <div class="border-t border-gray-200 pt-8">
             <h2 class="text-2xl font-semibold text-gray-900 mb-6">License Information</h2>
@@ -740,6 +809,63 @@ function useEnhancedBio() {
     setTimeout(() => {
         window.location.href = '/';
     }, 2500);
+}
+
+// Default Bio Management Functions
+function loadEnhancedBioToDefault() {
+    const enhancedBio = document.getElementById('enhanced-bio-content');
+    const defaultBioField = document.getElementById('default_author_bio');
+    
+    if (enhancedBio && enhancedBio.textContent && defaultBioField) {
+        defaultBioField.value = enhancedBio.textContent.trim();
+        alert('Enhanced bio loaded to default!');
+    } else {
+        alert('No enhanced bio available. Generate one first.');
+    }
+}
+
+function clearDefaultBio() {
+    const defaultBioField = document.getElementById('default_author_bio');
+    if (defaultBioField) {
+        if (confirm('Are you sure you want to clear the default author bio?')) {
+            defaultBioField.value = '';
+            alert('Default bio cleared.');
+        }
+    }
+}
+
+function previewDefaultBio() {
+    const defaultBio = document.getElementById('default_author_bio').value;
+    if (!defaultBio.trim()) {
+        alert('No default bio to preview.');
+        return;
+    }
+    
+    // Create modal to show preview
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Author Bio Preview</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                    <i data-feather="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="prose max-w-none">
+                <p class="text-gray-700 leading-relaxed">${defaultBio}</p>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button onclick="this.closest('.fixed').remove()" 
+                        class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    feather.replace();
 }
 </script>
 {% endblock %}
