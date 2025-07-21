@@ -104,13 +104,13 @@ Return only the chapter titles, one per line, without numbers or additional text
 
         # Try to generate with configured AI provider
         if config.get('ai_provider') == 'gemini' and config.get('gemini_api_key'):
-            response = generate_with_gemini(prompt, config)
+            success, response = generate_with_gemini(prompt, config.get('gemini_api_key'), config.get('gemini_model', 'gemini-1.5-flash'))
         elif config.get('openrouter_api_key'):
-            response = generate_with_openrouter(prompt, config)
+            success, response = generate_with_openrouter(prompt, config.get('openrouter_api_key'), config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free'))
         else:
             return None
         
-        if response:
+        if success and response:
             titles = [line.strip() for line in response.strip().split('\n') if line.strip()]
             # Ensure we have the right number of titles
             if len(titles) >= num_chapters:
@@ -169,13 +169,14 @@ Write the complete chapter content:"""
                     try:
                         # Generate content with AI
                         if config.get('ai_provider') == 'gemini' and config.get('gemini_api_key'):
-                            content = generate_with_gemini(chapter_prompt, config)
+                            success, content = generate_with_gemini(chapter_prompt, config.get('gemini_api_key'), config.get('gemini_model', 'gemini-1.5-flash'))
                         elif config.get('openrouter_api_key'):
-                            content = generate_with_openrouter(chapter_prompt, config)
+                            success, content = generate_with_openrouter(chapter_prompt, config.get('openrouter_api_key'), config.get('selected_model', 'meta-llama/llama-3.2-3b-instruct:free'))
                         else:
+                            success = False
                             content = f"AI content generation unavailable. Please edit this chapter manually.\n\nChapter: {chapter['title']}\n\nAdd your content here..."
                         
-                        if content:
+                        if success and content:
                             chapter['content'] = content
                             chapter['status'] = 'completed'
                             chapter['word_count'] = len(content.split())

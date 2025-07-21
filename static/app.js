@@ -2733,7 +2733,7 @@ function displayBooks(books) {
         
         return `
             <div class="group bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden hover:bg-white/15 hover:scale-105 transition-all duration-300 cursor-pointer" 
-                 onclick="openBook(\"${book.filename.replace(".json", "")}\")">
+                 onclick="openBook('${book.filename.replace('.json', '')}')">
                 <div class="aspect-[3/4] relative overflow-hidden">
                     <img src="${coverImage}" alt="${book.title || "Untitled"}" 
                          class="w-full h-full object-cover" 
@@ -2748,11 +2748,11 @@ function displayBooks(books) {
                     <!-- Hover Actions -->
                     <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <div class="flex space-x-2">
-                            <button onclick="event.stopPropagation(); openBook(\"${book.filename.replace(".json", "")}\")\" 
+                            <button onclick="event.stopPropagation(); openBook('${book.filename.replace('.json', '')}')" 
                                     class="flex-1 bg-blue-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-blue-700/80 transition-colors">
                                 <i data-feather="eye" class="w-4 h-4 inline mr-1"></i>View
                             </button>
-                            <button onclick="event.stopPropagation(); previewBook(\"${book.filename.replace(".json", "")}\")\" 
+                            <button onclick="event.stopPropagation(); previewBook('${book.filename.replace('.json', '')}')" 
                                     class="flex-1 bg-green-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-green-700/80 transition-colors">
                                 <i data-feather="book-open" class="w-4 h-4 inline mr-1"></i>Preview
                             </button>
@@ -2787,11 +2787,11 @@ function displayBooks(books) {
                     
                     <!-- Bottom Action Buttons -->
                     <div class="flex space-x-2 mt-auto">
-                        <button onclick="event.stopPropagation(); editBook(\"${book.filename.replace(".json", "")}\")\" 
+                        <button onclick="event.stopPropagation(); editBook('${book.filename.replace('.json', '')}')" 
                                 class="flex-1 bg-orange-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-orange-700/80 transition-colors">
                             <i data-feather="edit" class="w-3 h-3 inline mr-1"></i>Edit
                         </button>
-                        <button onclick="event.stopPropagation(); deleteBook(\"${book.filename.replace(".json", "")}\", \"${book.title || "Untitled Book"}\")\" 
+                        <button onclick="event.stopPropagation(); deleteBook('${book.filename.replace('.json', '')}', '${(book.title || 'Untitled Book').replace(/'/g, '\\\'')}')" 
                                 class="flex-1 bg-red-600/80 backdrop-blur text-white py-2 px-3 rounded-lg text-sm text-center hover:bg-red-700/80 transition-colors">
                             <i data-feather="trash-2" class="w-3 h-3 inline mr-1"></i>Delete
                         </button>

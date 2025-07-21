@@ -265,6 +265,17 @@ Preferred communication style: Simple, everyday language.
 - Enhanced project creation workflow to support hybrid generation approaches
 - Fixed JavaScript syntax errors and improved Book Library filtering functionality
 
+### 2025-07-21: UI Improvements & Book Library Enhancement
+- Changed book description text color from gray to black in library cards for better readability
+- Changed Essential Features cards text color from gray to black for improved visibility
+- Removed AI Book Generation section from homepage as requested by user
+- Added Edit and Delete buttons to bottom of each book card in library
+- Implemented delete functionality with confirmation dialog and proper error handling
+- Enhanced book cards with new action buttons for improved user interaction
+- Updated book library with comprehensive action controls (View, Preview, Edit, Delete)
+- Fixed JavaScript delete endpoint to use existing Flask route /delete_project/<id>
+- Improved homepage layout by removing AI generation section and focusing on manual creation
+
 ### 2025-07-21: Homepage Redesign - Removed Statistics Charts
 - Removed total books and total chapters statistics charts from homepage as requested
 - Replaced center statistics dashboard with clean welcome message and AI status overview
