@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.name }}</title>
+    <style>
+        /* 
+         * Professional Amazon KDP Book Formatter
+         * Optimized for 6x9 inch paperback print standards
+         * 
+         * CUSTOMIZATION SETTINGS:
+         * - Trim Size: Change @page size (current: 6in 9in)
+         * - Margins: Modify margin values in @page rules
+         * - Fonts: Update font-family declarations
+         * - Font Size: Adjust font-size values in body and content classes
+         */
+        
+        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* MAIN TYPOGRAPHY SETTINGS - Customizable */
+        body {
+            font-family: 'EB Garamond', 'Times New Roman', serif; /* Professional book font */
+            font-size: 12pt; /* Standard book font size */
+            line-height: 1.6; /* Comfortable reading line height */
+            color: #1a1a1a; /* Rich black for professional printing */
+            background: white;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* AMAZON KDP PAGE SETTINGS - 6x9 inch trim size */
+        @page {
+            size: 6in 9in; /* Standard KDP paperback size - CUSTOMIZABLE */
+            margin-top: 0.75in; /* Top margin - CUSTOMIZABLE */
+            margin-bottom: 0.75in; /* Bottom margin - CUSTOMIZABLE */
+            margin-inside: 0.75in; /* Inside margin (binding side) - CUSTOMIZABLE */
+            margin-outside: 0.5in; /* Outside margin - CUSTOMIZABLE */
+            
+            @bottom-center {
+                content: counter(page);
+                font-family: 'EB Garamond', serif;
+                font-size: 10pt;
+                color: #666;
+                margin-bottom: 0.3in;
+            }
+        }
+        
+        /* COVER PAGE - No margins, full bleed */
+        @page:first {
+            margin: 0;
+            size: 6in 9in;
+            @bottom-center {
+                content: none; /* No page number on cover */
+            }
+        }
+        
+        /* RIGHT PAGES (Odd pages) - Standard margins */
+        @page:right {
+            margin-left: 0.75in; /* Inside margin */
+            margin-right: 0.5in; /* Outside margin */
+        }
+        
+        /* LEFT PAGES (Even pages) - Mirrored margins */
+        @page:left {
+            margin-left: 0.5in; /* Outside margin */
+            margin-right: 0.75in; /* Inside margin */
+        }
+        
+        /* COVER PAGE STYLING */
+        .cover-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6in;
+            height: 9in;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+            {% if project.cover_image %}
+            background: url('{{ url_for("static", filename="uploads/" + project.cover_image) }}') no-repeat center center;
+            background-size: cover;
+            {% else %}
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
+            {% endif %}
+            color: white;
+            page-break-after: always;
+            box-sizing: border-box;
+        }
+        
+        .cover-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3); /* Subtle overlay for text readability */
+            z-index: 1;
+        }
+        
+        .cover-content {
+            position: relative;
+            z-index: 2;
+            max-width: 85%;
+            padding: 2rem;
+        }
+        
+        .cover-title {
+            font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+            font-size: 2.8rem; /* Large, prominent title - CUSTOMIZABLE */
+            font-weight: 600;
+            margin: 0 0 1.5rem 0;
+            color: white;
+            line-height: 1.1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .cover-subtitle {
+            font-size: 1.3rem; /* Subtitle size - CUSTOMIZABLE */
+            margin: 0 0 2.5rem 0;
+            opacity: 0.95;
+            color: white;
+            line-height: 1.3;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .cover-author {
+            font-size: 1.1rem;
+            margin: 2.5rem 0 0 0;
+            opacity: 0.9;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* TABLE OF CONTENTS STYLING */
+        .toc-page {
+            page-break-before: always;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .toc-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem; /* TOC title size - CUSTOMIZABLE */
+            font-weight: 600;
+            text-align: center;
+            margin: 0 0 2rem 0;
+            color: #2c3e50;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .toc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 0.7rem 0;
+            border-bottom: 1px dotted #bdc3c7;
+            font-size: 1rem;
+        }
+        
+        .toc-item:last-child {
+            border-bottom: none;
+        }
+        
+        .toc-chapter-title {
+            flex: 1;
+            margin-right: 1rem;
+        }
+        
+        .toc-page-number {
+            font-weight: 500;
+            color: #7f8c8d;
+        }
+        
+        /* CHAPTER STYLING */
+        .chapter-page {
+            page-break-before: always; /* Each chapter starts on new page */
+            padding: 0;
+            margin: 0;
+        }
+        
+        .chapter-number {
+            text-align: center;
+            font-size: 0.9rem; /* Chapter number size - CUSTOMIZABLE */
+            color: #7f8c8d;
+            letter-spacing: 3px;
+            margin: 0 0 0.8rem 0;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        
+        .chapter-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem; /* Chapter title size - CUSTOMIZABLE */
+            font-weight: 600;
+            text-align: center;
+            margin: 0 0 2.5rem 0;
+            color: #2c3e50;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #ecf0f1;
+            line-height: 1.2;
+        }
+        
+        /* PARAGRAPH AND TEXT FORMATTING */
+        .chapter-content {
+            text-align: justify; /* Justified text for professional look */
+            hyphens: auto; /* Automatic hyphenation */
+            margin-bottom: 2rem;
+        }
+        
+        .chapter-content p {
+            margin-bottom: 1.2rem; /* Paragraph spacing - CUSTOMIZABLE */
+            text-indent: 1.5em; /* First line indent - CUSTOMIZABLE */
+            line-height: 1.6; /* Line height - CUSTOMIZABLE */
+            text-align: justify;
+            hyphens: auto;
+            orphans: 3; /* Prevent single lines at bottom of page */
+            widows: 3; /* Prevent single lines at top of page */
+            word-spacing: 0.1em;
+        }
+        
+        /* First paragraph in chapter has no indent */
+        .chapter-content p:first-child {
+            text-indent: 0;
+        }
+        
+        /* DROP CAP for first letter of first paragraph */
+        .chapter-content p:first-child::first-letter {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.8rem; /* Drop cap size - CUSTOMIZABLE */
+            font-weight: 600;
+            float: left;
+            line-height: 0.8;
+            margin: 0.1rem 0.6rem 0 0;
+            color: #2c3e50;
+        }
+        
+        /* AUTHOR BIO SECTION */
+        .author-bio-page {
+            page-break-before: always;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .author-bio-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-align: center;
+            margin: 0 0 2rem 0;
+            color: #2c3e50;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .author-bio-content p {
+            margin-bottom: 1.2rem;
+            line-height: 1.6;
+            text-align: justify;
+            hyphens: auto;
+            text-indent: 1.5em;
+        }
+        
+        .author-bio-content p:first-child {
+            text-indent: 0;
+        }
+        
+        /* PRINT-SPECIFIC ADJUSTMENTS */
+        @media print {
+            body {
+                font-size: 12pt;
+                line-height: 1.6;
+            }
+            
+            .chapter-content p {
+                margin-bottom: 1.2rem;
+                text-align: justify;
+                hyphens: auto;
+            }
+            
+            /* Ensure proper page breaks */
+            .cover-page,
+            .toc-page,
+            .chapter-page,
+            .author-bio-page {
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* RESPONSIVE ADJUSTMENTS FOR PREVIEW */
+        @media screen {
+            body {
+                background: #f5f5f5;
+                padding: 2rem 0;
+            }
+            
+            .book-container {
+                max-width: 6in;
+                margin: 0 auto;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            }
+            
+            .cover-page,
+            .toc-page,
+            .chapter-page,
+            .author-bio-page {
+                background: white;
+                margin-bottom: 2rem;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="book-container">
+        <!-- COVER PAGE -->
+        <div class="cover-page">
+            {% if project.cover_image %}
+            <div class="cover-overlay"></div>
+            {% endif %}
+            <div class="cover-content">
+                <h1 class="cover-title">{{ project.name }}</h1>
+                {% if project.topic %}
+                <p class="cover-subtitle">{{ project.topic }}</p>
+                {% endif %}
+                <div class="cover-author">
+                    <p>{{ project.author_name if project.author_name else 'BookGenPro Author' }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TABLE OF CONTENTS -->
+        <div class="toc-page">
+            <h2 class="toc-title">Table of Contents</h2>
+            <ul class="toc-list">
+                {% set page_num = 3 %} <!-- Start after cover and TOC -->
+                {% for chapter in project.chapters %}
+                <li class="toc-item">
+                    <span class="toc-chapter-title">Chapter {{ chapter.number }}: {{ chapter.title }}</span>
+                    <span class="toc-page-number">{{ page_num }}</span>
+                </li>
+                {% set page_num = page_num + 1 %}
+                {% endfor %}
+                {% if project.author_bio and project.author_bio.strip() %}
+                <li class="toc-item">
+                    <span class="toc-chapter-title">About the Author</span>
+                    <span class="toc-page-number">{{ page_num }}</span>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <!-- CHAPTERS -->
+        {% for chapter in project.chapters %}
+        <div class="chapter-page">
+            <div class="chapter-number">Chapter {{ chapter.number }}</div>
+            <h1 class="chapter-title">{{ chapter.title }}</h1>
+            <div class="chapter-content">
+                {% if chapter.cleaned_paragraphs %}
+                    {% for paragraph in chapter.cleaned_paragraphs %}
+                        {% if paragraph.strip() %}
+                            <p>{{ paragraph.strip() }}</p>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <!-- Fallback content processing -->
+                    {% set clean_content = chapter.content.replace('##', '').replace('###', '').replace('**', '').replace('*', '').replace('_', '') %}
+                    {% for paragraph in clean_content.split('\n\n') %}
+                        {% if paragraph.strip() and not paragraph.strip().startswith('#') and not paragraph.strip().startswith('Chapter') and paragraph.strip()|length > 20 %}
+                            <p>{{ paragraph.strip() }}</p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- AUTHOR BIO SECTION -->
+        {% if project.author_bio and project.author_bio.strip() %}
+        <div class="author-bio-page">
+            <h2 class="author-bio-title">About the Author</h2>
+            <div class="author-bio-content">
+                {% for paragraph in project.author_bio.split('\n\n') %}
+                    {% if paragraph.strip() %}
+                        <p>{{ paragraph.strip() }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

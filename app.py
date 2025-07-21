@@ -1630,6 +1630,107 @@ def clean_chapter_content(content):
     
     return paragraphs
 
+def enhance_content_for_kdp(content):
+    """
+    Advanced content processing for Amazon KDP print-ready formatting
+    
+    Features:
+    - Intelligent paragraph detection and formatting
+    - Professional sentence structure optimization  
+    - Removal of poor formatting and excessive whitespace
+    - Chapter title and markdown cleanup
+    - Optimal paragraph length for print readability
+    """
+    if not content:
+        return []
+    
+    import re
+    
+    # Step 1: Advanced markdown and formatting cleanup
+    clean_text = content
+    
+    # Remove all markdown formatting markers
+    clean_text = re.sub(r'\*\*([^*]+)\*\*', r'\1', clean_text)  # Bold
+    clean_text = re.sub(r'\*([^*]+)\*', r'\1', clean_text)      # Italic
+    clean_text = re.sub(r'_([^_]+)_', r'\1', clean_text)        # Underscore italic
+    clean_text = re.sub(r'`([^`]+)`', r'\1', clean_text)        # Code spans
+    clean_text = re.sub(r'#+\s*', '', clean_text)              # Headers
+    clean_text = re.sub(r'^\s*[-*+]\s+', '', clean_text, flags=re.MULTILINE)  # List items
+    
+    # Step 2: Remove chapter headers and unwanted elements
+    lines = clean_text.split('\n')
+    filtered_lines = []
+    
+    for line in lines:
+        line = line.strip()
+        # Skip empty lines, chapter headers, and very short lines
+        if (line and 
+            not line.lower().startswith('chapter') and 
+            not line.startswith('#') and
+            not re.match(r'^\d+\.?\s*$', line) and  # Skip standalone numbers
+            len(line) > 20):  # Skip very short lines that are likely formatting artifacts
+            filtered_lines.append(line)
+    
+    # Step 3: Join and clean up spacing
+    full_text = ' '.join(filtered_lines)
+    
+    # Remove excessive whitespace
+    full_text = re.sub(r'\s+', ' ', full_text)
+    
+    # Step 4: Intelligent sentence detection with improved splitting
+    sentence_endings = re.compile(r'(?<=[.!?])\s+(?=[A-Z])')
+    sentences = sentence_endings.split(full_text)
+    
+    # Clean up sentences
+    cleaned_sentences = []
+    for sentence in sentences:
+        sentence = sentence.strip()
+        if len(sentence) > 25:  # Only include substantial sentences
+            # Ensure proper sentence ending
+            if not sentence.endswith(('.', '!', '?')):
+                sentence += '.'
+            cleaned_sentences.append(sentence)
+    
+    # Step 5: Create optimal paragraphs for print formatting
+    paragraphs = []
+    current_paragraph = []
+    current_length = 0
+    target_paragraph_length = 400  # Optimal for 6x9 print format
+    max_paragraph_length = 600     # Maximum before forced break
+    
+    for sentence in cleaned_sentences:
+        sentence_length = len(sentence)
+        
+        # Add sentence to current paragraph
+        current_paragraph.append(sentence)
+        current_length += sentence_length
+        
+        # Check if paragraph should end
+        should_end_paragraph = (
+            len(current_paragraph) >= 4 or  # Maximum 4 sentences per paragraph
+            current_length >= target_paragraph_length or
+            (current_length >= max_paragraph_length)
+        )
+        
+        if should_end_paragraph:
+            if current_paragraph:
+                paragraph_text = ' '.join(current_paragraph)
+                # Final cleanup of the paragraph
+                paragraph_text = re.sub(r'\s+', ' ', paragraph_text).strip()
+                if len(paragraph_text) > 50:  # Only add substantial paragraphs
+                    paragraphs.append(paragraph_text)
+            current_paragraph = []
+            current_length = 0
+    
+    # Add remaining sentences as final paragraph
+    if current_paragraph:
+        paragraph_text = ' '.join(current_paragraph)
+        paragraph_text = re.sub(r'\s+', ' ', paragraph_text).strip()
+        if len(paragraph_text) > 50:
+            paragraphs.append(paragraph_text)
+    
+    return paragraphs
+
 @app.route('/export_pdf/<project_id>')
 def export_pdf(project_id):
     try:
@@ -1661,6 +1762,195 @@ def export_pdf(project_id):
     except Exception as e:
         flash(f'Error exporting PDF: {str(e)}', 'error')
         return redirect(url_for('project_view', project_id=project_id))
+
+@app.route('/export_kdp_pdf/<project_id>')
+def export_kdp_pdf(project_id):
+    """
+    Export project as professionally formatted Amazon KDP print-ready PDF
+    
+    Features:
+    - 6x9 inch trim size (standard KDP paperback)
+    - Professional margins optimized for binding
+    - Garamond/Times New Roman typography
+    - Justified text with proper hyphenation
+    - Chapter formatting with drop caps
+    - Print-ready quality with no watermarks
+    """
+    try:
+        project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+        with open(project_file, 'r') as f:
+            project = json.load(f)
+        
+        # Enhanced content cleaning for professional formatting
+        if project.get('chapters'):
+            for chapter in project['chapters']:
+                # Use advanced content cleaning for KDP format
+                chapter['cleaned_paragraphs'] = enhance_content_for_kdp(chapter.get('content', ''))
+        
+        # Generate professional KDP HTML content
+        html_content = render_template('kdp_book_export.html', project=project)
+        
+        # Fix relative URLs to absolute paths for PDF generation
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        static_path = os.path.join(current_dir, 'static', 'uploads')
+        html_content = html_content.replace('/static/uploads/', f'file://{static_path}/')
+        
+        # Create KDP-optimized PDF with professional settings
+        pdf_filename = f"{project['name']}_KDP_Ready_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        pdf_path = os.path.join(EXPORTS_FOLDER, pdf_filename)
+        
+        # Enhanced WeasyPrint configuration for professional print quality
+        html_doc = weasyprint.HTML(string=html_content, base_url=request.url_root)
+        html_doc.write_pdf(
+            pdf_path,
+            # Professional PDF settings for print
+            pdf_version='1.4',  # Compatible with most printers
+            pdf_identifier=False,  # No metadata for cleaner output
+            uncompressed_pdf=False,  # Compressed for smaller file size
+            # Optimize for print quality
+            optimize_size=('fonts', 'images')
+        )
+        
+        return send_file(pdf_path, as_attachment=True, download_name=pdf_filename)
+        
+    except Exception as e:
+        flash(f'Error exporting KDP PDF: {str(e)}', 'error')
+        return redirect(url_for('project_view', project_id=project_id))
+
+@app.route('/upload_raw_text', methods=['GET', 'POST'])
+def upload_raw_text():
+    """
+    Upload and process raw text or poorly formatted PDF content for KDP formatting
+    Creates a new project with optimized content structure
+    """
+    if request.method == 'POST':
+        try:
+            # Get form data
+            project_name = request.form.get('project_name', '').strip()
+            raw_content = request.form.get('raw_content', '').strip()
+            author_name = request.form.get('author_name', '').strip()
+            
+            if not project_name or not raw_content:
+                flash('Project name and content are required!', 'error')
+                return redirect(url_for('upload_raw_text'))
+            
+            # Process the raw content into chapters
+            processed_chapters = process_raw_content_to_chapters(raw_content)
+            
+            if not processed_chapters:
+                flash('Could not process the content into chapters. Please check your text format.', 'error')
+                return redirect(url_for('upload_raw_text'))
+            
+            # Create new project
+            project_id = str(uuid.uuid4())
+            project_data = {
+                'id': project_id,
+                'name': project_name,
+                'topic': 'Imported from raw text',
+                'language': 'English',
+                'chapters': processed_chapters,
+                'author_name': author_name or 'Unknown Author',
+                'status': 'completed',
+                'generation_mood': 'focused',
+                'created_at': datetime.now().isoformat(),
+                'last_modified': datetime.now().isoformat()
+            }
+            
+            # Save project
+            project_file = os.path.join(PROJECTS_FOLDER, f"{project_id}.json")
+            with open(project_file, 'w') as f:
+                json.dump(project_data, f, indent=2)
+            
+            flash(f'Successfully created project "{project_name}" with {len(processed_chapters)} chapters!', 'success')
+            return redirect(url_for('project_view', project_id=project_id))
+            
+        except Exception as e:
+            flash(f'Error processing content: {str(e)}', 'error')
+            return redirect(url_for('upload_raw_text'))
+    
+    return render_template('upload_raw_text.html')
+
+def process_raw_content_to_chapters(raw_content):
+    """
+    Process raw text content into structured chapters
+    Automatically detects chapter breaks and formats content
+    """
+    import re
+    
+    # Step 1: Detect chapter breaks
+    chapter_patterns = [
+        r'Chapter\s+\d+[:\-\s]+(.*?)(?=Chapter\s+\d+|$)',  # "Chapter 1: Title"
+        r'CHAPTER\s+\d+[:\-\s]+(.*?)(?=CHAPTER\s+\d+|$)',  # "CHAPTER 1: Title"
+        r'Ch\.\s*\d+[:\-\s]+(.*?)(?=Ch\.\s*\d+|$)',       # "Ch. 1: Title"
+        r'(\d+)\.\s+(.*?)(?=\d+\.\s+|$)',                  # "1. Title"
+    ]
+    
+    chapters = []
+    chapter_found = False
+    
+    # Try each pattern to detect chapters
+    for pattern in chapter_patterns:
+        matches = re.findall(pattern, raw_content, re.IGNORECASE | re.DOTALL)
+        if matches and len(matches) > 1:  # Need at least 2 chapters
+            chapter_found = True
+            for i, match in enumerate(matches):
+                if isinstance(match, tuple):
+                    title = match[1].strip() if len(match) > 1 else f"Chapter {i+1}"
+                    content = match[0].strip() if match[0] else ""
+                else:
+                    # Extract title from first line of content
+                    lines = match.strip().split('\n')
+                    title = lines[0].strip() if lines else f"Chapter {i+1}"
+                    content = '\n'.join(lines[1:]).strip() if len(lines) > 1 else match.strip()
+                
+                # Clean the title
+                title = re.sub(r'^(Chapter\s+\d+[:\-\s]*)', '', title, flags=re.IGNORECASE).strip()
+                if not title:
+                    title = f"Chapter {i+1}"
+                
+                chapters.append({
+                    'number': i + 1,
+                    'title': title[:100],  # Limit title length
+                    'content': content
+                })
+            break
+    
+    # If no chapter pattern found, split by length or paragraphs
+    if not chapter_found:
+        # Split content into chunks of reasonable chapter length
+        paragraphs = [p.strip() for p in raw_content.split('\n\n') if p.strip()]
+        
+        if len(paragraphs) < 3:
+            # Very short content, create single chapter
+            chapters.append({
+                'number': 1,
+                'title': 'Chapter 1',
+                'content': raw_content.strip()
+            })
+        else:
+            # Group paragraphs into chapters
+            chapter_size = max(3, len(paragraphs) // 10)  # Aim for ~10 chapters
+            current_chapter = 1
+            
+            for i in range(0, len(paragraphs), chapter_size):
+                chapter_paragraphs = paragraphs[i:i+chapter_size]
+                content = '\n\n'.join(chapter_paragraphs)
+                
+                # Generate chapter title from first paragraph
+                first_paragraph = chapter_paragraphs[0]
+                title = first_paragraph[:50] + "..." if len(first_paragraph) > 50 else first_paragraph
+                title = re.sub(r'[^\w\s]', '', title).strip()
+                if not title:
+                    title = f"Chapter {current_chapter}"
+                
+                chapters.append({
+                    'number': current_chapter,
+                    'title': title,
+                    'content': content
+                })
+                current_chapter += 1
+    
+    return chapters
 
 @app.route('/export_docx/<project_id>')
 def export_docx(project_id):
@@ -2349,9 +2639,11 @@ def standalone_generation_background(session_id, params, config):
         save_standalone_to_project(session, params)
         
     except Exception as e:
-        if 'session' in locals():
+        try:
             session['status'] = 'error'
             session['error'] = str(e)
+        except:
+            pass
 
 def save_standalone_to_project(session, params):
     """Save standalone generation to main project system"""
@@ -2375,8 +2667,10 @@ def save_standalone_to_project(session, params):
         with open(project_file, 'w') as f:
             json.dump(project_data, f, indent=2)
             
-        if 'session' in locals():
+        try:
             session['project_id'] = project_id
+        except:
+            pass
         
     except Exception as e:
         print(f"Error saving standalone project: {e}")

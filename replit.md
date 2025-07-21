@@ -11,6 +11,14 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 21, 2025
+- **Professional Amazon KDP Book Formatter**: Complete implementation of professional PDF formatting system
+  - Created dedicated KDP export template with 6x9 inch trim size and proper margins (inside: 0.75", outside: 0.5")
+  - Added enhanced content processing function for intelligent paragraph detection and professional formatting
+  - Implemented raw text upload system with automatic chapter detection and content structuring
+  - Built professional typography with EB Garamond font, justified text, and drop caps
+  - Added KDP Print-Ready PDF export button to all projects with professional WeasyPrint settings
+  - Created comprehensive upload interface for transforming poorly formatted content into print-ready books
+  - Integrated KDP formatter into homepage with dedicated orange-themed action card
 - **About Section Update**: Completely refreshed the "About BookGenPro" section on homepage with:
   - Enhanced description highlighting dual AI support (OpenRouter & Gemini)
   - Updated feature highlights to emphasize complete workflow and print-ready exports  

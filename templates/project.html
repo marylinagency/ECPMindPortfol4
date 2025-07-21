@@ -230,6 +230,13 @@
             Export as PDF
         </a>
         
+        <a href="{{ url_for('export_kdp_pdf', project_id=project.get('id', '')) }}" 
+           class="bg-gradient-to-r from-orange-600 to-red-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium"
+           title="Professional Amazon KDP print-ready PDF with 6x9 trim size, proper margins, and Garamond typography">
+            <i data-feather="printer" class="w-5 h-5 inline mr-2"></i>
+            KDP Print-Ready PDF
+        </a>
+        
         <a href="{{ url_for('export_docx', project_id=project.get('id', '')) }}" 
            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium">
             <i data-feather="file-text" class="w-5 h-5 inline mr-2"></i>
